@@ -47,6 +47,9 @@ ro.surface_flinger.use_content_detection_for_refresh_rate=false
 ro.hardware.keystore=mdfpp
 ro.security.keystore.keytype=sak,gak
 
+# Memory optimizations
+ro.config.avoid_gfx_accel=true
+
 # RIL
 ro.telephony.default_network=9,9
 vendor.sec.rild.libpath=/vendor/lib64/libsec-ril.so
