@@ -36,6 +36,7 @@ ro.frp.pst=/dev/block/persistent
 
 # Graphics
 debug.renderengine.backend=threaded
+debug.sf.latch_unsignaled=1
 persist.sys.sf.color_saturation=1.0
 persist.sys.sf.native_mode=2
 ro.hwui.render_ahead=20
