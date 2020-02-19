@@ -13,7 +13,11 @@ genfscon sysfs /devices/platform/141c0000.speedy/i2c-15/15-0000/s2mps18-rtc/rtc/
 genfscon sysfs /devices/platform/14360000.hsi2c/i2c-13/13-0066/max77705-charger/power_supply/max77705-charger/type u:object_r:sysfs_battery:s0
 genfscon sysfs /devices/platform/14360000.hsi2c/i2c-13/13-0066/max77705-fuelgauge/power_supply/max77705-fuelgauge/type u:object_r:sysfs_battery:s0
 genfscon sysfs /devices/platform/14360000.hsi2c/i2c-13/13-0066/max77705-charger/power_supply/otg/type u:object_r:sysfs_battery:s0
+genfscon sysfs /devices/platform/14360000.hsi2c/i2c-16/16-0066/max77705-charger/power_supply/max77705-charger/type u:object_r:sysfs_battery:s0
+genfscon sysfs /devices/platform/14360000.hsi2c/i2c-16/16-0066/max77705-fuelgauge/power_supply/max77705-fuelgauge/type u:object_r:sysfs_battery:s0
+genfscon sysfs /devices/platform/14360000.hsi2c/i2c-16/16-0066/max77705-charger/power_supply/otg/type u:object_r:sysfs_battery:s0
 genfscon sysfs /devices/platform/14370000.hsi2c/i2c-14/14-003b/power_supply/mfc-charger/type u:object_r:sysfs_battery:s0
+genfscon sysfs /devices/platform/14370000.hsi2c/i2c-17/17-003b/power_supply/mfc-charger/type u:object_r:sysfs_battery:s0
 genfscon sysfs /devices/platform/16030000.decon_f/psr_info u:object_r:sysfs_decon:s0
 genfscon sysfs /devices/platform/16030000.decon_f/vsync u:object_r:sysfs_decon_writable:s0
 genfscon sysfs /devices/platform/16050000.decon_t/vsync u:object_r:sysfs_decon_writable:s0
