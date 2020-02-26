@@ -8,6 +8,9 @@ af.fast_track_multiplier=1
 # Dalvik
 dalvik.vm.lockprof.threshold=500
 
+# Fastbootd
+ro.fastbootd.available=true
+
 # Frp
 ro.frp.pst=/dev/block/persistent
 

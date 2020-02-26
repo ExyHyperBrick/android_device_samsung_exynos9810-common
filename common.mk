@@ -72,6 +72,10 @@ PRODUCT_PACKAGES += \
     android.hardware.drm@1.4.vendor:32 \
     android.hardware.drm@1.4-service.clearkey
 
+# fastbootd
+PRODUCT_PACKAGES += \
+    fastbootd
+
 # FastCharge
 PRODUCT_PACKAGES += \
     vendor.lineage.fastcharge@1.0-service.samsung
