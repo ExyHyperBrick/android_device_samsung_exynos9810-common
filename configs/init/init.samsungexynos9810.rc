@@ -943,6 +943,10 @@ on fs
     chown system system /sys/class/mdnie/mdnie/whiteRGB
     chown system system /sys/class/mdnie/mdnie/light_notification
 
+    # ISunlightEnhancement
+    chown system system /sys/class/mdnie/mdnie/lux
+    chmod 0644 /sys/class/mdnie/mdnie/lux
+
 # Permissions for System LSI NFC
 # NFC : Permissions for NFC
     chmod 0660 /dev/sec-nfc
