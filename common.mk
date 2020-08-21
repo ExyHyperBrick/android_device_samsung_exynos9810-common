@@ -235,6 +235,10 @@ PRODUCT_PACKAGES += \
 PRODUCT_PACKAGES += \
     libshim_sensorndkbridge
 
+# Tethering
+PRODUCT_PACKAGES += \
+    TetheringConfigOverlay
+
 # Thermal
 PRODUCT_PACKAGES += \
     android.hardware.thermal@2.0-service.samsung
