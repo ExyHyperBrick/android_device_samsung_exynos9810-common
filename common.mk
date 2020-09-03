@@ -185,6 +185,10 @@ PRODUCT_PACKAGES += \
     android.hardware.sensors@1.0-service \
     libsensorndkbridge
 
+# Shims
+PRODUCT_PACKAGES += \
+    libshim_sensorndkbridge
+
 # USB
 PRODUCT_PACKAGES += \
     android.hardware.usb@1.3-service.samsung
