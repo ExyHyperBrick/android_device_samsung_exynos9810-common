@@ -63,6 +63,9 @@ function blob_fixup() {
         vendor/lib/hw/audio.primary.exynos9810.so)
                 "${PATCHELF}" --replace-needed libvndsecril-client.so libsecril-client.so "${2}"
                 ;;
+        vendor/lib*/libsensorlistener.so)
+                "${PATCHELF}" --add-needed libshim_sensorndkbridge.so "${2}"
+                ;;
     esac
 }
 
