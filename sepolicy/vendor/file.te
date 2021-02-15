@@ -1,0 +1,24 @@
+# Data
+type log_data_file, file_type, data_file_type, core_data_file_type;
+type mediadrm_vendor_data_file, file_type, data_file_type;
+
+# Debugfs
+type debugfs_ion, fs_type, debugfs_type;
+type debugfs_mali, fs_type, debugfs_type;
+type debugfs_mali_mem, fs_type, debugfs_type;
+
+# Proc
+type proc_swappiness, fs_type, proc_type;
+
+# Sysfs
+type sysfs_camera, sysfs_type, r_fs_type, fs_type;
+type sysfs_camera_writable, sysfs_type, rw_fs_type, fs_type;
+type sysfs_chipid, sysfs_type, r_fs_type, fs_type;
+type sysfs_decon, sysfs_type, r_fs_type, fs_type;
+type sysfs_decon_writable, sysfs_type, rw_fs_type, fs_type;
+type sysfs_gpu_writable, sysfs_type, rw_fs_type, fs_type;
+type sysfs_lcd, sysfs_type, r_fs_type, fs_type;
+type sysfs_led_writable, sysfs_type, rw_fs_type, fs_type;
+type sysfs_modelinfo, sysfs_type, r_fs_type, fs_type;
+type sysfs_rfkill_writable, sysfs_type, rw_fs_type, fs_type;
+type sysfs_v4l, sysfs_type, r_fs_type, fs_type;

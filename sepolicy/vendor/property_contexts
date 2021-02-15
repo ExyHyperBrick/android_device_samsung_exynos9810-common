@@ -1,0 +1,11 @@
+# Bluetooth
+vendor.bluetooth_fw_ver u:object_r:wifi_log_prop:s0
+
+# Camera
+persist.sys.camera. u:object_r:vendor_camera_prop:s0
+
+# TEE
+sys.mobicoredaemon.enable u:object_r:tee_prop:s0
+
+# Wi-Fi
+vendor.wlan. u:object_r:vendor_wlan_prop:s0

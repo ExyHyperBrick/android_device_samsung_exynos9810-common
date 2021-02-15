@@ -1,0 +1,5 @@
+hal_client_domain(mediacodec, hal_power);
+
+allow mediacodec sysfs_v4l:file r_file_perms;
+
+allow mediacodec m2m1shot_device:chr_file rw_file_perms;

@@ -1,0 +1,9 @@
+allow kernel device:chr_file { create setattr getattr unlink };
+allow kernel device:dir { add_name write remove_name rmdir };
+
+allow kernel self:capability mknod;
+
+r_dir_file(kernel, sysfs_sec_key);
+
+allow kernel efs_file:dir search;
+allow kernel efs_file:file rw_file_perms;

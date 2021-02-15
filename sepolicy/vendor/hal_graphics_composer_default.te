@@ -1,0 +1,23 @@
+allow hal_graphics_composer_default self:netlink_kobject_uevent_socket { create bind read setopt };
+
+hal_client_domain(hal_graphics_composer_default, hal_graphics_allocator);
+vndbinder_use(hal_graphics_composer_default);
+
+allow hal_graphics_composer_default sysfs_chipid:file r_file_perms;
+
+allow hal_graphics_composer_default sysfs_decon_writable:file rw_file_perms;
+allow hal_graphics_composer_default sysfs_decon:file r_file_perms;
+
+# TODO(b/36644492): Remove data_between_core_and_vendor_violators once
+# hal_graphics_composer no longer directly accesses log_data_file.
+typeattribute hal_graphics_composer_default data_between_core_and_vendor_violators;
+
+allow hal_graphics_composer_default {
+    log_data_file
+    log_vendor_data_file
+}:dir { rw_file_perms add_name search };
+
+allow hal_graphics_composer_default {
+    log_data_file
+    log_vendor_data_file
+}:file { rw_file_perms create };
