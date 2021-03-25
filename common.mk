@@ -67,7 +67,7 @@ PRODUCT_PACKAGES += \
     android.hardware.drm@1.0-impl:32 \
     android.hardware.drm@1.0-service \
     android.hardware.drm@1.4.vendor:32 \
-    android.hardware.drm@1.2-service.clearkey
+    android.hardware.drm@1.4-service.clearkey
 
 # FastCharge
 PRODUCT_PACKAGES += \
