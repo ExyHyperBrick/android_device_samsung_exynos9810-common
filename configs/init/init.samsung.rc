@@ -231,20 +231,12 @@ on post-fs-data
     chmod 0660 /sys/class/sec/hdm/hdm_test
     mkdir /data/vendor/tz_hdm 0770 system system
 
-    # NFC: create data/nfc for nv storage
-    mkdir /data/nfc 0770 nfc nfc
-    mkdir /data/nfc/param 0770 nfc nfc
-
     # NFC: create /efs/sec_efs/nfc and /efs/nfc for nv storage
     mkdir /efs/sec_efs/nfc 0700 nfc nfc
     mkdir /efs/nfc 0700 nfc nfc
 
     # NFC KEY
     mkdir /data/vendor/nfc 0770 nfc nfc
-    mkdir /data/nfc_log 0750 nfc system
-    copy /system/etc/nfc_key /data/nfc/Key
-    chmod 660 /data/nfc/Key
-    chown nfc nfc /data/nfc/Key
 
     # Create all remaining /data root dirs so that they are made through init
     # and get proper encryption policy installed

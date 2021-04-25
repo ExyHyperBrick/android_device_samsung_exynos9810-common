@@ -1,6 +1,7 @@
 # Data
 type log_data_file, file_type, data_file_type, core_data_file_type;
 type mediadrm_vendor_data_file, file_type, data_file_type;
+type nfc_vendor_data_file, file_type, data_file_type;
 
 # Debugfs
 type debugfs_ion, fs_type, debugfs_type;
