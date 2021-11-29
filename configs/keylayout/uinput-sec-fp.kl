@@ -1,0 +1,5 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (C) 2022 The LineageOS Project
+
+key 108   SYSTEM_NAVIGATION_DOWN
+key 103   SYSTEM_NAVIGATION_UP
