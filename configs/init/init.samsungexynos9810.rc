@@ -1,4 +1,4 @@
-import /vendor/etc/init/hw/init.samsungexynos9810.root.rc
+import /vendor/etc/init/hw/init.samsung.rc
 
 on early-init
     mkdir /mnt/vendor/efs 0771 radio system
