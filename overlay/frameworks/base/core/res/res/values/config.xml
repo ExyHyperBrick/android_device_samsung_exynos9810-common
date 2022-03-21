@@ -20,6 +20,12 @@
 <!-- These resources are around just to allow their values to be customized
      for different hardware and product builds.  Do not translate. -->
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <!-- Height of the status bar in portrait -->
+    <dimen name="status_bar_height">126px</dimen>
+
+    <!-- Height of the status bar in landscape -->
+    <dimen name="status_bar_height_landscape">24dp</dimen>
+
     <!-- This string array should be overridden by the device to present a list of network
          attributes.  This is used by the connectivity manager to decide which networks can coexist
          based on the hardware -->
