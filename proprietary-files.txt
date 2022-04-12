@@ -1,58 +1,26 @@
 # Proprietary files - from Samsung package version referenced in device specific repos, unless pinned
 
 # Audio
-vendor/etc/a2dp_audio_policy_configuration.xml
 vendor/etc/audio_board_info.xml
-vendor/etc/audio_effects.xml
-vendor/etc/audio_effects_common.conf
-vendor/etc/audio_effects_sec.xml
 vendor/etc/default_volume_tables.xml
-vendor/etc/hearing_aid_audio_policy_configuration.xml
-vendor/etc/playback_record_audio_policy_configuration.xml
-vendor/etc/tms_audio_policy_configuration.xml
 vendor/etc/usb_audio_policy_configuration.xml
--vendor/lib/hw/audio.primary.exynos9810.so
--vendor/lib/hw/sound_trigger.primary.exynos9810.so
--vendor/lib/hw/vendor.samsung.hardware.audio@1.0-impl.so
 -vendor/lib/libSamsungPostProcessConvertor.so
--vendor/lib/lib_SoundAlive_3DPosition_ver202.so
--vendor/lib/lib_SoundAlive_AlbumArt_ver105.so
 -vendor/lib/lib_SoundAlive_SRC384_ver320.so
 -vendor/lib/lib_soundaliveresampler.so
 -vendor/lib/libaboxpcmdump.so
 -vendor/lib/libalsautils_sec.so
 -vendor/lib/libaudio_soundtrigger.so
 -vendor/lib/libaudiodebugfs.so
--vendor/lib/libaudioproxy.so
 -vendor/lib/libcodecdspdump.so
 -vendor/lib/libdatamod.so
 -vendor/lib/libfloatingfeature.so
 -vendor/lib/libprofileparamstorage.so
 -vendor/lib/libsecaudiocoreutils.so
 -vendor/lib/libsecaudioinfo.so
--vendor/lib/soundfx/libaudioeffectoffload.so
--vendor/lib/soundfx/libaudiosaplus_sec.so
--vendor/lib/soundfx/libgearvr.so
--vendor/lib/soundfx/libmysound.so
--vendor/lib/soundfx/libmyspace.so
--vendor/lib/soundfx/libplaybackrecorder.so
--vendor/lib/vendor.samsung.hardware.audio@1.0.so
 -vendor/lib/vndk/libaudioroute.so;MODULE=libaudioroute.exynos9810
 -vendor/lib/vndk/libtinyalsa.so;MODULE=libtinyalsa.exynos9810
--vendor/lib64/hw/sound_trigger.primary.exynos9810.so
--vendor/lib64/hw/vendor.samsung.hardware.audio@1.0-impl.so
--vendor/lib64/lib_SoundAlive_3DPosition_ver202.so
--vendor/lib64/lib_SoundAlive_AlbumArt_ver105.so
 -vendor/lib64/libfloatingfeature.so
--vendor/lib64/libsecaudiocoreutils.so
 -vendor/lib64/libsecaudioinfo.so
--vendor/lib64/soundfx/libaudioeffectoffload.so
--vendor/lib64/soundfx/libaudiosaplus_sec.so
--vendor/lib64/soundfx/libgearvr.so
--vendor/lib64/soundfx/libmysound.so
--vendor/lib64/soundfx/libmyspace.so
--vendor/lib64/soundfx/libplaybackrecorder.so
--vendor/lib64/vendor.samsung.hardware.audio@1.0.so
 
 # Audio Firmware
 vendor/firmware/HFD.cfg.bin
@@ -90,7 +58,6 @@ vendor/firmware/vts.bin
 -vendor/lib64/camera.device@3.3-impl.so;MODULE=camera.device@3.3-impl.exynos9810
 -vendor/lib64/camera.device@3.5-impl.so;MODULE=camera.device@3.5-impl.exynos9810
 -vendor/lib/libSEF.quram.so
--vendor/lib/lib_SamsungRec_06006.so
 -vendor/lib/libacryl.so
 -vendor/lib/libacryl_plugin_slsi_hdr10.so
 -vendor/lib/libcnn.so
