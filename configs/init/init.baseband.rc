@@ -1,0 +1,25 @@
+on init
+    symlink /dev/block/platform/11120000.ufs/by-name/RADIO /dev/mbin0
+    restorecon /dev/mbin0
+
+    write /proc/sys/net/core/netdev_max_backlog 100000
+
+on fs
+    chown radio radio sys/devices/virtual/misc/multipdp/waketime
+    chmod 0660 /sys/devices/virtual/misc/umts_dm0/dm_state
+    chown radio system /sys/devices/virtual/misc/umts_dm0/dm_state
+
+    # For cpefs partition
+    mkdir /mnt/vendor/cpefs 0771 radio system
+    mount ext4 /dev/block/platform/11120000.ufs/by-name/CPEFS /mnt/vendor/cpefs nosuid nodev noatime noauto_da_alloc,discard,journal_checksum,data=ordered,errors=panic
+
+service cpboot-daemon /vendor/bin/cbd -d -tss310 -bm -mm -P platform/11120000.ufs/by-name/RADIO
+    class main
+    user root
+    group radio cache inet misc audio sdcard_rw log sdcard_r shell system
+    seclabel u:r:cbd:s0
+
+# SS/DS configuration
+on property:ro.vendor.multisim.simslotcount=*
+    write /sys/module/modem_ctrl_ss310ap/parameters/ds_detect ${ro.vendor.multisim.simslotcount}
+
