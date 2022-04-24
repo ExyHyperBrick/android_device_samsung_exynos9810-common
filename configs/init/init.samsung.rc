@@ -245,33 +245,6 @@ on post-fs-data
     # Create all remaining /data root dirs so that they are made through init
     # and get proper encryption policy installed
     mkdir /data/backup 0700 system system
-    mkdir /data/ss 0700 system system
-
-    # TAD
-    mkdir /data/tad 0770 system system
-
-    # Samsung Pass
-    mkdir /data/.fido 0700 system system
-
-    # Samsung font
-    mkdir /data/app_fonts 0775 system system
-
-    # super slow motion
-    mkdir /data/vendor/mediacodec 0700 mediacodec mediacodec
-    mkdir /data/vendor/mediacodec/fruc_files 0700 mediacodec mediacodec
-    mkdir /data/vendor/mediacodec/fruc_assets 0700 mediacodec mediacodec
-    copy /system/media/fruc_kernels.s9.slsi.bin /data/vendor/mediacodec/fruc_assets/fruc_kernels.s9.slsi.bin
-    copy /system/media/fruc_kernels.exynos9820.bin /data/vendor/mediacodec/fruc_assets/fruc_kernels.exynos9820.bin
-    copy /system/media/fruc_kernels.exynos990.bin /data/vendor/mediacodec/fruc_assets/fruc_kernels.exynos990.bin
-    copy /system/media/fruc_kernels.exynos980.bin /data/vendor/mediacodec/fruc_assets/fruc_kernels.exynos980.bin
-    copy /system/media/fruc_kernels.exynos9610.bin /data/vendor/mediacodec/fruc_assets/fruc_kernels.exynos9610.bin
-    copy /system/media/fruc_kernels.exynos7885.bin /data/vendor/mediacodec/fruc_assets/fruc_kernels.exynos7885.bin
-    chown mediacodec mediacodec /data/vendor/mediacodec/fruc_assets/fruc_kernels.s9.slsi.bin
-    chown mediacodec mediacodec /data/vendor/mediacodec/fruc_assets/fruc_kernels.exynos9820.bin
-    chown mediacodec mediacodec /data/vendor/mediacodec/fruc_assets/fruc_kernels.exynos990.bin
-    chown mediacodec mediacodec /data/vendor/mediacodec/fruc_assets/fruc_kernels.exynos9610.bin
-    chown mediacodec mediacodec /data/vendor/mediacodec/fruc_assets/fruc_kernels.exynos980.bin
-    chown mediacodec mediacodec /data/vendor/mediacodec/fruc_assets/fruc_kernels.exynos7885.bin
 
     # FINGERPRINT
     mkdir /data/vendor/biometrics 0770 system system
