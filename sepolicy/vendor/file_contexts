@@ -15,6 +15,8 @@
 /dev/sec-nfc u:object_r:nfc_device:s0
 # Secmem
 /dev/s5p-smem u:object_r:secmem_device:s0
+# ZRAM
+/dev/block/zram0 u:object_r:swap_block_device:s0
 
 ### Sysfs
 # Camera

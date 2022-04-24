@@ -520,6 +520,8 @@ on post-fs-data
     chown clat clat /sys/kernel/clat/xlat_v4_addrs
   
 on boot
+    write /proc/sys/vm/swappiness 100
+
     # Allow to access debugfs for system:system
     chmod 0755 /sys/kernel/debug
     chown system system /sys/kernel/debug
@@ -843,6 +845,7 @@ on boot
 
 on fs
     mount_all /vendor/etc/fstab.${ro.hardware}
+    swapon_all /vendor/etc/fstab.${ro.hardware}
 
     mount none /mnt/vendor/efs /efs bind
     mount none /mnt/vendor/cpefs /cpefs bind
