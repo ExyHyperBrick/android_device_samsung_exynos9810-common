@@ -934,4 +934,9 @@
 
     <!-- If this is true, device supports Sustained Performance Mode. -->
     <bool name="config_sustainedPerformanceModeSupported">true</bool>
+
+    <!-- List of comma separated package names for which we the system will not show crash like
+         tts, etc. dialogs. -->
+    <string name="config_appsNotReportingCrashes">com.google.android.tts</string>
+
 </resources>
