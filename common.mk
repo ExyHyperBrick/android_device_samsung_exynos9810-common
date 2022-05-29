@@ -3,6 +3,9 @@
 
 COMMON_PATH := device/samsung/exynos9810-common
 
+# Get non-open-source specific aspects
+$(call inherit-product, vendor/samsung/exynos9810-common/exynos9810-common-vendor.mk)
+
 # Soong namespaces
 PRODUCT_SOONG_NAMESPACES += \
     $(COMMON_PATH) \
