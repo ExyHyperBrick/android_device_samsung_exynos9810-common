@@ -8,6 +8,7 @@ persist.sys.camera. u:object_r:vendor_camera_prop:s0
 ro.fastbootd.available         u:object_r:exported_default_prop:s0
 
 # Hwc
+ro.vendor.winupdate            u:object_r:vendor_hwc_prop:s0
 vendor.hwc.display.            u:object_r:vendor_hwc_prop:s0
 
 # TEE
