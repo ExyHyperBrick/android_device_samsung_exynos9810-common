@@ -337,11 +337,17 @@ vendor/etc/init/android.hardware.drm@1.2-service.widevine.rc
 vendor/etc/init/vendor.samsung.hardware.security.widevine.keyprovisioning@1.0-service.rc
 -vendor/lib64/vendor.samsung.hardware.security.widevine.keyprovisioning@1.0.so
 
-# Wi-Fi
+# Wi-Fi - N770FXXU8GVF2
 vendor/etc/init/wifi.rc
-vendor/etc/init/wifi_brcm.rc
-vendor/etc/wifi/bcmdhd_mfg.bin_b0
-vendor/etc/wifi/bcmdhd_mon.bin_b2
-vendor/etc/wifi/bcmdhd_sta.bin_b0
-vendor/etc/wifi/indoorchannel.info
-vendor/etc/wifi/wldu.conf
+vendor/etc/init/wifi_brcm.rc|7e10bdb418353a269ae966ccc43b8444e2fd97e6
+vendor/firmware/bcm4361B2_murata.hcd|098ac8ad27bd48428f8a08d4d2baa8c9ef40b5b9
+vendor/firmware/bcm4361B2_semco.hcd|830e22f9f7940e8617d08b8a935d9a1aed5ccde4
+vendor/firmware/bcmdhd_clm.blob|f12265f1e0c28d24db314b4cd9847f0d1b2685bc
+vendor/firmware/bcmdhd_mfg.bin_b0|4e129f293e5c8f5dad4f9a05adf6a2d021505b54
+vendor/firmware/bcmdhd_mfg.bin_b2|0a239b9d18a90e5703d3df3e2c8a4bfb6bf688e7
+vendor/firmware/bcmdhd_mon.bin_b2|a26dbf45c511f96e374a18839417ae2ec562571b
+vendor/firmware/bcmdhd_sta.bin_b0|0c20d243bbf1862b8389d60b03cf18102df1f507
+vendor/firmware/bcmdhd_sta.bin_b2|4571624f0e2b024e402e7e57d4c8eb04b17f3c67
+vendor/firmware/nvram.txt_murata_r041_b2|2adda0674d47181251b256cf13c5a717282d58dc
+vendor/firmware/nvram.txt_r02a_b2|20bb9e2d91aa736ba016283e9f198730d0a5b4dd
+vendor/firmware/nvram.txt_r02b_b2|02bf8a48b74edb8c81ed580ff6dca1f9c40089b6
