@@ -56,6 +56,10 @@ PRODUCT_COPY_FILES += \
 PRODUCT_PACKAGES += \
     android.hardware.camera.provider@2.5-service
 
+# Charger
+PRODUCT_PACKAGES += \
+    charger_res_images_vendor
+
 # ConfigStore
 PRODUCT_PACKAGES += \
     disable_configstore
@@ -97,8 +101,8 @@ PRODUCT_PACKAGES += \
 
 # Health
 PRODUCT_PACKAGES += \
-    android.hardware.health@2.1-impl:64 \
-    android.hardware.health@2.1-service
+    android.hardware.health-service.samsung \
+    android.hardware.health-service.samsung-recovery
 
 # HIDL
 PRODUCT_PACKAGES += \

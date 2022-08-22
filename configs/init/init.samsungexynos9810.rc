@@ -1003,15 +1003,3 @@ on fs
 
 # ARGOSD network_throughput
     chown system system /dev/network_throughput
-
-on property:ro.bootmode=charger
-    wait /dev/block/platform/11120000.ufs/by-name/EFS
-    mount ext4 /dev/block/platform/11120000.ufs/by-name/EFS /efs nosuid nodev noatime noauto_da_alloc,discard,journal_checksum,data=ordered,errors=panic
-    chown radio system /efs
-    chmod 0771 /efs
-    chown radio system /efs/usb_hw_param
-    chmod 771 /efs/usb_hw_param
-    chown system system /efs/usb_hw_param/usb_hw_param.log
-    chmod 0660 /efs/usb_hw_param/usb_hw_param.log
-    mkdir /efs/lpm 0775 system system
-    class_start sec-charger
