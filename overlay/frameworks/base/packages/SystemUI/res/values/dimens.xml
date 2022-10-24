@@ -21,4 +21,7 @@
 
     <!-- Height of the status bar header bar when on Keyguard -->
     <dimen name="status_bar_header_height_keyguard">@*android:dimen/status_bar_height_default</dimen>
+
+    <!-- Starting padding for a left-aligned quick status bar clock -->
+    <dimen name="status_bar_left_clock_starting_padding">0dp</dimen>
 </resources>
