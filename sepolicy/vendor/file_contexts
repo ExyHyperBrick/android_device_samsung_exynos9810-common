@@ -4,6 +4,9 @@
 /data/vendor/nfc(/.*)? u:object_r:nfc_vendor_data_file:s0
 
 ### DEV
+# Extcon
+/sys/devices/platform/(.*)/extcon/extcon[0-9]/cable.[0-9]/name u:object_r:sysfs_extcon:s0
+
 # Audio (Soundtrigger)
 /dev/vts_fio_dev u:object_r:vts_fio_device:s0
 # Camera

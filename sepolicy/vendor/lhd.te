@@ -1,0 +1,3 @@
+allow lhd netd:unix_stream_socket connectto;
+
+binder_call(lhd, servicemanager)
