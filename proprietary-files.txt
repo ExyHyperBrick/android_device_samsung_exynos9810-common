@@ -140,9 +140,9 @@ vendor/etc/sensor/lhd.conf
 
 # Graphics/Mali
 -vendor/bin/bcc_mali
--vendor/lib/egl/libGLES_mali.so
+-vendor/lib/egl/libGLES_mali.so|40a0d996bb7da9c9fb47f8adb93f697f8d76bf69
 -vendor/lib/libmalicore.bc
--vendor/lib64/egl/libGLES_mali.so
+-vendor/lib64/egl/libGLES_mali.so|ff7f87973705174551faeb0c0e9b801189f02895
 -vendor/lib64/libLLVM_android_mali.so
 -vendor/lib64/libbcc_mali.so
 -vendor/lib64/libmalicore.bc
