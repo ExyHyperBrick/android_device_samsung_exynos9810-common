@@ -22,3 +22,8 @@ allow hal_graphics_composer_default {
     log_data_file
     log_vendor_data_file
 }:file { rw_file_perms create };
+
+allow hal_graphics_composer_default vendor_surfaceflinger_vndservice:service_manager {
+    add
+    find
+};
