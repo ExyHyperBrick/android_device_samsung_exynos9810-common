@@ -1,3 +1,5 @@
+allow lhd hal_system_suspend_service:service_manager find;
+
 allow lhd netd:unix_stream_socket connectto;
 
 binder_call(lhd, servicemanager)
