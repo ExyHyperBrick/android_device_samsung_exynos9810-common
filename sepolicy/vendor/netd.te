@@ -1,0 +1,2 @@
+allow netd lhd:fd use;
+allow netd lhd:tcp_socket { read write getopt setopt };
