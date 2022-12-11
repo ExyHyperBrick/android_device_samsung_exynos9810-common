@@ -50,7 +50,7 @@ vendor/firmware/vts.bin
 # AptX - from crosshatch - RQ1A.201205.003
 -product/lib64/libaptX_encoder.so|df1c89d7af1bb35808d5fe3496b04ba066c10cbc
 
-# Camera - N770FXXS8GVI2
+# Camera - N770FXXU8HVK5
 -vendor/lib/camera.device@1.0-impl.so;MODULE=camera.device@1.0-impl.exynos9810
 -vendor/lib/camera.device@3.3-impl.so;MODULE=camera.device@3.3-impl.exynos9810
 -vendor/lib/camera.device@3.5-impl.so;MODULE=camera.device@3.5-impl.exynos9810
@@ -58,7 +58,7 @@ vendor/firmware/vts.bin
 -vendor/lib64/camera.device@3.3-impl.so;MODULE=camera.device@3.3-impl.exynos9810
 -vendor/lib64/camera.device@3.5-impl.so;MODULE=camera.device@3.5-impl.exynos9810
 -vendor/lib/libSEF.quram.so
--vendor/lib/libacryl_plugin_slsi_hdr10.so|1768ff2f5fa4c585e8f37e4520f7cc6680382d77
+-vendor/lib/libacryl_plugin_slsi_hdr10.so|8da73c509adb822e0c1722b735a3f9a6cdbef0dd
 -vendor/lib/libcnn.so
 -vendor/lib/libcsc.so
 -vendor/lib/libgiantmscl.so|cb0b5740dd02f861442cc0b58980a23eef930cb1
@@ -70,7 +70,7 @@ vendor/firmware/vts.bin
 -vendor/lib/libuniplugin.so
 -vendor/lib/libvkmanager_vendor.so
 -vendor/lib64/libSEF.quram.so
--vendor/lib64/libacryl_plugin_slsi_hdr10.so|ff1294872d77a2d37684ce390363fbeb0bbceb84
+-vendor/lib64/libacryl_plugin_slsi_hdr10.so|bbabd4a29b768f0bf5430b15bb7404853e1415b7
 -vendor/lib64/libcsc.so
 -vendor/lib64/libgiantmscl.so|9b4a3fb30219a30cbb8f554b4270d76f136d644d
 -vendor/lib64/libhwjpeg.so
@@ -119,9 +119,9 @@ vendor/etc/media_profiles_V1_0.xml
 -vendor/lib/hw/gatekeeper.exynos9810.so
 -vendor/lib64/hw/gatekeeper.exynos9810.so
 
-# Gralloc - N770FXXS8GVI2
--vendor/lib/hw/gralloc.exynos9810.so|c981f40825011e48f1afaca3284df8d02029b2a1
--vendor/lib64/hw/gralloc.exynos9810.so|dab907b2c3d802828e16bd47a3d4cbd9e2a96558
+# Gralloc - N770FXXU8HVK5
+-vendor/lib/hw/gralloc.exynos9810.so|7a29efc31d455d32ea8b00787e90ffcc386d1ffb
+-vendor/lib64/hw/gralloc.exynos9810.so|9ef8cb695084888272aab866be20e962d01e8c4a
 
 # GPS/GNSS
 -vendor/bin/hw/gpsd
@@ -263,29 +263,29 @@ vendor/openvx/cost/cost_iva.dat
 vendor/openvx/cost/cost_score.dat
 vendor/openvx/xml/_hifi_still_schedule.xml
 
-# Samsung SLSI HWC - N770FXXS8GVI2
--vendor/lib/hw/hwcomposer.exynos9810.so|debe377effca8b3b54aea924c677c45130bf4192
--vendor/lib/libExynosHWCService.so|61dae6cba4affe8696c065e83c9ce0afd509e148
--vendor/lib/libGrallocWrapper.so|32a1d62b94ee29f032b8af6eaf76fe7ce7f08637
--vendor/lib/libacryl.so|8fe57b99a211ba75da0a38f779195625252ad626
--vendor/lib/libdrmresource.so|4be2d2cfcb5c8fc780615910f9e794d6cab80d56
--vendor/lib/libexynosdisplay.so|a1a5eea5782edb311df8d46755567fd499c12d94
--vendor/lib/libexynosgraphicbuffer.so|8ae57ad403cc7995c2a8c1b872df53e03561e169
+# Samsung SLSI HWC - N770FXXU8HVK5
+-vendor/lib/hw/hwcomposer.exynos9810.so|4a3254a697fb43f73f5324fe229fff5499c7c39f
+-vendor/lib/libExynosHWCService.so|0bb7af5a110dd22376951cce33253201aa8b37b2
+-vendor/lib/libGrallocWrapper.so|539a29a1dd6330379ec44523f6301f1624f155a8
+-vendor/lib/libacryl.so|cb90271f3f141ed214bbe3823ebfdbbcb121f387
+-vendor/lib/libdrmresource.so|09de60a252e19ffabc9974880c332e590e1502e0
+-vendor/lib/libexynosdisplay.so|e03abb34e312c6ae3538a6b51c1c6ad885631ecc
+-vendor/lib/libexynosgraphicbuffer.so|70273622532640602f3c1800ff7b54eb3e2d36e7
 -vendor/lib/libexynosgscaler.so
--vendor/lib/libexynosscaler.so|c04ec7c28549138e0909abeff7f6c5f04cff0bb0
+-vendor/lib/libexynosscaler.so|fd0da8e7a84786f02241360e48fa158c8bd7ce88
 -vendor/lib/libexynosutils.so|978bc378dd83b7b93a5342e40713e328375b1e5e
--vendor/lib/libexynosv4l2.so|0bfde54c099ceea5526d552e888ebf6520721146
--vendor/lib64/hw/hwcomposer.exynos9810.so|52d2d36b317d4cc5fdc63a6b82952dad1aee5562
--vendor/lib64/libExynosHWCService.so|f8f10f0f9bf0997519d23607f3cdebe5e21ae8c0
--vendor/lib64/libGrallocWrapper.so|51d9c2e2856e7eac4a8062f8c502f490df315406
--vendor/lib64/libacryl.so|839deb86e09398a9acedcc4fcb42b571c80dfd50
--vendor/lib64/libdrmresource.so|49ee262f855335c12a6da99fa3b8fad150daa68d
--vendor/lib64/libexynosdisplay.so|6e7f7414f29667f557817cff25c9089cb8dc4eda
--vendor/lib64/libexynosgraphicbuffer.so|3cc3ff629e4dedf78f3ee17584a0f49dd9eee886
+-vendor/lib/libexynosv4l2.so|2eaa63c884ea07212b47e2623fcee7d8fc9b5057
+-vendor/lib64/hw/hwcomposer.exynos9810.so|e9c3a7bd0a3d44492f3dd11656ddbd8deecbf513
+-vendor/lib64/libExynosHWCService.so|27361e800f414623696158ecb9c4ad2223e1c41f
+-vendor/lib64/libGrallocWrapper.so|5d198a79a8c58fb97d571c683a74a9c6365d93dc
+-vendor/lib64/libacryl.so|17131782128531cccd171b936906ee2355bb959e
+-vendor/lib64/libdrmresource.so|6f5f54bfd91a199496691452517b2df1e0d16a32
+-vendor/lib64/libexynosdisplay.so|93f29badba9da1ff93a412dbb4b298fbad4a5c2e
+-vendor/lib64/libexynosgraphicbuffer.so|d243e212a7d7726bf48c081dbcfab71b7e1b5a23
 -vendor/lib64/libexynosgscaler.so
--vendor/lib64/libexynosscaler.so|3ecd29452fcf6fa08251ef1e93274d4b101347e5
--vendor/lib64/libexynosutils.so|d30a8f26ab2a91e5da7b99d3e355fc79e3821a15
--vendor/lib64/libexynosv4l2.so|306f8d44c0c1b5af3740019b6ffc7da8b6c693df
+-vendor/lib64/libexynosscaler.so|835f80a08faf3ca6ae5675b80af249733c8f542c
+-vendor/lib64/libexynosutils.so|aab76513635ac75d87b72b0891f1037a5201244c
+-vendor/lib64/libexynosv4l2.so|d7035ad64f51e60f5f8661728e45e0d9005b57a0
 -vendor/lib64/libmpp.so
 
 # Samsung SLSI Memtrack
