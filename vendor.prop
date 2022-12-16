@@ -62,7 +62,6 @@ ro.config.avoid_gfx_accel=true
 
 # RIL
 ro.telephony.default_network=9,9
-ro.vendor.sec.radio.def_network=9
 vendor.sec.rild.libpath=/vendor/lib64/libsec-ril.so
 
 # Samsung_SLSI
