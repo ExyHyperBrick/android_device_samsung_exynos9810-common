@@ -60,6 +60,9 @@ fi
 
 function blob_fixup() {
     case "${1}" in
+        vendor/bin/hw/rild)
+                "${PATCHELF}" --replace-needed libril.so libril-samsung.so "${2}"
+                ;;
         vendor/lib*/libsensorlistener.so)
                 "${PATCHELF}" --add-needed libshim_sensorndkbridge.so "${2}"
                 ;;
