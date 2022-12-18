@@ -1,0 +1,11 @@
+# Custom Pressure Settings
+on init
+    chown system system /sys/class/timed_output/vibrator/enable
+    chown system system /sys/class/timed_output/vibrator/intensity
+    chown system system /sys/class/timed_output/vibrator/force_touch_intensity
+
+# Force Touch
+on property:sys.boot_completed=1
+    write /sys/class/timed_output/vibrator/force_touch_intensity 10000
+    write /sys/class/sec/tsp/cmd set_pressure_user_level,3
+    write /sys/class/sec/tsp/cmd set_pressure_status_mode,1
