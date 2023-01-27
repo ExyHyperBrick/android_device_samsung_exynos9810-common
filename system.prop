@@ -7,6 +7,9 @@ ro.cmc.version=2.0
 # Charger
 ro.charger.enable_suspend=true
 
+# Graphics
+debug.sf.auto_latch_unsignaled=0
+
 # Wi-Fi Direct
 wifi.direct.interface=p2p-dev-wlan0
 
