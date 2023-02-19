@@ -19,6 +19,10 @@ DEVICE_PACKAGE_OVERLAYS += \
 
 PRODUCT_ENFORCE_RRO_TARGETS += *
 
+# Acrylic
+PRODUCT_PACKAGES += \
+    libacryl
+
 # Audio
 PRODUCT_PACKAGES += \
     android.hardware.audio.effect@7.0-impl:32 \
@@ -96,6 +100,20 @@ PRODUCT_PACKAGES += \
     android.hardware.gatekeeper@1.0-impl:64 \
     android.hardware.gatekeeper@1.0-service
 
+# Gralloc
+PRODUCT_PACKAGES += \
+    libGrallocWrapper \
+    gralloc.exynos9810
+
+# Graphics
+PRODUCT_PACKAGES += \
+    libcsc \
+    libexynosgscaler \
+    libexynosutils \
+    libexynosscaler \
+    libexynosv4l2 \
+    libion_exynos
+
 # GNSS
 PRODUCT_PACKAGES += \
     android.hardware.gnss@2.0.vendor:64
@@ -111,6 +129,10 @@ PRODUCT_PACKAGES += \
     libhidltransport.vendor \
     libhwbinder \
     libhwbinder.vendor
+
+# HWComposer
+PRODUCT_PACKAGES += \
+    hwcomposer.exynos9810
 
 # init
 PRODUCT_COPY_FILES += \
@@ -267,6 +289,10 @@ PRODUCT_SYSTEM_SERVER_COMPILER_FILTER := speed-profile
 # Tethering
 PRODUCT_PACKAGES += \
     TetheringConfigOverlay
+
+# Stagefright
+PRODUCT_PACKAGES += \
+    libstagefrighthw
 
 # Thermal
 PRODUCT_PACKAGES += \
