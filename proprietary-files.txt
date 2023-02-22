@@ -137,6 +137,10 @@ vendor/etc/sensor/lhd.conf
 -vendor/lib/egl/libGLES_mali.so|028af88de64f967dec90b3f303b7978da463e675
 -vendor/lib64/egl/libGLES_mali.so|4b4d57580937650d133058e2b2bdb7ad7d3ca401
 
+# Vulkan - N770FXXU8HWA2
+-vendor/lib/hw/vulkan.mali.so|eae6e331f73caf11d93534eb093e791bfb093f26
+-vendor/lib64/hw/vulkan.mali.so|e163e88ac8801721922dfd1209cc719cc3a61763
+
 # Ion - N770FXXS8GVI2
 -vendor/lib/libion_exynos.so|d9e8ef48d4b97d3f1c3dcf11030794be9410d4db
 -vendor/lib64/libion_exynos.so|ac1e7a62e6c544e71abf8c9c9721f7f54366714f
