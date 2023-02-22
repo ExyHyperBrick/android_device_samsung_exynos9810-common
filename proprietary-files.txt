@@ -140,6 +140,10 @@ vendor/etc/sensor/lhd.conf
 -vendor/lib/egl/libGLES_mali.so
 -vendor/lib64/egl/libGLES_mali.so
 
+# Vulkan - N770FXXU8HWA2
+-vendor/lib/hw/vulkan.mali.so|eae6e331f73caf11d93534eb093e791bfb093f26
+-vendor/lib64/hw/vulkan.mali.so|e163e88ac8801721922dfd1209cc719cc3a61763
+
 # Ion
 -vendor/lib/libion_exynos.so
 -vendor/lib64/libion_exynos.so
