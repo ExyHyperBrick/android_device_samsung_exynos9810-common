@@ -136,9 +136,11 @@ vendor/etc/sensor/lhd.conf
 -vendor/lib64/hw/vendor.samsung.hardware.gnss@2.0-impl.so
 -vendor/lib64/vendor.samsung.hardware.gnss@2.0.so
 
-# Graphics/Mali
--vendor/lib/egl/libGLES_mali.so
--vendor/lib64/egl/libGLES_mali.so
+# Graphics/Mali - N770FXXU8HWA2
+-vendor/etc/snap_gpu_kernel_64.bin|9a21ffa4194b2698d4f2ad8e64839889f04db490
+-vendor/lib/egl/libGLES_mali.so|028af88de64f967dec90b3f303b7978da463e675
+-vendor/lib64/egl/libGLES_mali.so|4b4d57580937650d133058e2b2bdb7ad7d3ca401
+-vendor/lib64/libgpudataproducer.so|71c1c207705d1bdc65993226e6e6a00c7daf5917
 
 # Vulkan - N770FXXU8HWA2
 -vendor/lib/hw/vulkan.mali.so|eae6e331f73caf11d93534eb093e791bfb093f26
