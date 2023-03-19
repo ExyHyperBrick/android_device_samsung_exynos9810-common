@@ -53,6 +53,9 @@ ro.surface_flinger.running_without_sync_framework=false
 ro.surface_flinger.vsync_event_phase_offset_ns=0
 ro.surface_flinger.vsync_sf_event_phase_offset_ns=0
 
+# Hwcomposer
+vendor.hwc.exynos.vsync_mode=0
+
 # Keystore
 ro.hardware.keystore=mdfpp
 ro.security.keystore.keytype=sak,gak
