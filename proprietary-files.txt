@@ -240,10 +240,6 @@ vendor/openvx/cost/cost_iva.dat
 vendor/openvx/cost/cost_score.dat
 vendor/openvx/xml/_hifi_still_schedule.xml
 
-# Samsung SLSI Memtrack
--vendor/lib64/hw/memtrack.exynos9810.so
--vendor/lib/hw/memtrack.exynos9810.so
-
 # Secnative
 -vendor/lib/libsecnativefeature.so
 -vendor/lib64/libsecnativefeature.so
