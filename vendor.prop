@@ -56,6 +56,7 @@ ro.surface_flinger.vsync_event_phase_offset_ns=0
 ro.surface_flinger.vsync_sf_event_phase_offset_ns=0
 
 # HWUI
+ro.hwui.render_ahead=20
 debug.hwui.skia_atrace_enabled=false
 
 # Keystore
