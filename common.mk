@@ -12,7 +12,8 @@ PRODUCT_SOONG_NAMESPACES += \
     hardware/google/interfaces \
     hardware/google/pixel \
     hardware/samsung \
-    hardware/samsung/aidl/power-libperfmgr
+    hardware/samsung/aidl/power-libperfmgr \
+    hardware/samsung_slsi/graphics
 
 DEVICE_PACKAGE_OVERLAYS += \
     $(COMMON_PATH)/overlay
