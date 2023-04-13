@@ -1,5 +1,6 @@
 # Kernel headers
 TARGET_BOARD_KERNEL_HEADERS := hardware/samsung_slsi/exynos/kernel-4.9-headers/kernel-headers
+TARGET_SLSI_VARIANT := custom
 
 # Acrylic
 BOARD_LIBACRYL_DEFAULT_COMPOSITOR := fimg2d_9810
