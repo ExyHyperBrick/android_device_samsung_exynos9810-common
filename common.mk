@@ -74,9 +74,6 @@ PRODUCT_PACKAGES += \
     android.hardware.graphics.composer@2.4-service \
     android.hardware.graphics.mapper@2.0-impl-2.1
 
-PRODUCT_PACKAGES += \
-    libdrm.vendor:64
-
 # DRM
 PRODUCT_PACKAGES += \
     android.hardware.drm@1.4.vendor:32 \
