@@ -1,3 +1,5 @@
+# init.te
+
 allow init socket_device:sock_file create_file_perms;
 
 allow init efs_file:dir mounton;

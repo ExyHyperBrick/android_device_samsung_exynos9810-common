@@ -45,8 +45,9 @@ vendor/firmware/vts.bin
 -vendor/lib64/libqfp_sensortest.so
 -vendor/lib64/libsynaFpSensorTestNwd.so
 
-# Bluetooth
--vendor/lib64/libbt-vendor.so
+# Bluetooth (AptX) - from crosshatch - RQ1A.201205.003
+-product/lib64/libaptX_encoder.so|df1c89d7af1bb35808d5fe3496b04ba066c10cbc
+-vendor/lib64/libbt-vendor.so;MODULE=libbt-vendor.exynos9810
 
 # Camera
 -vendor/lib/camera.device@1.0-impl.so;MODULE=camera.device@1.0-impl.exynos9810
@@ -55,6 +56,8 @@ vendor/firmware/vts.bin
 -vendor/lib64/camera.device@1.0-impl.so;MODULE=camera.device@1.0-impl.exynos9810
 -vendor/lib64/camera.device@3.3-impl.so;MODULE=camera.device@3.3-impl.exynos9810
 -vendor/lib64/camera.device@3.5-impl.so;MODULE=camera.device@3.5-impl.exynos9810
+
+# Camera dependencies
 -vendor/lib/libSEF.quram.so
 -vendor/lib/libacryl.so
 -vendor/lib/libacryl_plugin_slsi_hdr10.so
@@ -78,12 +81,16 @@ vendor/firmware/vts.bin
 -vendor/lib64/libuniapi.so
 -vendor/lib64/libuniplugin.so
 -vendor/lib64/libvkmanager_vendor.so
+
+# Camera IDDQD plugin
 -vendor/lib/libIDDQD_core.so
 -vendor/lib/libIDDQD_interface.so
 -vendor/lib/libOpenCv.camera.samsung.so
 -vendor/lib64/libIDDQD_core.so
 -vendor/lib64/libIDDQD_interface.so
 -vendor/lib64/libOpenCv.camera.samsung.so
+
+# Camera firmware
 vendor/firmware/score/develop1/score_dummy
 vendor/firmware/score/camera1/score_kc2_pmw.bin
 vendor/firmware/score/camera1/score_kc2_dmb.bin
@@ -215,7 +222,7 @@ vendor/etc/init/mobicore.rc
 -vendor/lib/hw/power.exynos9810.so
 -vendor/lib64/hw/power.exynos9810.so
 
-# RIL - N770FXXU8FVB4 (S)
+# RIL - N770FXXU8FUL7
 vendor/etc/init/init.vendor.rilchip.rc|0f5f13a11c084db5dc0eb47bb693235a2273f91e
 vendor/etc/init/init.vendor.rilcommon.rc|eb3115e335457fdc95c854190ee6804e165718f2
 vendor/etc/plmn_delta.bin|6a826cb6a8a1d460403ab2ebccf4f0d7be546ce6
@@ -224,22 +231,20 @@ vendor/etc/plmn_delta_hktw.bin|97a5a4747e8c32d463d8f26254257309b8a03a63
 vendor/etc/plmn_delta_usagsm.bin|9a25ec9e9da16ed2f8a9db07f037fe08283b24e5
 vendor/etc/plmn_se13.bin|6445f3c7ee35c59999de2fdd47c718048a3f550f
 -vendor/bin/cbd|155f94ba40e72680d6125a93ad8d8c0445eff86a
+-vendor/bin/hw/rild|e1782518a28bad77f29a2862dd40757309b8c0b0
 -vendor/lib/libaudio-ril.so|47e9bbb359a498409146d02dd6228b43410475f8
 -vendor/lib/libsecril-client.so;MODULE=libsecril-client.exynos9810|4d5ee418f73e7f644220462f9c0eaefdcb54153a
 -vendor/lib/libsemnativecarrierfeature.so|a25d959ddf046b26d678011b5e1d4dd1dc09f809
 -vendor/lib64/libengmode_client.so|a7d678bad7a8c3b9729ff3d56cc35159ece548a3
--vendor/lib64/vendor.samsung.hardware.radio.bridge@2.0.so|4f803c313c74e161a871bac17581ee5f01d076ec
--vendor/lib64/vendor.samsung.hardware.radio.channel@2.0.so|38bc33189382277cd9ea0a44d2f9a8a13e91bf49
--vendor/lib64/vendor.samsung.hardware.radio@2.0.so|4b2836fd3370945b0d8e7c3ab1c8ab45db819077
--vendor/lib64/vendor.samsung.hardware.radio@2.1.so|7d1d5a2c86ed493ab5eb1d177d59b0dfa21d6421
-
-# RIL - N770FXXS8EUL2 (R)
--vendor/bin/hw/rild|e1782518a28bad77f29a2862dd40757309b8c0b0
 -vendor/lib64/libril-samsung.so|cf62752d95d5bd16fe2613ee0b4ab1cb5328b37c
 -vendor/lib64/libsec-ril.so|1956b2cf4fafc8c9ade6f227b5e0065f36a20b8b
 -vendor/lib64/libsec-ril-dsds.so|9ff3afd48584969f8a7590ca0f534ceb5a7d87d1
 -vendor/lib64/libsecril-client.so;MODULE=libsecril-client.exynos9810|f63f4a658dec8e419f5316d3d0db086bdb17d595
 -vendor/lib64/libsemnativecarrierfeature.so|b9663215a8cae356b4ddf86790359beda9c30f47
+-vendor/lib64/vendor.samsung.hardware.radio.bridge@2.0.so|4f803c313c74e161a871bac17581ee5f01d076ec
+-vendor/lib64/vendor.samsung.hardware.radio.channel@2.0.so|38bc33189382277cd9ea0a44d2f9a8a13e91bf49
+-vendor/lib64/vendor.samsung.hardware.radio@2.0.so|4b2836fd3370945b0d8e7c3ab1c8ab45db819077
+-vendor/lib64/vendor.samsung.hardware.radio@2.1.so|7d1d5a2c86ed493ab5eb1d177d59b0dfa21d6421
 
 # Samsung SLSI IVA
 -vendor/lib/libiva_android_hal.so
@@ -298,11 +303,11 @@ vendor/etc/init/android.hardware.drm@1.2-service.widevine.rc
 vendor/etc/init/vendor.samsung.hardware.security.widevine.keyprovisioning@1.0-service.rc
 -vendor/lib64/vendor.samsung.hardware.security.widevine.keyprovisioning@1.0.so
 
-# Wi-Fi - N770FXXU8GVF2
+# Wi-Fi - N770FXXU8HWA2
 vendor/etc/init/wifi.rc
 vendor/etc/init/wifi_brcm.rc|7e10bdb418353a269ae966ccc43b8444e2fd97e6
-vendor/firmware/bcm4361B2_murata.hcd|098ac8ad27bd48428f8a08d4d2baa8c9ef40b5b9
-vendor/firmware/bcm4361B2_semco.hcd|830e22f9f7940e8617d08b8a935d9a1aed5ccde4
+vendor/firmware/bcm4361B2_murata.hcd|6ce1e63ad8ae52513e99d6ad561ca7dc53da5584
+vendor/firmware/bcm4361B2_semco.hcd|15e35d87f1b693a45fccdf7e8510d4c31b44ec3f
 vendor/firmware/bcmdhd_clm.blob|f12265f1e0c28d24db314b4cd9847f0d1b2685bc
 vendor/firmware/bcmdhd_mfg.bin_b0|4e129f293e5c8f5dad4f9a05adf6a2d021505b54
 vendor/firmware/bcmdhd_mfg.bin_b2|0a239b9d18a90e5703d3df3e2c8a4bfb6bf688e7

@@ -1,11 +1,17 @@
 # Samsung specific
 ro.product_ship=true
+# Set csc support in OMX
+# If not set or set to 0, OMX will only use BT.601 colorspace.
 ro.vendor.cscsupported=1
+# Set cmc properties
 ro.cmc.device_type=pd
 ro.cmc.version=2.0
 
-# Charger
+# RIL
+persist.sys.fflag.override.settings_provider_model=false
+
+### CHARGER
 ro.charger.enable_suspend=true
 
-# Wi-Fi Direct
+### WIFI Direct
 wifi.direct.interface=p2p-dev-wlan0

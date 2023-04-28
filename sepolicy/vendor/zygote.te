@@ -1,1 +1,3 @@
+# zygote.te
+
 get_prop(zygote, exported_camera_prop);

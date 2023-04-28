@@ -1,3 +1,5 @@
+# device.te
+
 type m2m1shot_device, dev_type;
 type secmem_device, dev_type;
 type vts_fio_device, dev_type;

@@ -1,3 +1,5 @@
+# hal_camera_default.te
+
 r_dir_file(hal_camera_default, sysfs_camera);
 allow hal_camera_default sysfs_camera_writable:file rw_file_perms;
 
@@ -9,5 +11,3 @@ set_prop(hal_camera_default, vendor_camera_prop);
 allow hal_camera_default hal_graphics_composer_default:fd use;
 
 allow hal_camera_default property_socket:sock_file write;
-
-dontaudit hal_camera_default default_prop:file read;

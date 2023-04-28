@@ -86,6 +86,9 @@
     <!-- Device have higher than normal aspect ratio sreen -->
     <bool name="config_haveHigherAspectRatioScreen">true</bool>
 
+    <!-- Default values for LiveDisplay -->
+    <integer name="config_defaultLiveDisplayMode">0</integer>
+
     <!-- Whether the device supports wireless charging or not -->
     <bool name="config_deviceSupportsWirelessCharging">true</bool>
 </resources>

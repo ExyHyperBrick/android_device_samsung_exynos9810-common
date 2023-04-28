@@ -71,6 +71,8 @@ on init
     # vibrator
     chown system system /sys/class/timed_output/vibrator/intensity
     chown system system /sys/class/timed_output/vibrator/motor_type
+    chown system system /sys/class/timed_output/vibrator/force_touch_intensity
+    write /sys/class/timed_output/vibrator/force_touch_intensity 10000
 
 on early-fs
     # tzic need to be grand permission before vold
@@ -241,6 +243,15 @@ on post-fs-data
     # Create all remaining /data root dirs so that they are made through init
     # and get proper encryption policy installed
     mkdir /data/backup 0700 system system
+
+    # TAD
+    mkdir /data/tad 0770 system system
+
+    # Samsung Pass
+    mkdir /data/.fido 0700 system system
+
+    # Samsung font
+    mkdir /data/app_fonts 0775 system system
 
     # FINGERPRINT
     mkdir /data/vendor/biometrics 0770 system system

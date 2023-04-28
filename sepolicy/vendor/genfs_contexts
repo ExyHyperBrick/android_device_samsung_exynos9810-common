@@ -1,45 +1,53 @@
-# Debugfs
-genfscon debugfs /ion u:object_r:debugfs_ion:s0
-genfscon debugfs /mali/ u:object_r:debugfs_mali:s0
-genfscon debugfs /mali/mem/ u:object_r:debugfs_mali_mem:s0
+# DEBUGFS
+genfscon debugfs /ion                                                                                                     u:object_r:debugfs_ion:s0
+genfscon debugfs /mali/                                                                                                   u:object_r:debugfs_mali:s0
+genfscon debugfs /mali/mem/                                                                                               u:object_r:debugfs_mali_mem:s0
 
-# Proc
-genfscon proc /sys/vm/swappiness u:object_r:proc_swappiness:s0
+### PROC
+genfscon proc /sys/vm/swappiness                                                                                          u:object_r:proc_swappiness:s0
 
-# Devices
-genfscon sysfs /devices/platform/10000.mif_pdata/sim/ds_detect u:object_r:sysfs_sim_writable:s0
-genfscon sysfs /devices/platform/10430000.pinctrl/gpiochip39/gpio/gpio141/value u:object_r:sysfs_gps_writable:s0
-genfscon sysfs /devices/platform/141c0000.speedy/i2c-15/15-0000/s2mps18-rtc/rtc/rtc0/hctosys u:object_r:sysfs_rtc:s0
-genfscon sysfs /devices/platform/14360000.hsi2c/i2c-13/13-0066/max77705-charger/power_supply/max77705-charger/type u:object_r:sysfs_battery:s0
-genfscon sysfs /devices/platform/14360000.hsi2c/i2c-13/13-0066/max77705-fuelgauge/power_supply/max77705-fuelgauge/type u:object_r:sysfs_battery:s0
-genfscon sysfs /devices/platform/14360000.hsi2c/i2c-13/13-0066/max77705-charger/power_supply/otg/type u:object_r:sysfs_battery:s0
-genfscon sysfs /devices/platform/14360000.hsi2c/i2c-16/16-0066/max77705-charger/power_supply/max77705-charger/type u:object_r:sysfs_battery:s0
-genfscon sysfs /devices/platform/14360000.hsi2c/i2c-16/16-0066/max77705-fuelgauge/power_supply/max77705-fuelgauge/type u:object_r:sysfs_battery:s0
-genfscon sysfs /devices/platform/14360000.hsi2c/i2c-16/16-0066/max77705-charger/power_supply/otg/type u:object_r:sysfs_battery:s0
-genfscon sysfs /devices/platform/14370000.hsi2c/i2c-14/14-003b/power_supply/mfc-charger/type u:object_r:sysfs_battery:s0
-genfscon sysfs /devices/platform/14370000.hsi2c/i2c-17/17-003b/power_supply/mfc-charger/type u:object_r:sysfs_battery:s0
-genfscon sysfs /devices/platform/16030000.decon_f/psr_info u:object_r:sysfs_decon:s0
-genfscon sysfs /devices/platform/16030000.decon_f/vsync u:object_r:sysfs_decon_writable:s0
-genfscon sysfs /devices/platform/16050000.decon_t/vsync u:object_r:sysfs_decon_writable:s0
-genfscon sysfs /devices/platform/178d0000.mfc0/video4linux/video6/name u:object_r:sysfs_v4l:s0
-genfscon sysfs /devices/platform/178d0000.mfc0/video4linux/video7/name u:object_r:sysfs_v4l:s0
-genfscon sysfs /devices/platform/178d0000.mfc0/video4linux/video8/name u:object_r:sysfs_v4l:s0
-genfscon sysfs /devices/platform/bluetooth/rfkill/rfkill0/state u:object_r:sysfs_rfkill_writable:s0
-genfscon sysfs /devices/platform/panel_drv@001/backlight/panel/brightness u:object_r:sysfs_backlight_writable:s0
-genfscon sysfs /devices/platform/panel_drv@001/backlight/panel/max_brightness u:object_r:sysfs_backlight_writable:s0
-genfscon sysfs /devices/platform/panel_drv@001/lcd/panel/window_type u:object_r:sysfs_lcd:s0
-genfscon sysfs /devices/platform/panel_drv@001/lcd/panel/mdnie/accessibility u:object_r:sysfs_lcd_writable:s0
-genfscon sysfs /devices/platform/panel_drv@001/lcd/panel/mdnie/lux u:object_r:sysfs_lcd_writable:s0
-genfscon sysfs /devices/platform/panel_drv@001/lcd/panel/mdnie/mode u:object_r:sysfs_lcd_writable:s0
-genfscon sysfs /devices/platform/panel_drv@001/lcd/panel/mdnie/sensorRGB u:object_r:sysfs_lcd_writable:s0
-genfscon sysfs /devices/system/chip-id/revision u:object_r:sysfs_chipid:s0
-genfscon sysfs /devices/virtual/sec/led/led_blink u:object_r:sysfs_led_writable:s0
-genfscon sysfs /devices/virtual/sec/sensorhub/mcu_power u:object_r:sysfs_sensorhub_writable:s0
-genfscon sysfs /devices/virtual/sensors/hrm_sensor/xtalk_code u:object_r:sysfs_sensors_writable:s0
+### SYSFS
 
-# Kernel
-genfscon sysfs /kernel/gpu/gpu_max_clock u:object_r:sysfs_gpu_writable:s0
-genfscon sysfs /kernel/gpu/gpu_min_clock u:object_r:sysfs_gpu_writable:s0
+# mali
+genfscon sysfs /devices/platform/17500000.mali/dma_buf_gpu_mem  u:object_r:sysfs_gpu:s0
+genfscon sysfs /devices/platform/17500000.mali/kprcs            u:object_r:sysfs_gpu:s0
+genfscon sysfs /devices/platform/17500000.mali/total_gpu_mem    u:object_r:sysfs_gpu:s0
 
-# Firmware
-genfscon sysfs /firmware/devicetree/base/model_info-system_rev u:object_r:sysfs_modelinfo:s0
+# devices
+genfscon sysfs /devices/platform/10000.mif_pdata/sim/ds_detect                                                            u:object_r:sysfs_sim_writable:s0
+genfscon sysfs /devices/platform/10430000.pinctrl/gpiochip39/gpio/gpio141/value                                           u:object_r:sysfs_gps_writable:s0
+genfscon sysfs /devices/platform/141c0000.speedy/i2c-15/15-0000/s2mps18-rtc/rtc/rtc0/hctosys                              u:object_r:sysfs_rtc:s0
+genfscon sysfs /devices/platform/14360000.hsi2c/i2c-13/13-0066/max77705-charger/power_supply/max77705-charger/type        u:object_r:sysfs_battery:s0
+genfscon sysfs /devices/platform/14360000.hsi2c/i2c-13/13-0066/max77705-fuelgauge/power_supply/max77705-fuelgauge/type    u:object_r:sysfs_battery:s0
+genfscon sysfs /devices/platform/14360000.hsi2c/i2c-13/13-0066/max77705-charger/power_supply/otg/type                     u:object_r:sysfs_battery:s0
+genfscon sysfs /devices/platform/14360000.hsi2c/i2c-16/16-0066/max77705-charger/power_supply/max77705-charger/type        u:object_r:sysfs_battery:s0
+genfscon sysfs /devices/platform/14360000.hsi2c/i2c-16/16-0066/max77705-fuelgauge/power_supply/max77705-fuelgauge/type    u:object_r:sysfs_battery:s0
+genfscon sysfs /devices/platform/14360000.hsi2c/i2c-16/16-0066/max77705-charger/power_supply/otg/type                     u:object_r:sysfs_battery:s0
+genfscon sysfs /devices/platform/14370000.hsi2c/i2c-14/14-003b/power_supply/mfc-charger/type                              u:object_r:sysfs_battery:s0
+genfscon sysfs /devices/platform/14370000.hsi2c/i2c-17/17-003b/power_supply/mfc-charger/type                              u:object_r:sysfs_battery:s0
+genfscon sysfs /devices/platform/16030000.decon_f/psr_info                                                                u:object_r:sysfs_decon:s0
+genfscon sysfs /devices/platform/16030000.decon_f/vsync                                                                   u:object_r:sysfs_decon_writable:s0
+genfscon sysfs /devices/platform/16050000.decon_t/vsync                                                                   u:object_r:sysfs_decon_writable:s0
+genfscon sysfs /devices/platform/10ab0000.displayport/extcon/extcon0/cable.0/state                                        u:object_r:sysfs_displayport_writable:s0
+genfscon sysfs /devices/platform/178d0000.mfc0/video4linux/video6/name                                                    u:object_r:sysfs_v4l:s0
+genfscon sysfs /devices/platform/178d0000.mfc0/video4linux/video7/name                                                    u:object_r:sysfs_v4l:s0
+genfscon sysfs /devices/platform/178d0000.mfc0/video4linux/video8/name                                                    u:object_r:sysfs_v4l:s0
+genfscon sysfs /devices/platform/bluetooth/rfkill/rfkill0/state                                                           u:object_r:sysfs_rfkill_writable:s0
+genfscon sysfs /devices/platform/panel_drv@001/backlight/panel/brightness                                                 u:object_r:sysfs_backlight_writable:s0
+genfscon sysfs /devices/platform/panel_drv@001/backlight/panel/max_brightness                                             u:object_r:sysfs_backlight_writable:s0
+genfscon sysfs /devices/platform/panel_drv@001/lcd/panel/window_type                                                      u:object_r:sysfs_lcd:s0
+genfscon sysfs /devices/platform/panel_drv@001/lcd/panel/mdnie/accessibility                                              u:object_r:sysfs_lcd_writable:s0
+genfscon sysfs /devices/platform/panel_drv@001/lcd/panel/mdnie/lux                                                        u:object_r:sysfs_lcd_writable:s0
+genfscon sysfs /devices/platform/panel_drv@001/lcd/panel/mdnie/mode                                                       u:object_r:sysfs_lcd_writable:s0
+genfscon sysfs /devices/platform/panel_drv@001/lcd/panel/mdnie/sensorRGB                                                  u:object_r:sysfs_lcd_writable:s0
+genfscon sysfs /devices/system/chip-id/revision                                                                           u:object_r:sysfs_chipid:s0
+genfscon sysfs /devices/virtual/sec/led/led_blink                                                                         u:object_r:sysfs_led_writable:s0
+genfscon sysfs /devices/virtual/sec/sensorhub/mcu_power                                                                   u:object_r:sysfs_sensorhub_writable:s0
+genfscon sysfs /devices/virtual/sensors/hrm_sensor/xtalk_code                                                             u:object_r:sysfs_sensors_writable:s0
+
+# kernel
+genfscon sysfs /kernel/gpu/gpu_max_clock                                                                                  u:object_r:sysfs_gpu_writable:s0
+genfscon sysfs /kernel/gpu/gpu_min_clock                                                                                  u:object_r:sysfs_gpu_writable:s0
+
+# firmware
+genfscon sysfs /firmware/devicetree/base/model_info-system_rev                                                            u:object_r:sysfs_modelinfo:s0

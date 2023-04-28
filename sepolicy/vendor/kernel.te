@@ -1,3 +1,5 @@
+# kernel.te
+
 allow kernel block_device:dir search;
 allow kernel device:chr_file { create setattr getattr unlink };
 allow kernel device:dir { add_name write remove_name rmdir };

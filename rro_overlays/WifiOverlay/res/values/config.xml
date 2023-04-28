@@ -28,7 +28,7 @@
     <bool translatable="false" name="config_wifi_background_scan_support">true</bool>
 
     <!-- Wifi driver supports IEEE80211AC for softap -->
-    <bool translatable="false" name="config_wifi_softap_ieee80211ac_supported">true</bool>
+    <bool translatable="false" name="config_wifi_softap_ieee80211ac_supported">false</bool>
 
     <!-- Enable ACS (auto channel selection) for softap -->
     <bool translatable="false" name="config_wifi_softap_acs_supported">false</bool>

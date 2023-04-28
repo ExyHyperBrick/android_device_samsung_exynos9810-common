@@ -1,3 +1,5 @@
+# mediacodec.te
+
 hal_client_domain(mediacodec, hal_power);
 
 allow mediacodec sysfs_v4l:file r_file_perms;

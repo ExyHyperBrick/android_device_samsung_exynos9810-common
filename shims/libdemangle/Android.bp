@@ -1,0 +1,24 @@
+cc_library {
+    name: "libdemangle",
+    vendor_available: true,
+    include_dirs: [
+        "external/libcxx/include",
+        "external/libcxxabi/include",
+        "external/libcxxabi/src",
+    ],
+    cflags: [
+        "-Wall",
+        "-Werror",
+    ],
+    cppflags: [
+        "-std=c++14",
+        "-fexceptions",
+        "-Wextra",
+        "-Wno-unused-function",
+        "-Wno-implicit-fallthrough",
+        // src/cxa_demangle.cpp:2591 -Wimplicit-fallthrough
+    ],
+    srcs: [
+        "cxa_demangle.cpp"
+    ],
+}

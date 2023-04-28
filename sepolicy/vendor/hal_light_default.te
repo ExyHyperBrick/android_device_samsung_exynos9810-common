@@ -1,1 +1,3 @@
+# hal_light_default.te
+
 allow hal_light_default sysfs_led_writable:file rw_file_perms;

@@ -1,1 +1,6 @@
+# tee.te
+
 allow tee unlabeled:dir search;
+
+allow tee tee_vendor_data_file:dir { create add_name search rw_file_perms };
+allow tee tee_vendor_data_file:file { create rw_file_perms };

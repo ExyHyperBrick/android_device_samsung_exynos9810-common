@@ -1,0 +1,14 @@
+[
+    {
+        "repository": "android_device_samsung_slsi_sepolicy",
+        "target_path": "device/samsung_slsi/sepolicy"
+    },
+    {
+        "repository": "android_hardware_samsung",
+        "target_path": "hardware/samsung"
+    },
+    {
+        "repository": "android_kernel_samsung_exynos9810",
+        "target_path": "kernel/samsung/exynos9810"
+    }
+]

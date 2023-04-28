@@ -1,3 +1,5 @@
+# domain.te
+
 allow domain debugfs_ion:dir search;
 allow domain debugfs_mali:dir search;
 allow domain debugfs_mali_mem:dir search;

@@ -1,18 +1,16 @@
-# Bluetooth
-vendor.bluetooth_fw_ver u:object_r:wifi_log_prop:s0
+# BLUETOOTH
+vendor.bluetooth_fw_ver        u:object_r:wifi_log_prop:s0
 
-# Camera
-persist.sys.camera. u:object_r:vendor_camera_prop:s0
-
-# Fastbootd
-ro.fastbootd.available         u:object_r:exported_default_prop:s0
+# CAMERA
+persist.sys.camera.            u:object_r:vendor_camera_prop:s0
 
 # Hwc
 ro.vendor.winupdate            u:object_r:vendor_hwc_prop:s0
 vendor.hwc.display.            u:object_r:vendor_hwc_prop:s0
+hwc.exynos.                    u:object_r:vendor_hwc_prop:s0
 
 # TEE
-sys.mobicoredaemon.enable u:object_r:tee_prop:s0
+sys.mobicoredaemon.enable      u:object_r:tee_prop:s0
 
-# Wi-Fi
-vendor.wlan. u:object_r:vendor_wlan_prop:s0
+# FASTBOOTD
+ro.fastbootd.available         u:object_r:exported_default_prop:s0

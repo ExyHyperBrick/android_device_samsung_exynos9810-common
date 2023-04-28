@@ -1,1 +1,3 @@
+# hal_bluetooth_default.te
+
 allow hal_bluetooth_default sysfs_rfkill_writable:file rw_file_perms;
