@@ -843,6 +843,8 @@ on boot
     chown root system /efs/FactoryApp/gyro_cal_data
     chown root system /efs/FactoryApp/mag_cal_param
 
+    setprop vendor.powerhal.init 1
+
 on fs
     mount_all /vendor/etc/fstab.${ro.hardware}
     swapon_all /vendor/etc/fstab.${ro.hardware}
