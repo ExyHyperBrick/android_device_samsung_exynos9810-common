@@ -287,6 +287,7 @@ PRODUCT_COPY_FILES += \
 
 # RIL
 PRODUCT_PACKAGES += \
+    android.hardware.radio-service.compat \
     secril_config_svc
 
 # SamsungDoze
