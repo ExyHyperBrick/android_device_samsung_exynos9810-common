@@ -107,7 +107,10 @@ vendor/firmware/score/camera2/score_mc_dmb.bin
 # Camera legacy (prebuilt) - from A13
 vendor/lib/android.hardware.camera.provider@2.4-legacy.so|21ea6425c6898aa2142223ddeaff890d30a43b5c
 
-## Codecs
+# Charger Firmware
+vendor/firmware/mfc_fw.bin
+
+# Codecs
 vendor/etc/media_codecs_performance.xml
 vendor/etc/media_profiles_V1_0.xml
 
