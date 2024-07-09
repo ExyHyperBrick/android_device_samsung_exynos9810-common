@@ -110,8 +110,7 @@ vendor/lib/android.hardware.camera.provider@2.4-legacy.so|21ea6425c6898aa2142223
 # Charger Firmware
 vendor/firmware/mfc_fw.bin
 
-# Codecs
-vendor/etc/media_codecs.xml
+## Codecs
 vendor/etc/media_codecs_performance.xml
 vendor/etc/media_profiles_V1_0.xml
 
