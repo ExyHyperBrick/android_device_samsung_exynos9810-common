@@ -288,6 +288,7 @@ PRODUCT_PACKAGES += \
 
 # VNDK
 PRODUCT_PACKAGES += \
+    libion-v34 \
     libutils-v32
 
 # Wi-Fi
