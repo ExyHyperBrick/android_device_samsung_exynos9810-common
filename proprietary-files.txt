@@ -254,7 +254,7 @@ vendor/openvx/cost/cost_score.dat
 vendor/openvx/xml/_hifi_still_schedule.xml
 
 # Samsung SLSI HWC - N770FXXU8HVK5
--vendor/lib/hw/hwcomposer.exynos9810.so|4a3254a697fb43f73f5324fe229fff5499c7c39f
+-vendor/lib/hw/hwcomposer.exynos9810.so|9496b0cabcf35771b4ebd6e23dbffe96de229178
 -vendor/lib/libExynosHWCService.so|0bb7af5a110dd22376951cce33253201aa8b37b2
 -vendor/lib/libGrallocWrapper.so|539a29a1dd6330379ec44523f6301f1624f155a8
 -vendor/lib/libacryl.so|cb90271f3f141ed214bbe3823ebfdbbcb121f387
@@ -265,7 +265,7 @@ vendor/openvx/xml/_hifi_still_schedule.xml
 -vendor/lib/libexynosscaler.so|5c1dd918f6ed265158301acbbb897df88409a522
 -vendor/lib/libexynosutils.so|978bc378dd83b7b93a5342e40713e328375b1e5e
 -vendor/lib/libexynosv4l2.so|2eaa63c884ea07212b47e2623fcee7d8fc9b5057
--vendor/lib64/hw/hwcomposer.exynos9810.so|e9c3a7bd0a3d44492f3dd11656ddbd8deecbf513
+-vendor/lib64/hw/hwcomposer.exynos9810.so|d35a860b5c39c17e7cc83411780c232afc31f0c2
 -vendor/lib64/libExynosHWCService.so|27361e800f414623696158ecb9c4ad2223e1c41f
 -vendor/lib64/libGrallocWrapper.so|5d198a79a8c58fb97d571c683a74a9c6365d93dc
 -vendor/lib64/libacryl.so|17131782128531cccd171b936906ee2355bb959e
