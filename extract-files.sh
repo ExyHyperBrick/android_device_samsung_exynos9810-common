@@ -69,6 +69,9 @@ function blob_fixup() {
         vendor/lib*/sensors.*.so)
                 "${PATCHELF}" --replace-needed libutils.so libutils-v32.so "${2}"
                 ;;
+        vendor/lib*/hw/hwcomposer.exynos9810.so)
+                "${PATCHELF}" --replace-needed libion.so libion-v34.so "${2}"
+                ;;                
     esac
 }
 
