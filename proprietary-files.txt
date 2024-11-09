@@ -1,26 +1,25 @@
-# Proprietary files - from Samsung package version referenced in device specific repos, unless pinned
+# Proprietary files for Exynos 9810 devices.
+#
+# Unless a section names a firmware build, blobs are extracted from
+# the stock package documented by the device-specific tree. SHA-1
+# pins keep mixed-firmware sets reproducible.
+#
+# DISABLE_CHECKELF is limited to blobs whose unresolved dependencies
+# are supplied by device-specific trees, compatibility libraries, or
+# source-built components.
 
 # Audio
 vendor/etc/audio_board_info.xml
 vendor/etc/default_volume_tables.xml
 vendor/etc/usb_audio_policy_configuration.xml
--vendor/lib/libSamsungPostProcessConvertor.so
--vendor/lib/lib_SoundAlive_SRC384_ver320.so
--vendor/lib/lib_soundaliveresampler.so
--vendor/lib/libaboxpcmdump.so
--vendor/lib/libalsautils_sec.so
--vendor/lib/libaudio_soundtrigger.so
--vendor/lib/libaudiodebugfs.so
--vendor/lib/libcodecdspdump.so
--vendor/lib/libdatamod.so
--vendor/lib/libfloatingfeature.so
--vendor/lib/libprofileparamstorage.so
--vendor/lib/libsecaudiocoreutils.so
--vendor/lib/libsecaudioinfo.so
--vendor/lib/vndk/libaudioroute.so:vendor/lib/libaudioroute.so;MODULE=libaudioroute.exynos9810
--vendor/lib/vndk/libtinyalsa.so:vendor/lib/libtinyalsa.so;MODULE=libtinyalsa.exynos9810
--vendor/lib64/libfloatingfeature.so
--vendor/lib64/libsecaudioinfo.so
+vendor/lib/libaboxpcmdump.so;DISABLE_CHECKELF
+vendor/lib/libaudio_soundtrigger.so;DISABLE_CHECKELF
+vendor/lib/libaudiodebugfs.so
+vendor/lib/libcodecdspdump.so;DISABLE_CHECKELF
+vendor/lib/libdatamod.so
+vendor/lib/libprofileparamstorage.so
+vendor/lib/libsecaudiocoreutils.so
+vendor/lib64/libfloatingfeature.so
 
 # Audio Firmware
 vendor/firmware/HFD.cfg.bin
@@ -32,47 +31,41 @@ vendor/firmware/dsm.bin
 vendor/firmware/vts.bin
 
 # Biometrics
--vendor/lib/libbauthserver.so
--vendor/lib/libbauthtzcommon.so
--vendor/lib/libegis_fp_normal_sensor_test.so
--vendor/lib/libgf_in_system_lib.so
--vendor/lib/libqfp_sensortest.so
--vendor/lib/libsynaFpSensorTestNwd.so
--vendor/lib64/libbauthserver.so
--vendor/lib64/libbauthtzcommon.so
--vendor/lib64/libegis_fp_normal_sensor_test.so
--vendor/lib64/libgf_in_system_lib.so
--vendor/lib64/libqfp_sensortest.so
--vendor/lib64/libsynaFpSensorTestNwd.so
+vendor/lib/libbauthserver.so
+vendor/lib/libbauthtzcommon.so
+vendor/lib/libegis_fp_normal_sensor_test.so
+vendor/lib/libgf_in_system_lib.so
+vendor/lib/libqfp_sensortest.so
+vendor/lib/libsynaFpSensorTestNwd.so;DISABLE_CHECKELF
+vendor/lib64/libbauthserver.so
+vendor/lib64/libbauthtzcommon.so
+vendor/lib64/libegis_fp_normal_sensor_test.so
+vendor/lib64/libgf_in_system_lib.so
+vendor/lib64/libqfp_sensortest.so
+vendor/lib64/libsynaFpSensorTestNwd.so;DISABLE_CHECKELF
 
 # Bluetooth
--vendor/lib64/libbt-vendor.so
+vendor/lib64/libbt-vendor.so
 
 # Camera
--vendor/lib/camera.device@1.0-impl.so;MODULE=camera.device@1.0-impl.exynos9810
--vendor/lib/camera.device@3.3-impl.so;MODULE=camera.device@3.3-impl.exynos9810
--vendor/lib/camera.device@3.5-impl.so;MODULE=camera.device@3.5-impl.exynos9810
--vendor/lib64/camera.device@1.0-impl.so;MODULE=camera.device@1.0-impl.exynos9810
--vendor/lib64/camera.device@3.3-impl.so;MODULE=camera.device@3.3-impl.exynos9810
--vendor/lib64/camera.device@3.5-impl.so;MODULE=camera.device@3.5-impl.exynos9810
--vendor/lib/libSEF.quram.so
--vendor/lib/libcnn.so
--vendor/lib/libhfd.so
--vendor/lib/libsensorlistener.so
--vendor/lib/libuniapi.so
--vendor/lib/libuniplugin.so
--vendor/lib/libvkmanager_vendor.so
--vendor/lib64/libSEF.quram.so
--vendor/lib64/libsensorlistener.so
--vendor/lib64/libuniapi.so
--vendor/lib64/libuniplugin.so
--vendor/lib64/libvkmanager_vendor.so
--vendor/lib/libIDDQD_core.so
--vendor/lib/libIDDQD_interface.so
--vendor/lib/libOpenCv.camera.samsung.so
--vendor/lib64/libIDDQD_core.so
--vendor/lib64/libIDDQD_interface.so
--vendor/lib64/libOpenCv.camera.samsung.so
+vendor/lib/libSEF.quram.so
+vendor/lib/libcnn.so;DISABLE_CHECKELF
+vendor/lib/libhfd.so
+vendor/lib/libsensorlistener.so
+vendor/lib/libuniapi.so
+vendor/lib/libuniplugin.so
+vendor/lib/libvkmanager_vendor.so
+vendor/lib64/libSEF.quram.so
+vendor/lib64/libsensorlistener.so
+vendor/lib64/libuniapi.so
+vendor/lib64/libuniplugin.so
+vendor/lib64/libvkmanager_vendor.so
+vendor/lib/libIDDQD_core.so
+vendor/lib/libIDDQD_interface.so
+vendor/lib/libOpenCv.camera.samsung.so;DISABLE_CHECKELF
+vendor/lib64/libIDDQD_core.so
+vendor/lib64/libIDDQD_interface.so
+vendor/lib64/libOpenCv.camera.samsung.so;DISABLE_CHECKELF
 vendor/firmware/score/develop1/score_dummy
 vendor/firmware/score/camera1/score_kc2_pmw.bin
 vendor/firmware/score/camera1/score_kc2_dmb.bin
@@ -93,9 +86,6 @@ vendor/firmware/score/camera2/score_kc1_dmb.bin
 vendor/firmware/score/camera2/score_kc1_pmw.bin
 vendor/firmware/score/camera2/score_mc_dmb.bin
 
-# Camera legacy (prebuilt) - from A13
-vendor/lib/android.hardware.camera.provider@2.4-legacy.so|21ea6425c6898aa2142223ddeaff890d30a43b5c
-
 # Charger Firmware
 vendor/firmware/mfc_fw.bin
 
@@ -104,36 +94,36 @@ vendor/etc/media_codecs_performance.xml
 vendor/etc/media_profiles_V1_0.xml
 
 # Gatekeeper
--vendor/lib/hw/gatekeeper.exynos9810.so
--vendor/lib64/hw/gatekeeper.exynos9810.so
+vendor/lib/hw/gatekeeper.exynos9810.so
+vendor/lib64/hw/gatekeeper.exynos9810.so
 
 # GPS/GNSS
--vendor/bin/hw/gpsd
--vendor/bin/hw/lhd
--vendor/bin/hw/vendor.samsung.hardware.gnss@2.0-service
+vendor/bin/hw/gpsd;DISABLE_CHECKELF
+vendor/bin/hw/lhd
+vendor/bin/hw/vendor.samsung.hardware.gnss@2.0-service
 vendor/etc/gnss/gps.cer
 vendor/etc/gnss/gps.xml
 vendor/etc/init/init.gps.rc
 vendor/etc/init/vendor.samsung.hardware.gnss@2.0-service.rc
 vendor/etc/sensor/lhd.conf
--vendor/lib64/hw/gps.default.so
--vendor/lib64/hw/android.hardware.gnss@2.0-impl.so
--vendor/lib64/hw/vendor.samsung.hardware.gnss@2.0-impl.so
--vendor/lib64/vendor.samsung.hardware.gnss@2.0.so
+vendor/lib64/hw/gps.default.so;FIX_SONAME
+vendor/lib64/hw/android.hardware.gnss@2.0-impl.so;FIX_SONAME
+vendor/lib64/hw/vendor.samsung.hardware.gnss@2.0-impl.so
+vendor/lib64/vendor.samsung.hardware.gnss@2.0.so
 
 # Graphics/Mali - N770FXXU8HVK5
--vendor/lib/egl/libGLES_mali.so|028af88de64f967dec90b3f303b7978da463e675
--vendor/lib64/egl/libGLES_mali.so|4b4d57580937650d133058e2b2bdb7ad7d3ca401
+vendor/lib/egl/libGLES_mali.so;SYMLINK=vendor/lib/libOpenCL.so;SYMLINK=vendor/lib/libOpenCL.so.1;SYMLINK=vendor/lib/libOpenCL.so.1.1|028af88de64f967dec90b3f303b7978da463e675
+vendor/lib64/egl/libGLES_mali.so;SYMLINK=vendor/lib64/libOpenCL.so;SYMLINK=vendor/lib64/libOpenCL.so.1;SYMLINK=vendor/lib64/libOpenCL.so.1.1|4b4d57580937650d133058e2b2bdb7ad7d3ca401
 
 # Vulkan - N770FXXU8HVK5
--vendor/lib/hw/vulkan.mali.so|eae6e331f73caf11d93534eb093e791bfb093f26
--vendor/lib64/hw/vulkan.mali.so|e163e88ac8801721922dfd1209cc719cc3a61763
+vendor/lib/hw/vulkan.mali.so|eae6e331f73caf11d93534eb093e791bfb093f26
+vendor/lib64/hw/vulkan.mali.so|e163e88ac8801721922dfd1209cc719cc3a61763
 
 # Keymaster
--vendor/lib/liboemcrypto.so
--vendor/lib64/hw/keystore.mdfpp.so
--vendor/lib64/libkeymaster2_mdfpp.so
--vendor/lib64/libskeymaster3device.so
+vendor/lib/liboemcrypto.so
+vendor/lib64/hw/keystore.mdfpp.so;DISABLE_CHECKELF
+vendor/lib64/libkeymaster2_mdfpp.so;DISABLE_CHECKELF
+vendor/lib64/libskeymaster3device.so;DISABLE_CHECKELF
 
 # Mobicore
 vendor/app/mcRegistry/07010000000000000000000000000000.tlbin
@@ -161,13 +151,13 @@ vendor/app/mcRegistry/ffffffffd0000000000000000000001a.tlbin
 vendor/app/mcRegistry/ffffffffd00000000000000000000045.drbin
 vendor/app/mcRegistry/ffffffffd00000000000000000000062.tlbin
 vendor/app/mcRegistry/fffffffff0000000000000000000001b.tlbin
--vendor/bin/mcDriverDaemon
--vendor/lib/libMcClient.so
--vendor/lib64/libMcClient.so
+vendor/bin/mcDriverDaemon
+vendor/lib/libMcClient.so
+vendor/lib64/libMcClient.so
 
 # Power
--vendor/lib/hw/power.exynos9810.so
--vendor/lib64/hw/power.exynos9810.so
+vendor/lib/hw/power.exynos9810.so
+vendor/lib64/hw/power.exynos9810.so
 
 # RIL - N770FXXU8HVK5
 vendor/etc/init/vendor.sem.rilchip.rc|95aa52333814b340e5064eae3a9bd5cb8a96a3ff
@@ -177,30 +167,28 @@ vendor/etc/plmn_delta_attaio.bin|751a1c7105f1c03fc196689c2a71e2c69aa14e1f
 vendor/etc/plmn_delta_hktw.bin|6a2688e54e0c01f9a682fbc7fe5535a2afbf28b8
 vendor/etc/plmn_delta_usagsm.bin|9a25ec9e9da16ed2f8a9db07f037fe08283b24e5
 vendor/etc/plmn_se13.bin|cf144bf910b5e0f432fdedb50f5c544167f935dc
--vendor/bin/cbd|702692aae172976476b697275711241927487b27
--vendor/bin/hw/rild|4fce1d84582b1b34afd191a05b283a7377f5f073
--vendor/lib/libaudio-ril.so|a67b1818bb3be98a6e969f85ddbe7f40c11556c7
--vendor/lib/libsec_semRil.so|56a094c45e21598e061a083b02dfb82dbeb4cacc
--vendor/lib/libsecril-client.so;MODULE=libsecril-client.exynos9810|e6b801c15a1f8fe4d9d701b98f96fff4e1fbae1f
--vendor/lib/libsecril-client.so:vendor/lib/libsecril-client-samsung.so|e6b801c15a1f8fe4d9d701b98f96fff4e1fbae1f
--vendor/lib/libsemnativecarrierfeature.so|cf975569e6879a74d67fd405e873feea1e8bc173
--vendor/lib64/libengmode_client.so|e2652d2040c1d903f206924e81cff4cc01a79b97
--vendor/lib64/libril_sem.so|54f20b88ac3aa113f666fdde318f2bd336e1da10
--vendor/lib64/libsec-ril.so|0e646b55ca53425cd7d7bbe0b02d042220c95457
--vendor/lib64/libsec_semRil.so|5ba12964e0a929b607fd65870e9d535d5bb56fff
--vendor/lib64/libsecril-client.so;MODULE=libsecril-client.exynos9810|d0d02a5b76e30ce8a812bdd7481940c60952195a
--vendor/lib64/libSemDataProps.so|a5349b7d78f430ae682cc2178e5dc25e5a1dee6f
--vendor/lib64/libsemnativecarrierfeature.so|fd906e5685f0c7b6249c7912344a916b6c9751b8
--vendor/lib64/libSemTelephonyProps.so|c4081087f08713db79500976602ff0103e5c1a55
--vendor/lib64/vendor.samsung.hardware.radio.bridge@2.0.so|d26bd92510500715bbc40513a2d6ec8311581992
--vendor/lib64/vendor.samsung.hardware.radio.bridge@2.1.so|812b23bc8a807a9c8539955967fc988d9f35319a
--vendor/lib64/vendor.samsung.hardware.radio.channel@2.0.so|ed70423abdf01f4636b49c4ea709fdf145994d9d
+vendor/bin/cbd|702692aae172976476b697275711241927487b27
+vendor/bin/hw/rild|4fce1d84582b1b34afd191a05b283a7377f5f073
+vendor/lib/libsec_semRil.so|56a094c45e21598e061a083b02dfb82dbeb4cacc
+vendor/lib/libsecril-client.so|e6b801c15a1f8fe4d9d701b98f96fff4e1fbae1f
+vendor/lib/libsemnativecarrierfeature.so|cf975569e6879a74d67fd405e873feea1e8bc173
+vendor/lib64/libengmode_client.so|e2652d2040c1d903f206924e81cff4cc01a79b97
+vendor/lib64/libril_sem.so|54f20b88ac3aa113f666fdde318f2bd336e1da10
+vendor/lib64/libsec-ril.so|0e646b55ca53425cd7d7bbe0b02d042220c95457
+vendor/lib64/libsec_semRil.so|5ba12964e0a929b607fd65870e9d535d5bb56fff
+vendor/lib64/libsecril-client.so|d0d02a5b76e30ce8a812bdd7481940c60952195a
+vendor/lib64/libSemDataProps.so|a5349b7d78f430ae682cc2178e5dc25e5a1dee6f
+vendor/lib64/libsemnativecarrierfeature.so|fd906e5685f0c7b6249c7912344a916b6c9751b8
+vendor/lib64/libSemTelephonyProps.so|c4081087f08713db79500976602ff0103e5c1a55
+vendor/lib64/vendor.samsung.hardware.radio.bridge@2.0.so|d26bd92510500715bbc40513a2d6ec8311581992
+vendor/lib64/vendor.samsung.hardware.radio.bridge@2.1.so|812b23bc8a807a9c8539955967fc988d9f35319a
+vendor/lib64/vendor.samsung.hardware.radio.channel@2.0.so|ed70423abdf01f4636b49c4ea709fdf145994d9d
 
 # Samsung SLSI IVA
--vendor/lib/libiva_android_hal.so
--vendor/lib/libvxu.so
--vendor/lib64/libiva_android_hal.so
--vendor/lib64/libvxu.so
+vendor/lib/libiva_android_hal.so
+vendor/lib/libvxu.so;DISABLE_CHECKELF
+vendor/lib64/libiva_android_hal.so
+vendor/lib64/libvxu.so;DISABLE_CHECKELF
 vendor/openvx/cost/cost_c_iva.dat
 vendor/openvx/cost/cost_c_neon.dat
 vendor/openvx/cost/cost_c_score.dat
@@ -210,26 +198,25 @@ vendor/openvx/cost/cost_score.dat
 vendor/openvx/xml/_hifi_still_schedule.xml
 
 # Secnative
--vendor/lib/libsecnativefeature.so
--vendor/lib64/libsecnativefeature.so
+vendor/lib/libsecnativefeature.so
+vendor/lib64/libsecnativefeature.so
 
 # Sensors
 vendor/etc/sensors/hals.conf
--vendor/lib/sensors.bio.so
--vendor/lib/sensors.grip.so
--vendor/lib64/libflicker.so
--vendor/lib64/sensors.bio.so
--vendor/lib64/sensors.grip.so
+vendor/lib/sensors.bio.so
+vendor/lib/sensors.grip.so
+vendor/lib64/libflicker.so;FIX_SONAME
+vendor/lib64/sensors.bio.so
+vendor/lib64/sensors.grip.so
 
 # Widevine
--vendor/bin/hw/android.hardware.drm@1.2-service.widevine
--vendor/bin/vendor.samsung.hardware.security.widevine.keyprovisioning@1.0-service
+vendor/bin/hw/android.hardware.drm@1.2-service.widevine;DISABLE_CHECKELF
+vendor/bin/vendor.samsung.hardware.security.widevine.keyprovisioning@1.0-service
 vendor/etc/init/android.hardware.drm@1.2-service.widevine.rc
 vendor/etc/init/vendor.samsung.hardware.security.widevine.keyprovisioning@1.0-service.rc
--vendor/lib64/vendor.samsung.hardware.security.widevine.keyprovisioning@1.0.so
+vendor/lib64/vendor.samsung.hardware.security.widevine.keyprovisioning@1.0.so
 
 # Wi-Fi - N770FXXU8GVF2
-vendor/etc/init/wifi.rc
 vendor/etc/init/wifi_brcm.rc|7e10bdb418353a269ae966ccc43b8444e2fd97e6
 vendor/firmware/bcm4361B2_murata.hcd|098ac8ad27bd48428f8a08d4d2baa8c9ef40b5b9
 vendor/firmware/bcm4361B2_semco.hcd|830e22f9f7940e8617d08b8a935d9a1aed5ccde4
