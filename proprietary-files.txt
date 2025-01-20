@@ -260,7 +260,7 @@ vendor/openvx/xml/_hifi_still_schedule.xml
 -vendor/lib/libacryl.so|cb90271f3f141ed214bbe3823ebfdbbcb121f387
 -vendor/lib/libdrmresource.so|09de60a252e19ffabc9974880c332e590e1502e0
 -vendor/lib/libexynosdisplay.so|e03abb34e312c6ae3538a6b51c1c6ad885631ecc
--vendor/lib/libexynosgraphicbuffer.so|70273622532640602f3c1800ff7b54eb3e2d36e7
+-vendor/lib/libexynosgraphicbuffer.so|31a164a5c55c7d8b9a04b833423f96249514a496
 -vendor/lib/libexynosgscaler.so
 -vendor/lib/libexynosscaler.so|5c1dd918f6ed265158301acbbb897df88409a522
 -vendor/lib/libexynosutils.so|978bc378dd83b7b93a5342e40713e328375b1e5e
@@ -271,7 +271,7 @@ vendor/openvx/xml/_hifi_still_schedule.xml
 -vendor/lib64/libacryl.so|17131782128531cccd171b936906ee2355bb959e
 -vendor/lib64/libdrmresource.so|6f5f54bfd91a199496691452517b2df1e0d16a32
 -vendor/lib64/libexynosdisplay.so|93f29badba9da1ff93a412dbb4b298fbad4a5c2e
--vendor/lib64/libexynosgraphicbuffer.so|d243e212a7d7726bf48c081dbcfab71b7e1b5a23
+-vendor/lib64/libexynosgraphicbuffer.so|c5d87a1484e1d6a753c50675b785312186ea799c
 -vendor/lib64/libexynosgscaler.so
 -vendor/lib64/libexynosscaler.so|835f80a08faf3ca6ae5675b80af249733c8f542c
 -vendor/lib64/libexynosutils.so|aab76513635ac75d87b72b0891f1037a5201244c
