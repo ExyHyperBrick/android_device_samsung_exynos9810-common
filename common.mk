@@ -70,8 +70,7 @@ PRODUCT_PACKAGES += \
     android.hardware.graphics.allocator@2.0-impl:64 \
     android.hardware.graphics.allocator@2.0-service \
     android.hardware.graphics.composer@2.4-service \
-    android.hardware.graphics.mapper@2.0-impl-2.1 \
-    libion-v34
+    android.hardware.graphics.mapper@2.0-impl-2.1
 
 PRODUCT_PACKAGES += \
     libdrm.vendor:64
@@ -263,7 +262,8 @@ PRODUCT_PACKAGES += \
 # Shims
 PRODUCT_PACKAGES += \
     libshim_audioparams \
-    libshim_sensorndkbridge
+    libshim_sensorndkbridge \
+    libshim_ui
 
 # Speed profile services and wifi-service to reduce RAM and storage
 PRODUCT_SYSTEM_SERVER_COMPILER_FILTER := speed-profile
@@ -289,6 +289,7 @@ PRODUCT_PACKAGES += \
 
 # VNDK
 PRODUCT_PACKAGES += \
+    libion-v34 \
     libutils-v32
 
 # Wi-Fi

@@ -1,0 +1,11 @@
+cc_library_shared {
+    name: "libshim_ui",
+    shared_libs: [
+        "libui",
+        "libutils",
+    ],
+    srcs: [
+        "GraphicBufferMapper.cpp",
+    ],
+    vendor: true,
+}
