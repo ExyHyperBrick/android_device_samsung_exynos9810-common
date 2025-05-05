@@ -229,8 +229,6 @@ vendor/etc/plmn_se13.bin|6445f3c7ee35c59999de2fdd47c718048a3f550f
 -vendor/lib64/libengmode_client.so|a7d678bad7a8c3b9729ff3d56cc35159ece548a3
 -vendor/lib64/vendor.samsung.hardware.radio.bridge@2.0.so|4f803c313c74e161a871bac17581ee5f01d076ec
 -vendor/lib64/vendor.samsung.hardware.radio.channel@2.0.so|38bc33189382277cd9ea0a44d2f9a8a13e91bf49
--vendor/lib64/vendor.samsung.hardware.radio@2.0.so|4b2836fd3370945b0d8e7c3ab1c8ab45db819077
--vendor/lib64/vendor.samsung.hardware.radio@2.1.so|7d1d5a2c86ed493ab5eb1d177d59b0dfa21d6421
 
 # RIL - N770FXXS8EUL2 (R)
 -vendor/bin/hw/rild|e1782518a28bad77f29a2862dd40757309b8c0b0
