@@ -9,3 +9,6 @@ ro.charger.enable_suspend=true
 
 # Wi-Fi Direct
 wifi.direct.interface=p2p-dev-wlan0
+
+# Keystore
+ro.security.keystore.keytype=sak,gak
