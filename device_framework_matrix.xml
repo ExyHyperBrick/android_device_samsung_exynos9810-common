@@ -235,6 +235,14 @@
         </interface>
     </hal>
     <hal format="aidl">
+        <name>android.hardware.memtrack</name>
+        <version>1</version>
+        <interface>
+            <name>IMemtrack</name>
+            <instance>default</instance>
+        </interface>
+    </hal>
+    <hal format="aidl">
         <name>android.hardware.power</name>
         <version>5</version>
         <interface>
