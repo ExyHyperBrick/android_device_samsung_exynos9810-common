@@ -259,6 +259,14 @@
         </interface>
     </hal>
     <hal format="aidl">
+        <name>android.hardware.thermal</name>
+        <version>1</version>
+        <interface>
+            <name>IThermal</name>
+            <instance>default</instance>
+        </interface>
+    </hal>
+    <hal format="aidl">
         <name>android.hardware.usb</name>
         <version>1</version>
         <interface>
