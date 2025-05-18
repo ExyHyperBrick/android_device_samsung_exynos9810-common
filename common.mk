@@ -288,6 +288,7 @@ PRODUCT_PACKAGES += \
 
 # VNDK
 PRODUCT_PACKAGES += \
+    libcrypto-v33 \
     libion-v34 \
     libutils-v32
 

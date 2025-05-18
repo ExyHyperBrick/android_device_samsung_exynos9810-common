@@ -1,0 +1,12 @@
+LOCAL_PATH := prebuilts/vndk/v33/arm64/arch-arm64-armv8-a/shared/vndk-core
+
+include $(CLEAR_VARS)
+LOCAL_MODULE := libcrypto-tm
+LOCAL_SRC_FILES := libcrypto.so
+LOCAL_MODULE_SUFFIX := .so
+LOCAL_MODULE_CLASS := SHARED_LIBRARIES
+LOCAL_MODULE_TARGET_ARCH := arm64
+LOCAL_MODULE_PATH := $(TARGET_OUT_VENDOR_SHARED_LIBRARIES)
+LOCAL_MODULE_TAGS := optional
+LOCAL_CHECK_ELF_FILES := false
+include $(BUILD_PREBUILT)
