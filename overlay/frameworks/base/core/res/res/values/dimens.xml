@@ -27,4 +27,9 @@
          Do not read this dimen directly. Use {@link SystemBarUtils#getStatusBarHeight} instead.
          -->
     <dimen name="status_bar_height_landscape">30.85dp</dimen>
+
+     <!-- Rounded corners during animations -->
+    <dimen name="rounded_corner_radius">30dp</dimen>
+    <dimen name="rounded_corner_radius_buttom">30dp</dimen>
+    <dimen name="rounded_corner_radius_top">30dp</dimen>
 </resources>
