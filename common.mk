@@ -297,7 +297,8 @@ PRODUCT_PACKAGES += \
 # VNDK
 PRODUCT_PACKAGES += \
     libion-v34 \
-    libutils-v32
+    libutils-v32 \
+    libcrypto-tm
 
 # Wi-Fi
 PRODUCT_PACKAGES += \
