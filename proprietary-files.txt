@@ -103,6 +103,9 @@ vendor/firmware/score/camera2/score_kc1_dmb.bin
 vendor/firmware/score/camera2/score_kc1_pmw.bin
 vendor/firmware/score/camera2/score_mc_dmb.bin
 
+# Camera legacy (prebuilt) - from A13
+vendor/lib/android.hardware.camera.provider@2.4-legacy.so|21ea6425c6898aa2142223ddeaff890d30a43b5c
+
 # Charger Firmware
 vendor/firmware/mfc_fw.bin
 
