@@ -17,8 +17,8 @@ vendor/etc/usb_audio_policy_configuration.xml
 -vendor/lib/libprofileparamstorage.so
 -vendor/lib/libsecaudiocoreutils.so
 -vendor/lib/libsecaudioinfo.so
--vendor/lib/vndk/libaudioroute.so;MODULE=libaudioroute.exynos9810
--vendor/lib/vndk/libtinyalsa.so;MODULE=libtinyalsa.exynos9810
+-vendor/lib/vndk/libaudioroute.so:vendor/lib/libaudioroute.so;MODULE=libaudioroute.exynos9810
+-vendor/lib/vndk/libtinyalsa.so:vendor/lib/libtinyalsa.so;MODULE=libtinyalsa.exynos9810
 -vendor/lib64/libfloatingfeature.so
 -vendor/lib64/libsecaudioinfo.so
 
