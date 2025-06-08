@@ -63,6 +63,9 @@ function blob_fixup() {
         vendor/bin/hw/rild)
                 "${PATCHELF}" --replace-needed libril.so libril-samsung.so "${2}"
                 ;;
+        vendor/lib/libaudio-ril.so)
+                "${PATCHELF}" --replace-needed libsecril-client.so libsecril-client-samsung.so "${2}"
+                ;;
         vendor/lib*/libsensorlistener.so)
                 "${PATCHELF}" --add-needed libshim_sensorndkbridge.so "${2}"
                 ;;
@@ -70,7 +73,7 @@ function blob_fixup() {
                 "${PATCHELF}" --replace-needed libutils.so libutils-v32.so "${2}"
                 ;;
         vendor/lib*/libexynosgraphicbuffer.so)
-            "${PATCHELF}" --add-needed libshim_ui.so "${2}"
+                "${PATCHELF}" --add-needed libshim_ui.so "${2}"
                 ;;
         vendor/lib*/hw/hwcomposer.exynos9810.so)
                 "${PATCHELF}" --replace-needed libion.so libion-v34.so "${2}"
