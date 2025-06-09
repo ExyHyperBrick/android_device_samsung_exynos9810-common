@@ -69,14 +69,15 @@ function blob_fixup() {
         vendor/lib*/libsensorlistener.so)
                 "${PATCHELF}" --add-needed libshim_sensorndkbridge.so "${2}"
                 ;;
-        vendor/lib*/libexynosdisplay.so|vendor/lib*/hw/hwcomposer.exynos9810.so|vendor/lib*/sensors.*.so)
+        vendor/lib*/hw/hwcomposer.exynos9810.so)
+                "${PATCHELF}" --replace-needed libutils.so libutils-v32.so "${2}"
+                "${PATCHELF}" --replace-needed libion.so libion-v34.so "${2}"
+                ;;
+        vendor/lib*/libexynosdisplay.so|vendor/lib*/sensors.*.so)
                 "${PATCHELF}" --replace-needed libutils.so libutils-v32.so "${2}"
                 ;;
         vendor/lib*/libexynosgraphicbuffer.so)
                 "${PATCHELF}" --add-needed libshim_ui.so "${2}"
-                ;;
-        vendor/lib*/hw/hwcomposer.exynos9810.so)
-                "${PATCHELF}" --replace-needed libion.so libion-v34.so "${2}"
                 ;;
     esac
 }
