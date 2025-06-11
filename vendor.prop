@@ -53,6 +53,7 @@ vendor.hwc.exynos.vsync_mode=0
 
 # Keystore
 ro.hardware.keystore=mdfpp
+ro.security.keystore.keytype=sak,gak
 
 # Memory optimizations
 ro.config.avoid_gfx_accel=true
