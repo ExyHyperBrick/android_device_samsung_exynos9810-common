@@ -269,8 +269,7 @@ PRODUCT_PACKAGES += \
 # Shims
 PRODUCT_PACKAGES += \
     libshim_audioparams \
-    libshim_sensorndkbridge \
-    libshim_ui
+    libshim_sensorndkbridge
 
 # Speed profile services and wifi-service to reduce RAM and storage
 PRODUCT_SYSTEM_SERVER_COMPILER_FILTER := speed-profile
