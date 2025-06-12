@@ -247,6 +247,7 @@ PRODUCT_COPY_FILES += \
 PRODUCT_PACKAGES += \
     vendor.samsung.hardware.radio@2.0.vendor:64 \
     vendor.samsung.hardware.radio@2.1.vendor:64 \
+    vendor.samsung.hardware.radio@2.2.vendor:64 \
     android.hardware.radio.config@1.2.vendor:64 \
     android.hardware.radio.deprecated@1.0.vendor:64 \
     libexpat.vendor \
