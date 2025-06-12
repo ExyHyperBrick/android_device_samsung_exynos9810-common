@@ -60,9 +60,6 @@ fi
 
 function blob_fixup() {
     case "${1}" in
-        vendor/bin/hw/rild)
-                "${PATCHELF}" --replace-needed libril.so libril-samsung.so "${2}"
-                ;;
         vendor/lib/libaudio-ril.so)
                 "${PATCHELF}" --replace-needed libsecril-client.so libsecril-client-samsung.so "${2}"
                 ;;
