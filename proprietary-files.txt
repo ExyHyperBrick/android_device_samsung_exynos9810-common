@@ -56,25 +56,16 @@ vendor/firmware/vts.bin
 -vendor/lib64/camera.device@3.3-impl.so;MODULE=camera.device@3.3-impl.exynos9810
 -vendor/lib64/camera.device@3.5-impl.so;MODULE=camera.device@3.5-impl.exynos9810
 -vendor/lib/libSEF.quram.so
--vendor/lib/libacryl.so
--vendor/lib/libacryl_plugin_slsi_hdr10.so
 -vendor/lib/libcnn.so
--vendor/lib/libcsc.so
--vendor/lib/libgiantmscl.so
 -vendor/lib/libhfd.so
--vendor/lib/libhwjpeg.so
+-vendor/lib/libhwjpeg.so:vendor/lib/libhwjpeg-samsung.so
 -vendor/lib/libsensorlistener.so
--vendor/lib/libstagefrighthw.so
 -vendor/lib/libuniapi.so
 -vendor/lib/libuniplugin.so
 -vendor/lib/libvkmanager_vendor.so
 -vendor/lib64/libSEF.quram.so
--vendor/lib64/libacryl_plugin_slsi_hdr10.so
--vendor/lib64/libcsc.so
--vendor/lib64/libgiantmscl.so
--vendor/lib64/libhwjpeg.so
+-vendor/lib64/libhwjpeg.so:vendor/lib64/libhwjpeg-samsung.so
 -vendor/lib64/libsensorlistener.so
--vendor/lib64/libstagefrighthw.so
 -vendor/lib64/libuniapi.so
 -vendor/lib64/libuniplugin.so
 -vendor/lib64/libvkmanager_vendor.so
@@ -118,10 +109,6 @@ vendor/etc/media_profiles_V1_0.xml
 -vendor/lib/hw/gatekeeper.exynos9810.so
 -vendor/lib64/hw/gatekeeper.exynos9810.so
 
-# Gralloc
--vendor/lib/hw/gralloc.exynos9810.so
--vendor/lib64/hw/gralloc.exynos9810.so
-
 # GPS/GNSS
 -vendor/bin/hw/gpsd
 -vendor/bin/hw/lhd
@@ -140,11 +127,12 @@ vendor/etc/sensor/lhd.conf
 -vendor/lib/egl/libGLES_mali.so|028af88de64f967dec90b3f303b7978da463e675
 -vendor/lib64/egl/libGLES_mali.so|4b4d57580937650d133058e2b2bdb7ad7d3ca401
 
-# Ion
--vendor/lib/libion_exynos.so
--vendor/lib64/libion_exynos.so
+# Vulkan - N770FXXU8HVK5
+-vendor/lib/hw/vulkan.mali.so|eae6e331f73caf11d93534eb093e791bfb093f26
+-vendor/lib64/hw/vulkan.mali.so|e163e88ac8801721922dfd1209cc719cc3a61763
 
 # Keymaster
+-vendor/lib/liboemcrypto.so
 -vendor/lib64/hw/keystore.mdfpp.so
 -vendor/lib64/libkeymaster2_mdfpp.so
 -vendor/lib64/libskeymaster3device.so
@@ -178,33 +166,6 @@ vendor/app/mcRegistry/fffffffff0000000000000000000001b.tlbin
 -vendor/bin/mcDriverDaemon
 -vendor/lib/libMcClient.so
 -vendor/lib64/libMcClient.so
-
-# OMX
--vendor/lib/libExynosOMX_Core.so
--vendor/lib/libExynosOMX_Resourcemanager.so
--vendor/lib/libstagefright_omx_vendor.so
--vendor/lib/omx/libOMX.Exynos.AVC.Decoder.so
--vendor/lib/omx/libOMX.Exynos.AVC.WFD.Encoder.so
--vendor/lib/omx/libOMX.Exynos.HEVC.Decoder.so
--vendor/lib/omx/libOMX.Exynos.MPEG4.Decoder.so
--vendor/lib/omx/libOMX.Exynos.MPEG4.Encoder.so
--vendor/lib/omx/libOMX.Exynos.VP8.Decoder.so
--vendor/lib/omx/libOMX.Exynos.VP8.Encoder.so
--vendor/lib/omx/libOMX.Exynos.VP9.Decoder.so
--vendor/lib/omx/libOMX.Exynos.VP9.Encoder.so
--vendor/lib/omx/libOMX.Exynos.WMV.Decoder.so
--vendor/lib64/libExynosOMX_Core.so
--vendor/lib64/libExynosOMX_Resourcemanager.so
--vendor/lib64/omx/libOMX.Exynos.AVC.Decoder.so
--vendor/lib64/omx/libOMX.Exynos.AVC.WFD.Encoder.so
--vendor/lib64/omx/libOMX.Exynos.HEVC.Decoder.so
--vendor/lib64/omx/libOMX.Exynos.MPEG4.Decoder.so
--vendor/lib64/omx/libOMX.Exynos.MPEG4.Encoder.so
--vendor/lib64/omx/libOMX.Exynos.VP8.Decoder.so
--vendor/lib64/omx/libOMX.Exynos.VP8.Encoder.so
--vendor/lib64/omx/libOMX.Exynos.VP9.Decoder.so
--vendor/lib64/omx/libOMX.Exynos.VP9.Encoder.so
--vendor/lib64/omx/libOMX.Exynos.WMV.Decoder.so
 
 # Power
 -vendor/lib/hw/power.exynos9810.so
@@ -249,31 +210,6 @@ vendor/openvx/cost/cost_c_std.dat
 vendor/openvx/cost/cost_iva.dat
 vendor/openvx/cost/cost_score.dat
 vendor/openvx/xml/_hifi_still_schedule.xml
-
-# Samsung SLSI HWC
--vendor/lib/hw/hwcomposer.exynos9810.so
--vendor/lib/libExynosHWCService.so
--vendor/lib/libGrallocWrapper.so
--vendor/lib/libacryl.so
--vendor/lib/libexynosdisplay.so
--vendor/lib/libexynosgscaler.so
--vendor/lib/libexynosscaler.so
--vendor/lib/libexynosutils.so
--vendor/lib/libexynosv4l2.so
--vendor/lib64/hw/hwcomposer.exynos9810.so
--vendor/lib64/libExynosHWCService.so
--vendor/lib64/libGrallocWrapper.so
--vendor/lib64/libacryl.so
--vendor/lib64/libexynosdisplay.so
--vendor/lib64/libexynosgscaler.so
--vendor/lib64/libexynosscaler.so
--vendor/lib64/libexynosutils.so
--vendor/lib64/libexynosv4l2.so
--vendor/lib64/libmpp.so
-
-# Samsung SLSI Memtrack
--vendor/lib64/hw/memtrack.exynos9810.so
--vendor/lib/hw/memtrack.exynos9810.so
 
 # Secnative
 -vendor/lib/libsecnativefeature.so
