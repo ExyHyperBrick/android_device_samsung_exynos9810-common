@@ -148,6 +148,7 @@ vendor/etc/sensor/lhd.conf
 -vendor/lib64/libion_exynos.so|ac1e7a62e6c544e71abf8c9c9721f7f54366714f
 
 # Keymaster
+-vendor/lib/liboemcrypto.so
 -vendor/lib64/hw/keystore.mdfpp.so
 -vendor/lib64/libkeymaster2_mdfpp.so
 -vendor/lib64/libskeymaster3device.so
