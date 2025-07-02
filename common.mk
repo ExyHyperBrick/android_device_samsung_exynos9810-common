@@ -150,6 +150,10 @@ PRODUCT_PACKAGES += \
     android.hardware.keymaster@3.0-service \
     android.hardware.keymaster@3.0-impl
 
+# Lights
+PRODUCT_PACKAGES += \
+    android.hardware.light-service.samsung
+
 # Lineage Health
 PRODUCT_PACKAGES += \
     vendor.lineage.health-service.default
