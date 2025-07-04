@@ -2,12 +2,12 @@
     <hal format="hidl">
         <name>android.hardware.audio</name>
         <transport>hwbinder</transport>
-        <version>7.0</version>
+        <version>7.1</version>
         <interface>
             <name>IDevicesFactory</name>
             <instance>default</instance>
         </interface>
-        <fqname>@7.0::IDevicesFactory/default</fqname>
+        <fqname>@7.1::IDevicesFactory/default</fqname>
     </hal>
     <hal format="hidl">
         <name>android.hardware.audio.effect</name>
@@ -20,16 +20,6 @@
         <fqname>@7.0::IEffectsFactory/default</fqname>
     </hal>
     <hal format="hidl">
-        <name>android.hardware.biometrics.fingerprint</name>
-        <transport>hwbinder</transport>
-        <version>2.1</version>
-        <interface>
-            <name>IBiometricsFingerprint</name>
-            <instance>default</instance>
-        </interface>
-        <fqname>@2.1::IBiometricsFingerprint/default</fqname>
-    </hal>
-    <hal format="hidl">
         <name>android.hardware.bluetooth</name>
         <transport>hwbinder</transport>
         <version>1.0</version>
@@ -39,7 +29,7 @@
         </interface>
         <fqname>@1.0::IBluetoothHci/default</fqname>
     </hal>
-    <hal format="hidl">
+<!--    <hal format="hidl">
         <name>android.hardware.camera.provider</name>
         <transport>hwbinder</transport>
         <version>2.5</version>
@@ -49,6 +39,7 @@
         </interface>
         <fqname>@2.5::ICameraProvider/legacy/0</fqname>
     </hal>
+-->
     <hal format="hidl">
         <name>android.hardware.drm</name>
         <transport>hwbinder</transport>

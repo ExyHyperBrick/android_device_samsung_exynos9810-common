@@ -3,14 +3,19 @@
 
 COMMON_PATH := device/samsung/exynos9810-common
 
-BUILD_BROKEN_DUP_RULES := true
-BUILD_BROKEN_ELF_PREBUILT_PRODUCT_COPY_FILES := true
+#BUILD_BROKEN_DUP_RULES := true
+#BUILD_BROKEN_ELF_PREBUILT_PRODUCT_COPY_FILES := true
 
 # Include path
 TARGET_SPECIFIC_HEADER_PATH := $(COMMON_PATH)/include
 
 # Inherit proprietary vendor configuration
 include vendor/samsung/exynos9810-common/BoardConfigVendor.mk
+
+# Audio
+$(call soong_config_set,exynos_audio,PREDEFINED_LOW_CAPTURE_DURATION,20)
+$(call soong_config_set,exynos_audio,PROXY_LIBRARY,//device/samsung/exynos9810-common:libaudioproxy)
+#$(call soong_config_set,exynos9810AudioVars,use_dual_speaker,true)
 
 # APEX image
 DEXPREOPT_GENERATE_APEX_IMAGE := true
@@ -22,7 +27,7 @@ TARGET_CPU_ABI := arm64-v8a
 TARGET_CPU_ABI2 :=
 TARGET_CPU_VARIANT := cortex-a53
 
-# Architecture (secondary)
+# Architecture (Secondary)
 TARGET_2ND_ARCH := arm
 TARGET_2ND_ARCH_VARIANT := armv8-a
 TARGET_2ND_CPU_ABI := armeabi-v7a
@@ -35,6 +40,7 @@ TARGET_SCREEN_WIDTH := 1440
 
 # Boot Image
 BOARD_BOOT_HEADER_VERSION := 1
+BOARD_BOOTIMG_HEADER_VERSION := 1
 BOARD_CUSTOM_BOOTIMG := true
 BOARD_CUSTOM_BOOTIMG_MK := hardware/samsung/mkbootimg.mk
 BOARD_KERNEL_BASE := 0x10000000
@@ -70,18 +76,9 @@ HWUI_COMPILE_FOR_PERF := true
 
 # Kernel
 BOARD_KERNEL_IMAGE_NAME := Image
-KERNEL_LD := LD=ld.lld
 BOARD_KERNEL_SEPARATED_DT := true
 TARGET_CUSTOM_DTBTOOL := dtbhtoolExynos
 TARGET_KERNEL_SOURCE := kernel/samsung/exynos9810
-
-# Lineage Health
-TARGET_HEALTH_CHARGING_CONTROL_CHARGING_PATH := /sys/class/power_supply/battery/batt_slate_mode
-TARGET_HEALTH_CHARGING_CONTROL_CHARGING_ENABLED := 0
-TARGET_HEALTH_CHARGING_CONTROL_CHARGING_DISABLED := 1
-TARGET_HEALTH_CHARGING_CONTROL_SUPPORTS_BYPASS := false
-TARGET_HEALTH_CHARGING_CONTROL_SUPPORTS_TOGGLE := true
-TARGET_HEALTH_CHARGING_CONTROL_SUPPORTS_DEADLINE := false
 
 # Manifest
 # HIDL
@@ -117,7 +114,7 @@ TARGET_VENDOR_PROP += $(COMMON_PATH)/vendor.prop
 # Recovery
 BOARD_HAS_DOWNLOAD_MODE := true
 BOARD_USES_FULL_RECOVERY_IMAGE := true
-TARGET_RECOVERY_PIXEL_FORMAT := "ABGR_8888"
+TARGET_RECOVERY_PIXEL_FORMAT := ABGR_8888
 TARGET_RECOVERY_FSTAB := $(COMMON_PATH)/configs/init/fstab.samsungexynos9810
 
 # RIL
@@ -128,9 +125,6 @@ BOARD_SEPOLICY_TEE_FLAVOR := mobicore
 include device/lineage/sepolicy/exynos/sepolicy.mk
 include device/samsung_slsi/sepolicy/sepolicy.mk
 BOARD_VENDOR_SEPOLICY_DIRS += $(COMMON_PATH)/sepolicy/vendor
-
-# VNDK
-BOARD_VNDK_VERSION := current
 
 # Wi-Fi
 BOARD_WLAN_DEVICE := bcmdhd
