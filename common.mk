@@ -14,26 +14,24 @@ PRODUCT_SOONG_NAMESPACES += \
     hardware/google/interfaces \
     hardware/google/pixel \
     hardware/samsung \
-    hardware/samsung/aidl/power-libperfmgr
+    hardware/samsung/aidl/power-libperfmgr \
+    hardware/samsung_slsi-linaro/exynos/gralloc/gralloc3 \
+    hardware/samsung_slsi-linaro/exynos/libaudio/audiohal
 
-DEVICE_PACKAGE_OVERLAYS += \
-    $(COMMON_PATH)/overlay
-
-PRODUCT_ENFORCE_RRO_TARGETS += *
+# Audio
+PRODUCT_PACKAGES += \
+    audio.primary.universal9810
 
 # Audio
 PRODUCT_PACKAGES += \
     android.hardware.audio.effect@7.0-impl:32 \
-    android.hardware.audio@7.0-impl:32 \
+    android.hardware.audio@7.1-impl:32 \
     android.hardware.audio.service \
     android.hardware.bluetooth.audio-impl \
     android.hidl.allocator@1.0.vendor:32 \
     audio.bluetooth.default \
     audio.r_submix.default \
     audio.usb.default \
-    libaudioroute \
-    libtinyalsa \
-    libtinycompress \
     libprocessgroup.vendor
 
 PRODUCT_PACKAGES += \
@@ -60,14 +58,8 @@ PRODUCT_PACKAGES += \
 
 # Camera
 PRODUCT_PACKAGES += \
-    android.hardware.camera.provider@2.5-service \
-    libcamera_metadata \
-    libcamera_metadata.vendor
-
-PRODUCT_PACKAGES += \
-    libGrallocMapperCamera \
-    libGrallocWrapper \
-    libhwjpeg
+    android.hardware.camera.provider@2.5-service_64.samsung \
+    libGrallocMapperCamera
 
 # Charger
 PRODUCT_PACKAGES += \
@@ -85,8 +77,7 @@ PRODUCT_PACKAGES += \
 
 PRODUCT_PACKAGES += \
     android.hardware.composer.hwc3-service.slsi \
-    gralloc.exynos9810 \
-    libion
+    gralloc.universal9810
 
 # DRM
 PRODUCT_PACKAGES += \
@@ -137,7 +128,9 @@ PRODUCT_COPY_FILES += \
     $(COMMON_PATH)/configs/init/init.samsungexynos9810.rc:$(TARGET_COPY_OUT_VENDOR)/etc/init/init.samsungexynos9810.rc \
     $(COMMON_PATH)/configs/init/init.samsungexynos9810.usb.rc:$(TARGET_COPY_OUT_VENDOR)/etc/init/init.samsungexynos9810.usb.rc \
     $(COMMON_PATH)/configs/init/init.samsung.rc:$(TARGET_COPY_OUT_VENDOR)/etc/init/hw/init.samsung.rc \
-    $(COMMON_PATH)/configs/init/ueventd.rc:$(TARGET_COPY_OUT_VENDOR)/etc/ueventd.rc
+    $(COMMON_PATH)/configs/init/ueventd.rc:$(TARGET_COPY_OUT_VENDOR)/etc/ueventd.rc \
+    $(COMMON_PATH)/configs/init/wifi.rc:$(TARGET_COPY_OUT_VENDOR)/etc/init/wifi.rc
+
 
 # Keylayout
 PRODUCT_COPY_FILES += \
@@ -158,16 +151,18 @@ PRODUCT_PACKAGES += \
 PRODUCT_PACKAGES += \
     vendor.lineage.health-service.default
 
+$(call soong_config_set,lineage_health,charging_control_charging_path,/sys/class/power_supply/battery/batt_slate_mode)
+$(call soong_config_set,lineage_health,charging_control_charging_enabled,0)
+$(call soong_config_set,lineage_health,charging_control_charging_disabled,1)
+$(call soong_config_set,lineage_health,charging_control_supports_bypass,false)
+
 # Livedisplay
 PRODUCT_PACKAGES += \
     vendor.lineage.livedisplay@2.0-service.samsung-exynos
 
 # Media
 PRODUCT_COPY_FILES += \
-    $(COMMON_PATH)/configs/media/media_codecs.xml:$(TARGET_COPY_OUT_VENDOR)/etc/media_codecs.xml \
-    frameworks/av/media/libstagefright/data/media_codecs_google_audio.xml:$(TARGET_COPY_OUT_VENDOR)/etc/media_codecs_google_audio.xml \
-    frameworks/av/media/libstagefright/data/media_codecs_google_telephony.xml:$(TARGET_COPY_OUT_VENDOR)/etc/media_codecs_google_telephony.xml \
-    frameworks/av/media/libstagefright/data/media_codecs_google_video.xml:$(TARGET_COPY_OUT_VENDOR)/etc/media_codecs_google_video.xml
+    $(COMMON_PATH)/configs/media/media_codecs.xml:$(TARGET_COPY_OUT_VENDOR)/etc/media_codecs.xml
 
 # Memtrack
 PRODUCT_PACKAGES += \
@@ -177,7 +172,6 @@ PRODUCT_PACKAGES += \
 PRODUCT_PACKAGES += \
     android.hardware.nfc@1.2-service.samsung \
     com.android.nfc_extras \
-    NfcNci \
     Tag
 
 PRODUCT_COPY_FILES += \
@@ -203,6 +197,10 @@ PRODUCT_PACKAGES += \
     libOMX.Exynos.VP9.Decoder \
     libOMX.Exynos.VP9.Encoder \
     libOMX.Exynos.WMV.Decoder
+
+# Overlays
+DEVICE_PACKAGE_OVERLAYS += $(COMMON_PATH)/overlay
+PRODUCT_ENFORCE_RRO_TARGETS += *
 
 # Permissions
 PRODUCT_COPY_FILES += \
@@ -247,7 +245,6 @@ PRODUCT_COPY_FILES += \
     frameworks/native/data/etc/android.hardware.wifi.direct.xml:$(TARGET_COPY_OUT_VENDOR)/etc/permissions/android.hardware.wifi.direct.xml \
     frameworks/native/data/etc/android.hardware.wifi.xml:$(TARGET_COPY_OUT_VENDOR)/etc/permissions/android.hardware.wifi.xml \
     frameworks/native/data/etc/android.software.app_widgets.xml:$(TARGET_COPY_OUT_VENDOR)/etc/permissions/android.software.app_widgets.xml \
-    frameworks/native/data/etc/android.software.device_id_attestation.xml:$(TARGET_COPY_OUT_VENDOR)/etc/permissions/android.software.device_id_attestation.xml \
     frameworks/native/data/etc/android.software.freeform_window_management.xml:$(TARGET_COPY_OUT_VENDOR)/etc/permissions/android.software.freeform_window_management.xml \
     frameworks/native/data/etc/android.software.ipsec_tunnels.xml:$(TARGET_COPY_OUT_VENDOR)/etc/permissions/android.software.ipsec_tunnels.xml \
     frameworks/native/data/etc/android.software.midi.xml:$(TARGET_COPY_OUT_VENDOR)/etc/permissions/android.software.midi.xml \
@@ -261,7 +258,7 @@ PRODUCT_COPY_FILES += \
 # Power
 PRODUCT_PACKAGES += \
     android.hardware.power-service.pixel-libperfmgr
-    
+
 PRODUCT_COPY_FILES += \
     $(COMMON_PATH)/configs/power/powerhint.json:$(TARGET_COPY_OUT_VENDOR)/etc/powerhint.json \
     system/core/libprocessgroup/profiles/cgroups_28.json:$(TARGET_COPY_OUT_VENDOR)/etc/cgroups.json \
@@ -271,7 +268,8 @@ PRODUCT_COPY_FILES += \
 PRODUCT_PACKAGES += \
     libprotobuf-cpp-full-vendorcompat \
     libprotobuf-cpp-full-3.9.1-vendorcompat \
-    libprotobuf-cpp-lite-vendorcompat
+    libprotobuf-cpp-lite-vendorcompat \
+    libprotobuf-cpp-lite-3.9.1-vendorcompat
 
 # Public Libraries
 PRODUCT_COPY_FILES += \
@@ -279,14 +277,6 @@ PRODUCT_COPY_FILES += \
 
 # RIL
 PRODUCT_PACKAGES += \
-    vendor.samsung.hardware.radio@2.0.vendor:64 \
-    vendor.samsung.hardware.radio@2.1.vendor:64 \
-    vendor.samsung.hardware.radio@2.2.vendor:64 \
-    android.hardware.radio.config@1.2.vendor:64 \
-    android.hardware.radio.deprecated@1.0.vendor:64 \
-    libexpat.vendor \
-    libnetutils.vendor:64 \
-    libsqlite.vendor:64 \
     secril_config_svc
 
 # SamsungDoze
@@ -297,10 +287,7 @@ PRODUCT_PACKAGES += \
 PRODUCT_PACKAGES += \
     android.frameworks.schedulerservice@1.0.vendor:64 \
     android.hardware.sensors@1.0-impl.samsung:64 \
-    android.hardware.sensors@1.0-service \
-    android.frameworks.sensorservice@1.0 \
-    android.frameworks.sensorservice@1.0.vendor \
-    libsensorndkbridge
+    android.hardware.sensors@1.0-service
 
 # Shims
 PRODUCT_PACKAGES += \
@@ -312,8 +299,8 @@ PRODUCT_SYSTEM_SERVER_COMPILER_FILTER := speed-profile
 
 # Thermal
 PRODUCT_PACKAGES += \
-    android.hardware.thermal-service.samsung \
-    thermal_symlinks.samsung
+    android.hardware.thermal-service.pixel \
+    thermal_symlinks
 
 PRODUCT_COPY_FILES += \
     $(COMMON_PATH)/configs/thermal/thermal_info_config.json:$(TARGET_COPY_OUT_VENDOR)/etc/thermal_info_config.json
@@ -322,6 +309,10 @@ PRODUCT_COPY_FILES += \
 PRODUCT_PACKAGES += \
     vendor.lineage.touch@1.0-service.samsung
 
+# Update
+AB_OTA_UPDATER := false
+PRODUCT_SOONG_NAMESPACES += bootable/deprecated-ota
+
 # USB
 PRODUCT_PACKAGES += \
     android.hardware.usb-service.samsung
@@ -329,11 +320,6 @@ PRODUCT_PACKAGES += \
 # Vibrator
 PRODUCT_PACKAGES += \
     android.hardware.vibrator-service.samsung
-
-# VNDK
-PRODUCT_PACKAGES += \
-    libcrypto-v33 \
-    libutils-v32
 
 # Wi-Fi
 PRODUCT_PACKAGES += \
