@@ -57,12 +57,6 @@ vendor/lib64/libsynaFpSensorTestNwd.so;DISABLE_CHECKELF
 vendor/lib64/libbt-vendor.so
 
 # Camera
-#vendor/lib/camera.device@1.0-impl.so
-#vendor/lib/camera.device@3.3-impl.so
-#vendor/lib/camera.device@3.5-impl.so
-#vendor/lib64/camera.device@1.0-impl.so
-#vendor/lib64/camera.device@3.3-impl.so
-#v#endor/lib64/camera.device@3.5-impl.so
 vendor/lib/libSEF.quram.so
 vendor/lib/libcnn.so;DISABLE_CHECKELF
 vendor/lib/libhfd.so
@@ -100,9 +94,6 @@ vendor/firmware/score/camera2/score_mc_pmw.bin
 vendor/firmware/score/camera2/score_kc1_dmb.bin
 vendor/firmware/score/camera2/score_kc1_pmw.bin
 vendor/firmware/score/camera2/score_mc_dmb.bin
-
-# Camera legacy (prebuilt) - from A13
-#vendor/lib/android.hardware.camera.provider@2.4-legacy.so|21ea6425c6898aa2142223ddeaff890d30a43b5c
 
 # Charger Firmware
 vendor/firmware/mfc_fw.bin

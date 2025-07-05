@@ -3,9 +3,6 @@
 
 COMMON_PATH := device/samsung/exynos9810-common
 
-#BUILD_BROKEN_DUP_RULES := true
-#BUILD_BROKEN_ELF_PREBUILT_PRODUCT_COPY_FILES := true
-
 # Include path
 TARGET_SPECIFIC_HEADER_PATH := $(COMMON_PATH)/include
 
@@ -15,7 +12,7 @@ include vendor/samsung/exynos9810-common/BoardConfigVendor.mk
 # Audio
 $(call soong_config_set,exynos_audio,PREDEFINED_LOW_CAPTURE_DURATION,20)
 $(call soong_config_set,exynos_audio,PROXY_LIBRARY,//device/samsung/exynos9810-common:libaudioproxy)
-#$(call soong_config_set,exynos9810AudioVars,use_dual_speaker,true)
+$(call soong_config_set,exynos9810AudioVars,use_dual_speaker,true)
 
 # APEX image
 DEXPREOPT_GENERATE_APEX_IMAGE := true
@@ -51,6 +48,11 @@ BOARD_KERNEL_TAGS_OFFSET     := 0x00000100
 BOARD_MKBOOTIMG_ARGS += --ramdisk_offset $(BOARD_KERNEL_RAMDISK_OFFSET)
 BOARD_MKBOOTIMG_ARGS += --tags_offset $(BOARD_KERNEL_TAGS_OFFSET)
 BOARD_MKBOOTIMG_ARGS := --kernel_offset $(BOARD_KERNEL_OFFSET)
+
+# Camera
+SOONG_CONFIG_NAMESPACES += samsungCameraVars
+$(call soong_config_set,samsungCameraVars,usage_64bit,true)
+$(call soong_config_set,samsungCameraVars,needs_sec_reserved_field,true)
 
 # Display
 BOARD_MINIMUM_DISPLAY_BRIGHTNESS := 1

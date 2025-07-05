@@ -57,27 +57,9 @@ PRODUCT_PACKAGES += \
     libbt-vendor:64
 
 # Camera
-$(call soong_config_set,samsungCameraVars,needs_sec_reserved_field,true)
-
 PRODUCT_PACKAGES += \
-    android.hardware.camera.provider-service_32.samsung
-
-#    android.hardware.camera.provider-service.samsung \
-#    android.hardware.camera.provider@2.5-legacy.samsung \
-#    android.hardware.camera.provider@2.5-service \
-#    libcamera_metadata \
-#    libcamera_metadata.vendor
-#    camera.device@1.0-impl \
-#    camera.device@3.2-impl \
-#    camera.device@3.3-impl \
-#    camera.device@3.4-impl \
-#    camera.device@3.5-impl \
-#    android.hardware.camera.provider-service.samsung
-
-PRODUCT_PACKAGES += \
-    libGrallocMapperCamera \
-    libGrallocWrapper \
-    libhwjpeg
+    android.hardware.camera.provider@2.5-service_64.samsung \
+    libGrallocMapperCamera
 
 # Charger
 PRODUCT_PACKAGES += \
@@ -264,7 +246,6 @@ PRODUCT_COPY_FILES += \
     frameworks/native/data/etc/android.hardware.wifi.direct.xml:$(TARGET_COPY_OUT_VENDOR)/etc/permissions/android.hardware.wifi.direct.xml \
     frameworks/native/data/etc/android.hardware.wifi.xml:$(TARGET_COPY_OUT_VENDOR)/etc/permissions/android.hardware.wifi.xml \
     frameworks/native/data/etc/android.software.app_widgets.xml:$(TARGET_COPY_OUT_VENDOR)/etc/permissions/android.software.app_widgets.xml \
-    frameworks/native/data/etc/android.software.device_id_attestation.xml:$(TARGET_COPY_OUT_VENDOR)/etc/permissions/android.software.device_id_attestation.xml \
     frameworks/native/data/etc/android.software.freeform_window_management.xml:$(TARGET_COPY_OUT_VENDOR)/etc/permissions/android.software.freeform_window_management.xml \
     frameworks/native/data/etc/android.software.ipsec_tunnels.xml:$(TARGET_COPY_OUT_VENDOR)/etc/permissions/android.software.ipsec_tunnels.xml \
     frameworks/native/data/etc/android.software.midi.xml:$(TARGET_COPY_OUT_VENDOR)/etc/permissions/android.software.midi.xml \
