@@ -77,7 +77,6 @@ cc_library_shared {
 
     srcs: [
         "audio_proxy.c",
-        "audio_usb_proxy.c",
     ],
     include_dirs: [
         "hardware/samsung_slsi-linaro/exynos/include/libaudio/audiohal",

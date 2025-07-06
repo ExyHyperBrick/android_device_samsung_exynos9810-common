@@ -13,6 +13,8 @@ include vendor/samsung/exynos9810-common/BoardConfigVendor.mk
 $(call soong_config_set,exynos_audio,PREDEFINED_LOW_CAPTURE_DURATION,20)
 $(call soong_config_set,exynos_audio,PROXY_LIBRARY,//device/samsung/exynos9810-common:libaudioproxy)
 $(call soong_config_set,exynos9810AudioVars,use_dual_speaker,true)
+$(call soong_config_set,exynos9810AudioVars,use_soundtrigger_hal,true)
+$(call soong_config_set,exynos9810AudioVars,use_spkamp_playback,true)
 
 # APEX image
 DEXPREOPT_GENERATE_APEX_IMAGE := true
@@ -32,6 +34,7 @@ TARGET_2ND_CPU_ABI2 := armeabi
 TARGET_2ND_CPU_VARIANT := cortex-a53
 
 # Boot Animation
+TARGET_BOOTANIMATION_HALF_RES := true
 TARGET_SCREEN_HEIGHT := 2960
 TARGET_SCREEN_WIDTH := 1440
 
