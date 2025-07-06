@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-#define LOG_TAG "audio_hw_proxy"
+#define LOG_TAG "audio_hw_proxy_9810"
 #define LOG_NDEBUG 0
 
 //#define VERY_VERY_VERBOSE_LOGGING
@@ -52,12 +52,6 @@
 #include "audio_tables.h"
 #include "audio_definition.h"
 #include "audio_board_info.h"
-#include "voice_definition.h"
-
-#include "audio_usb_proxy_interface.h"
-#ifdef SUPPORT_BTA2DP_OFFLOAD
-#include "audio_a2dp_proxy.h"
-#endif
 
 
 /* Vendor Property Definitions */
@@ -81,6 +75,9 @@
 
 #define USBBYPRIMARY_DEFAULT    "no"
 #define USBBYPRIMARY_PROPERTY   "ro.vendor.config.usb_by_primary"
+
+#define A2DPBYPRIMARY_DEFAULT   "no"
+#define A2DPBYPRIMARY_PROPERTY  "ro.vendor.config.a2dp_by_primary"
 
 
 /******************************************************************************/
@@ -178,16 +175,17 @@ bool is_needed_config(void *proxy, int config_type)
 
     switch (config_type) {
         case NEED_VOICEPCM_REOPEN:
-            for (int i = 0; i < BTSCO_MAX_ERAP_IDX; i++) {
-                if (aproxy->btsco_erap[i]) {
-                    ret = true;
-                    break;
-                }
-            }
+            if (aproxy->btsco_playback)
+                ret = true;
             break;
 
         case SUPPORT_USB_BY_PRIMARY:
             if (aproxy->usb_by_primary)
+                ret = true;
+            break;
+
+        case SUPPORT_A2DP_BY_PRIMARY:
+            if (aproxy->a2dp_by_primary)
                 ret = true;
             break;
 
@@ -236,16 +234,6 @@ bool is_usage_APCall(audio_usage ausage)
         return false;
 }
 
-bool is_usage_Call(audio_usage ausage)
-{
-    if (ausage >= AUSAGE_CPCALL_MIN && ausage <= AUSAGE_CPCALL_MAX)
-        return true;
-    else if (ausage >= AUSAGE_APCALL_MIN && ausage <= AUSAGE_APCALL_MAX)
-        return true;
-    else
-        return false;
-}
-
 bool is_usage_Loopback(audio_usage ausage)
 {
     // AUSAGE_LOOPBACK == min, AUSAGE_LOOPBACK_CODEC == max
@@ -255,81 +243,58 @@ bool is_usage_Loopback(audio_usage ausage)
         return false;
 }
 
-bool is_usb_connected(void)
+bool is_audiomode_incall(struct audio_proxy *aproxy)
 {
-    struct audio_proxy *aproxy = getInstance();
-
-    if (proxy_is_usb_playback_device_connected(aproxy->usb_aproxy))
+    if (aproxy->audio_mode == AUDIO_MODE_IN_CALL)
         return true;
     else
         return false;
 }
 
-#ifdef SUPPORT_BTA2DP_OFFLOAD
-bool proxy_is_bt_a2dp_ready(void)
+// proxy interface sync-up function
+bool is_usb_connected(void)
 {
-    struct audio_proxy *aproxy = getInstance();
-
-    // bt offload enabled and not suspend state
-    if (aproxy && aproxy->a2dp_out_enabled) {
-        if (!proxy_a2dp_is_suspended())
-            return true;
-    }
-
     return false;
 }
 
-static const audio_format_t AUDIO_FORMAT_SEC_BT_A2DP_OFFLOAD = (audio_format_t)0x200000u;
-static inline bool audio_is_bt_offload_format(audio_format_t format){
-     if ((format & AUDIO_FORMAT_SEC_BT_A2DP_OFFLOAD) == AUDIO_FORMAT_SEC_BT_A2DP_OFFLOAD) {
-         return true;
-     }
-     return false;
-
-}
-#endif
-
-void update_usb_clksource_info(bool flag)
+int get_mmap_data_fd(void *proxy_stream, audio_usage_type usage_type,
+                                                            int *fd, unsigned int *size)
 {
-    struct audio_proxy *aproxy = getInstance();
-    struct mixer_ctl *ctrl = NULL;
+    struct audio_proxy_stream *apstream = (struct audio_proxy_stream *)proxy_stream;
+    struct snd_pcm_mmap_fd mmapfd_info;
+    char dev_name[128];
+    int hw_fd = -1;
     int ret = 0;
+    int hwdev_node = -1;
 
-    pthread_rwlock_rdlock(&aproxy->mixer_update_lock);
+    memset(&mmapfd_info, 0, sizeof(mmapfd_info));
+    mmapfd_info.dir = usage_type;
 
-    // set usb device clock info if flag is true and usb connected
-    if (flag) {
-        /* USB Clock Source information Mixer control */
-        ctrl = mixer_get_ctl_by_name(aproxy->mixer, MIXER_CTL_ABOX_USB_CLOCKSOURCE);
-        if (ctrl) {
-            ret = mixer_ctl_get_value(ctrl, 0);
-            if (ret < 0) {
-                ALOGE("proxy-%s: failed to get %s %d", __func__, MIXER_CTL_ABOX_USB_CLOCKSOURCE, ret);
-            } else {
-                aproxy->is_usb_single_clksrc = ret;
-                ALOGI("proxy-%s: get USB Device ClockSource information %d",
-                    __func__, aproxy->is_usb_single_clksrc);
-            }
-        } else {
-            ALOGE("proxy-%s: cannot find %s Mixer Control", __func__, MIXER_CTL_ABOX_USB_CLOCKSOURCE);
-        }
-    } else {
-        // reset usb device clock info when usb disconnected
-        aproxy->is_usb_single_clksrc = false;
-        ALOGI("proxy-%s: reset USB Device ClockSource information %d",
-            __func__, aproxy->is_usb_single_clksrc);
+    // get MMAP device node number based on usage direction
+    hwdev_node = ((usage_type ==  AUSAGE_PLAYBACK) ? MMAP_PLAYBACK_DEVICE :
+                            MMAP_CAPTURE_DEVICE);
+    snprintf(dev_name, sizeof(dev_name), "/dev/snd/hwC0D%d", hwdev_node);
+    hw_fd = open(dev_name, O_RDONLY);
+    if (hw_fd < 0) {
+        ALOGE("%s: hw %s node open failed", __func__, dev_name);
+        ret = -1;
+        goto err;
     }
 
-    pthread_rwlock_unlock(&aproxy->mixer_update_lock);
+    // get mmap fd for exclusive mode
+    if (ioctl(hw_fd, SNDRV_PCM_IOCTL_MMAP_DATA_FD, &mmapfd_info) < 0) {
+        ALOGE("%s-%s: get MMAP FD IOCTL failed",
+                  stream_table[apstream->stream_type], __func__);
+        ret = -1;
+        goto err;
+    }
+    *fd = mmapfd_info.fd;
+    *size = mmapfd_info.size;
 
-    return;
-}
-
-bool is_usb_single_clksource()
-{
-    struct audio_proxy *aproxy = getInstance();
-
-    return aproxy->is_usb_single_clksrc;
+err:
+    if (hw_fd >= 0)
+        close(hw_fd);
+    return ret;
 }
 
 /******************************************************************************/
@@ -364,102 +329,6 @@ static audio_format_t get_pcmformat_from_alsaformat(enum pcm_format pcmformat)
 
     return format;
 }
-
-static bool is_playback_device_bt(device_type device)
-{
-    if (device == DEVICE_BT_HEADSET || device == DEVICE_SPEAKER_AND_BT_HEADSET
-#ifdef SUPPORT_BTA2DP_OFFLOAD
-        || device == DEVICE_BT_A2DP_HEADPHONE || device == DEVICE_SPEAKER_AND_BT_A2DP_HEADPHONE
-#endif
-    )
-        return true;
-    else
-        return false;
-}
-
-static bool is_playback_device_speaker_dualpath(device_type device)
-{
-    if (device == DEVICE_SPEAKER_AND_HEADSET ||
-        device == DEVICE_SPEAKER_AND_HEADPHONE ||
-        device == DEVICE_SPEAKER_AND_BT_HEADSET ||
-        device == DEVICE_SPEAKER_AND_USB_HEADSET
-#ifdef SUPPORT_BTA2DP_OFFLOAD
-        || device == DEVICE_SPEAKER_AND_BT_A2DP_HEADPHONE
-#endif
-    )
-        return true;
-    else
-        return false;
-}
-
-#ifdef SUPPORT_BTA2DP_OFFLOAD
-static bool is_active_playback_device_bta2dp(struct audio_proxy *aproxy)
-{
-    if (aproxy->active_playback_device == DEVICE_BT_A2DP_HEADPHONE ||
-        aproxy->active_playback_device == DEVICE_SPEAKER_AND_BT_A2DP_HEADPHONE)
-        return true;
-    else
-        return false;
-}
-
-static bool is_playback_device_bta2dp(device_type device)
-{
-    if (device == DEVICE_BT_A2DP_HEADPHONE || device == DEVICE_SPEAKER_AND_BT_A2DP_HEADPHONE)
-        return true;
-    else
-        return false;
-}
-#endif
-
-static bool is_device_speaker(device_type device)
-{
-    if (device < DEVICE_MAIN_MIC) {
-        if (device == DEVICE_SPEAKER
-#ifdef SEC_AUDIO_SUPPORT_GAMECHAT_SPK_AEC
-                || (device == DEVICE_SPEAKER_GAMING)
-#endif
-                || (device == DEVICE_SPEAKER_DEX)) {
-            return true;
-        }
-        return false;
-    } else {
-        if (device == DEVICE_SPEAKER_MIC
-#ifdef SEC_AUDIO_SUPPORT_GAMECHAT_SPK_AEC
-                || (device == DEVICE_SPEAKER_GAMING_MIC)
-#endif
-                || (device == DEVICE_SPEAKER_DEX_MIC)) {
-            return true;
-        }
-        return false;
-    }
-}
-
-static bool is_usb_mic_device(device_type device)
-{
-    return (device == DEVICE_USB_HEADSET_MIC /*||
-                device == DEVICE_USB_FULL_MIC ||
-                device == DEVICE_USB_HCO_MIC*/);
-}
-
-#ifdef SUPPORT_QUAD_MIC
-static bool is_quad_mic_device(device_type device)
-{
-    struct audio_proxy *aproxy = getInstance();
-    bool flag = false;
-
-    if (device == DEVICE_QUAD_MIC)
-        flag = true;
-    else if (is_usage_CPCall(aproxy->active_capture_ausage) ||
-            is_usage_APCall(aproxy->active_capture_ausage))
-        flag = (device == DEVICE_MAIN_MIC ||
-                device == DEVICE_HANDSET_MIC ||
-                device == DEVICE_HEADPHONE_MIC ||
-                device == DEVICE_SPEAKER_MIC ||
-                device == DEVICE_SPEAKER_DEX_MIC /*||
-                device == DEVICE_SPEAKER_GAMING_MIC*/);
-	return flag;
-}
-#endif
 
 // If there are specific device number in mixer_paths.xml, it get the specific device number from mixer_paths.xml
 static int get_pcm_device_number(void *proxy, void *proxy_stream)
@@ -499,12 +368,12 @@ static int get_pcm_device_number(void *proxy, void *proxy_stream)
                 pcm_device_number = AUX_PLAYBACK_DEVICE;
                 break;
 
-            case ASTREAM_PLAYBACK_DIRECT:
-                pcm_device_number = DIRECT_PLAYBACK_DEVICE;
-                break;
-
             case ASTREAM_CAPTURE_PRIMARY:
-                pcm_device_number = PRIMARY_CAPTURE_DEVICE;
+                if (is_audiomode_incall(aproxy)) {
+                    pcm_device_number = CALLMIC_CAPTURE_DEVICE;
+                } else {
+                    pcm_device_number = PRIMARY_CAPTURE_DEVICE;
+                }
                 break;
 
             case ASTREAM_CAPTURE_CALL:
@@ -537,6 +406,71 @@ static int get_pcm_device_number(void *proxy, void *proxy_stream)
 /*
  * Internal Path Control Functions for A-Box
  */
+static void disable_out_loopback(void *proxy)
+{
+    struct audio_proxy *aproxy = proxy;
+    char pcm_path[MAX_PCM_PATH_LEN];
+
+    if (aproxy->support_out_loopback) {
+        snprintf(pcm_path, sizeof(pcm_path), "/dev/snd/pcmC%uD%u%c",
+                 OUT_LOOPBACK_CARD, OUT_LOOPBACK_DEVICE, 'c');
+
+        /* Disables Output Loopback Path */
+        if (aproxy->out_loopback) {
+            pcm_stop(aproxy->out_loopback);
+            pcm_close(aproxy->out_loopback);
+            aproxy->out_loopback = NULL;
+
+            ALOGI("proxy-%s: Out Loopback PCM Device(%s) is stopped & closed!", __func__, pcm_path);
+        }
+    }
+
+    return ;
+}
+
+static void enable_out_loopback(void *proxy)
+{
+    struct audio_proxy *aproxy = proxy;
+    struct pcm_config pcmconfig = pcm_config_out_loopback;
+    char pcm_path[MAX_PCM_PATH_LEN];
+
+    if (aproxy->support_out_loopback) {
+        snprintf(pcm_path, sizeof(pcm_path), "/dev/snd/pcmC%uD%u%c",
+                 OUT_LOOPBACK_CARD, OUT_LOOPBACK_DEVICE, 'c');
+
+        /* Enables Output Loopback Path */
+        if (aproxy->out_loopback == NULL) {
+            aproxy->out_loopback = pcm_open(OUT_LOOPBACK_CARD, OUT_LOOPBACK_DEVICE,
+                                        PCM_IN | PCM_MONOTONIC, &pcmconfig);
+            if (aproxy->out_loopback && !pcm_is_ready(aproxy->out_loopback)) {
+                /* pcm_open does always return pcm structure, not NULL */
+                ALOGE("proxy-%s: Out Loopback PCM Device(%s) with SR(%u) PF(%d) CC(%d) is not ready as error(%s)",
+                      __func__, pcm_path, pcmconfig.rate, pcmconfig.format, pcmconfig.channels,
+                      pcm_get_error(aproxy->out_loopback));
+                goto err_open;
+            }
+            ALOGI("proxy-%s: Out Loopback PCM Device(%s) with SR(%u) PF(%d) CC(%d) is opened",
+                  __func__, pcm_path, pcmconfig.rate, pcmconfig.format, pcmconfig.channels);
+
+            if (pcm_start(aproxy->out_loopback) == 0) {
+                ALOGI("proxy-%s: Out Loopback PCM Device(%s) with SR(%u) PF(%d) CC(%d) is started",
+                      __func__, pcm_path, pcmconfig.rate, pcmconfig.format, pcmconfig.channels);
+            } else {
+                ALOGE("proxy-%s: Out Loopback PCM Device(%s) with SR(%u) PF(%d) CC(%d) cannot be started as error(%s)",
+                      __func__, pcm_path, pcmconfig.rate, pcmconfig.format, pcmconfig.channels,
+                      pcm_get_error(aproxy->out_loopback));
+                goto err_open;
+            }
+        }
+    }
+
+    return ;
+
+err_open:
+    disable_out_loopback(proxy);
+    return ;
+}
+
 static void disable_erap_in(void *proxy)
 {
     struct audio_proxy *aproxy = proxy;
@@ -559,7 +493,7 @@ static void disable_erap_in(void *proxy)
     return ;
 }
 
-static void enable_erap_in(void *proxy, device_type target_device)
+static void enable_erap_in(void *proxy)
 {
     struct audio_proxy *aproxy = proxy;
     struct pcm_config pcmconfig = pcm_config_erap_in;
@@ -571,26 +505,6 @@ static void enable_erap_in(void *proxy, device_type target_device)
 
         /* Enables ERAP In Path */
         if (aproxy->erap_in == NULL) {
-            /* If target device is USB Headset, then loopback path's PCM channels should be
-             * matched with USB device supported channels */
-            if (target_device == DEVICE_SPEAKER_AND_USB_HEADSET) {
-                pcmconfig.channels = proxy_usb_get_playback_channels(aproxy->usb_aproxy);
-                /* check if connected USB headset's highest channel count is 6, then forcelly
-                 * change it to 8 channels as A-Box HW cannot support 6 channel conversion */
-                if (pcmconfig.channels == ABOX_UNSUPPORTED_CHANNELS) {
-                    ALOGI("proxy-%s: supported CH is(%d) Changed to (%d)", __func__, pcmconfig.channels,
-                        ABOX_SUPPORTED_MAX_CHANNELS);
-                    pcmconfig.channels = ABOX_SUPPORTED_MAX_CHANNELS;
-                }
-                ALOGI("proxy-%s: ERAP In USB Device channels updated as CC(%d)",
-                  __func__, pcmconfig.channels);
-            }
-#ifdef SUPPORT_QUAD_MIC
-            else if (target_device == DEVICE_CALL_FWD) {
-                pcmconfig.channels = MEDIA_4_CHANNELS;
-                ALOGI("proxy-%s: Call-forwarding/spectro ERAP In channels fixed to (%d)", __func__, pcmconfig.channels);
-            }
-#endif
             aproxy->erap_in = pcm_open(ERAP_IN_CARD, ERAP_IN_DEVICE,
                                        PCM_IN | PCM_MONOTONIC, &pcmconfig);
             if (aproxy->erap_in && !pcm_is_ready(aproxy->erap_in)) {
@@ -600,11 +514,11 @@ static void enable_erap_in(void *proxy, device_type target_device)
                       pcm_get_error(aproxy->erap_in));
                 goto err_open;
             }
-            ALOGVV("proxy-%s: ERAP In PCM Device(%s) with SR(%u) PF(%d) CC(%d) is opened",
+            ALOGI("proxy-%s: ERAP In PCM Device(%s) with SR(%u) PF(%d) CC(%d) is opened",
                   __func__, pcm_path, pcmconfig.rate, pcmconfig.format, pcmconfig.channels);
 
             if (pcm_start(aproxy->erap_in) == 0) {
-                ALOGI("proxy-%s: ERAP In PCM Device(%s) with SR(%u) PF(%d) CC(%d) is opened & started",
+                ALOGI("proxy-%s: ERAP In PCM Device(%s) with SR(%u) PF(%d) CC(%d) is started",
                       __func__, pcm_path, pcmconfig.rate, pcmconfig.format, pcmconfig.channels);
             } else {
                 ALOGE("proxy-%s: ERAP In PCM Device(%s) with SR(%u) PF(%d) CC(%d) cannot be started as error(%s)",
@@ -619,185 +533,6 @@ static void enable_erap_in(void *proxy, device_type target_device)
 
 err_open:
     disable_erap_in(proxy);
-    return ;
-}
-
-static void disable_usb_out_loopback(void *proxy)
-{
-    struct audio_proxy *aproxy = proxy;
-    char pcm_path[MAX_PCM_PATH_LEN];
-
-    if (aproxy->support_usb_out_loopback) {
-        snprintf(pcm_path, sizeof(pcm_path), "/dev/snd/pcmC%uD%u%c",
-                 USBOUT_LOOPBACK_CARD, USBOUT_LOOPBACK_DEVICE, 'c');
-
-        /* Disables USB Out Loopback Path */
-        if (aproxy->usb_out_loopback) {
-            pcm_stop(aproxy->usb_out_loopback);
-            pcm_close(aproxy->usb_out_loopback);
-            aproxy->usb_out_loopback = NULL;
-
-            ALOGI("proxy-%s: USBOut Loopback PCM Device(%s) is stopped & closed!", __func__, pcm_path);
-        }
-    }
-
-    return ;
-}
-
-static void enable_usb_out_loopback(void *proxy)
-{
-    struct audio_proxy *aproxy = proxy;
-    struct pcm_config pcmconfig = pcm_config_usb_out_loopback;
-    char pcm_path[MAX_PCM_PATH_LEN];
-
-    if (aproxy->support_usb_out_loopback) {
-        snprintf(pcm_path, sizeof(pcm_path), "/dev/snd/pcmC%uD%u%c",
-                 USBOUT_LOOPBACK_CARD, USBOUT_LOOPBACK_DEVICE, 'c');
-
-        /* Enables USB Out Loopback path */
-        if (aproxy->usb_out_loopback == NULL) {
-            // Updates PCM Configuration same as USB PCM Configuration
-            pcmconfig.rate = proxy_usb_get_playback_samplerate(aproxy->usb_aproxy);
-            pcmconfig.channels = proxy_usb_get_playback_channels(aproxy->usb_aproxy);
-            /* A-Box limitation all DMA buffer size should be multiple of 16
-               therefore Period Size(Frame Count) is rounded of to nearest 4 multiple */
-            pcmconfig.period_size = ((pcmconfig.rate * PREDEFINED_USB_PLAYBACK_DURATION) / 1000) & ~0x3;
-            pcmconfig.format = proxy_usb_get_playback_format(aproxy->usb_aproxy);
-
-            /* check if connected USB headset's channel count is 6, then forcelly
-              * change it to 8 channels as A-Box HW cannot support 6 channel conversion */
-            if (pcmconfig.channels == ABOX_UNSUPPORTED_CHANNELS) {
-                ALOGI("proxy-%s: supported CH is(%d) Changed to (%d)", __func__, pcmconfig.channels,
-                    ABOX_SUPPORTED_MAX_CHANNELS);
-                pcmconfig.channels = ABOX_SUPPORTED_MAX_CHANNELS;
-            }
-
-            /* PCM_FORMAT_S24_3LE (24bit packed) format is not supported by A-Box hardware
-             * therefore forcefully change the format to PCM_FORMAT_S24_LE */
-            if (pcmconfig.format == PCM_FORMAT_S24_3LE) {
-                ALOGI("proxy-%s: USB Format is forcefully changed 24bit packed -> 24bit padded", __func__);
-                pcmconfig.format = PCM_FORMAT_S24_LE;
-            }
-
-            aproxy->usb_out_loopback = pcm_open(USBOUT_LOOPBACK_CARD, USBOUT_LOOPBACK_DEVICE,
-                                               PCM_IN | PCM_MONOTONIC, &pcmconfig);
-            if (aproxy->usb_out_loopback && !pcm_is_ready(aproxy->usb_out_loopback)) {
-                /* pcm_open does always return pcm structure, not NULL */
-                ALOGE("proxy-%s: USBOut Loopback PCM Device(%s) with SR(%u) PF(%d) CC(%d) is not ready as error(%s)",
-                      __func__, pcm_path, pcmconfig.rate, pcmconfig.format, pcmconfig.channels,
-                      pcm_get_error(aproxy->usb_out_loopback));
-                goto err_open;
-            }
-            ALOGI("proxy-%s: USBOut Loopback PCM Device(%s) with SR(%u) PF(%d) CC(%d) PdSz(%d) PdCnt(%d) is opened",
-                  __func__, pcm_path, pcmconfig.rate, pcmconfig.format, pcmconfig.channels,
-                  pcmconfig.period_size, pcmconfig.period_count);
-
-            if (pcm_start(aproxy->usb_out_loopback) == 0) {
-                ALOGI("proxy-%s: USBOut Loopback PCM Device(%s) with SR(%u) PF(%d) CC(%d) is opened & started",
-                      __func__, pcm_path, pcmconfig.rate, pcmconfig.format, pcmconfig.channels);
-            } else {
-                ALOGE("proxy-%s: USBOut Loopback PCM Device(%s) with SR(%u) PF(%d) CC(%d) cannot be started as error(%s)",
-                      __func__, pcm_path, pcmconfig.rate, pcmconfig.format, pcmconfig.channels,
-                      pcm_get_error(aproxy->usb_out_loopback));
-                goto err_open;
-            }
-        }
-    }
-
-    return ;
-
-err_open:
-    disable_usb_out_loopback(proxy);
-    return ;
-}
-
-
-static void disable_usb_in_loopback(void *proxy)
-{
-    struct audio_proxy *aproxy = proxy;
-    char pcm_path[MAX_PCM_PATH_LEN];
-
-    if (aproxy->support_usb_in_loopback) {
-        snprintf(pcm_path, sizeof(pcm_path), "/dev/snd/pcmC%uD%u%c",
-                 USBIN_LOOPBACK_CARD, USBIN_LOOPBACK_DEVICE, 'p');
-
-        /* Disables USB In Loopback Path */
-        if (aproxy->usb_in_loopback) {
-            pcm_stop(aproxy->usb_in_loopback);
-            pcm_close(aproxy->usb_in_loopback);
-            aproxy->usb_in_loopback = NULL;
-
-            ALOGI("proxy-%s: USBIn Loopback PCM Device(%s) is stopped & closed!", __func__, pcm_path);
-        }
-    }
-
-    return ;
-}
-
-static void enable_usb_in_loopback(void *proxy)
-{
-    struct audio_proxy *aproxy = proxy;
-    struct pcm_config pcmconfig = pcm_config_usb_in_loopback;
-    char pcm_path[MAX_PCM_PATH_LEN];
-
-    if (aproxy->support_usb_in_loopback) {
-        snprintf(pcm_path, sizeof(pcm_path), "/dev/snd/pcmC%uD%u%c",
-                 USBIN_LOOPBACK_CARD, USBIN_LOOPBACK_DEVICE, 'p');
-
-        /* Enables USB In Loopback path */
-        if (aproxy->usb_in_loopback == NULL) {
-            // Updates PCM Configuration same as USB PCM Configuration
-            pcmconfig.rate = proxy_usb_get_capture_samplerate(aproxy->usb_aproxy);
-            pcmconfig.channels = proxy_usb_get_capture_channels(aproxy->usb_aproxy);
-            /* A-Box limitation all DMA buffer size should be multiple of 16
-               therefore Period Size(Frame Count) is rounded of to nearest 4 multiple */
-            pcmconfig.period_size = ((pcmconfig.rate * PREDEFINED_USB_PLAYBACK_DURATION) / 1000) & ~0x3;
-            pcmconfig.format = proxy_usb_get_capture_format(aproxy->usb_aproxy);
-
-            /* check if connected USB headset's channel count is 6, then forcelly
-              * change it to 8 channels as A-Box HW cannot support 6 channel conversion */
-            if (pcmconfig.channels == ABOX_UNSUPPORTED_CHANNELS) {
-                ALOGI("proxy-%s: supported CH is(%d) Changed to (%d)", __func__, pcmconfig.channels,
-                    ABOX_SUPPORTED_MAX_CHANNELS);
-                pcmconfig.channels = ABOX_SUPPORTED_MAX_CHANNELS;
-            }
-
-            /* PCM_FORMAT_S24_3LE (24bit packed) format is not supported by A-Box hardware
-             * therefore forcefully change the format to PCM_FORMAT_S24_LE */
-            if (pcmconfig.format == PCM_FORMAT_S24_3LE) {
-                ALOGI("proxy-%s: USB Format is forcefully changed from 24bit packed -> 24bit padded", __func__);
-                pcmconfig.format = PCM_FORMAT_S24_LE;
-            }
-
-            aproxy->usb_in_loopback = pcm_open(USBIN_LOOPBACK_CARD, USBIN_LOOPBACK_DEVICE,
-                                               PCM_OUT | PCM_MONOTONIC, &pcmconfig);
-            if (aproxy->usb_in_loopback && !pcm_is_ready(aproxy->usb_in_loopback)) {
-                /* pcm_open does always return pcm structure, not NULL */
-                ALOGE("proxy-%s: USBIn Loopback PCM Device(%s) with SR(%u) PF(%d) CC(%d) is not ready as error(%s)",
-                      __func__, pcm_path, pcmconfig.rate, pcmconfig.format, pcmconfig.channels,
-                      pcm_get_error(aproxy->usb_in_loopback));
-                goto err_open;
-            }
-            ALOGI("proxy-%s: USBIn Loopback PCM Device(%s) with SR(%u)PF(%d) CC(%d) PdSz(%d) PdCnt(%d) is opened",
-                  __func__, pcm_path, pcmconfig.rate, pcmconfig.format, pcmconfig.channels,
-                  pcmconfig.period_size, pcmconfig.period_count);
-
-            if (pcm_start(aproxy->usb_in_loopback) == 0) {
-                ALOGI("proxy-%s: USBIn Loopback PCM Device(%s) with SR(%u) PF(%d) CC(%d) is opened & started",
-                      __func__, pcm_path, pcmconfig.rate, pcmconfig.format, pcmconfig.channels);
-            } else {
-                ALOGE("proxy-%s: USBIn Loopback PCM Device(%s) with SR(%u) PF(%d) CC(%d) cannot be started as error(%s)",
-                      __func__, pcm_path, pcmconfig.rate, pcmconfig.format, pcmconfig.channels,
-                      pcm_get_error(aproxy->usb_in_loopback));
-                goto err_open;
-            }
-        }
-    }
-
-    return ;
-
-err_open:
-    disable_usb_in_loopback(proxy);
     return ;
 }
 
@@ -844,11 +579,11 @@ static void enable_spkamp_reference(void *proxy)
                       pcm_get_error(aproxy->spkamp_reference));
                 goto err_open;
             }
-            ALOGVV("proxy-%s: SPKAMP Reference PCM Device(%s) with SR(%u) PF(%d) CC(%d) is opened",
+            ALOGI("proxy-%s: SPKAMP Reference PCM Device(%s) with SR(%u) PF(%d) CC(%d) is opened",
                   __func__, pcm_path, pcmconfig.rate, pcmconfig.format, pcmconfig.channels);
 
             if (pcm_start(aproxy->spkamp_reference) == 0) {
-                ALOGI("proxy-%s: SPKAMP Reference PCM Device(%s) with SR(%u) PF(%d) CC(%d) is opened & started",
+                ALOGI("proxy-%s: SPKAMP Reference PCM Device(%s) with SR(%u) PF(%d) CC(%d) is started",
                       __func__, pcm_path, pcmconfig.rate, pcmconfig.format, pcmconfig.channels);
             } else {
                 ALOGE("proxy-%s: SPKAMP Reference PCM Device(%s) with SR(%u) PF(%d) CC(%d) cannot be started as error(%s)",
@@ -871,7 +606,7 @@ static void disable_spkamp_playback(void *proxy)
     struct audio_proxy *aproxy = proxy;
     char pcm_path[MAX_PCM_PATH_LEN];
 
-    if (aproxy->support_spkamp && ENABLE_SPKAMP_PLAYBACK) {
+    if (aproxy->support_spkamp) {
         snprintf(pcm_path, sizeof(pcm_path), "/dev/snd/pcmC%uD%u%c",
                  SPKAMP_PLAYBACK_CARD, SPKAMP_PLAYBACK_DEVICE, 'p');
 
@@ -894,7 +629,7 @@ static void enable_spkamp_playback(void *proxy)
     struct pcm_config pcmconfig = pcm_config_spkamp_playback;
     char pcm_path[MAX_PCM_PATH_LEN];
 
-    if (aproxy->support_spkamp && ENABLE_SPKAMP_PLAYBACK) {
+    if (aproxy->support_spkamp) {
         snprintf(pcm_path, sizeof(pcm_path), "/dev/snd/pcmC%uD%u%c",
                  SPKAMP_PLAYBACK_CARD, SPKAMP_PLAYBACK_DEVICE, 'p');
 
@@ -909,11 +644,11 @@ static void enable_spkamp_playback(void *proxy)
                       pcm_get_error(aproxy->spkamp_playback));
                 goto err_open;
             }
-            ALOGVV("proxy-%s: SPKAMP Playback PCM Device(%s) with SR(%u) PF(%d) CC(%d) is opened",
+            ALOGI("proxy-%s: SPKAMP Playback PCM Device(%s) with SR(%u) PF(%d) CC(%d) is opened",
                   __func__, pcm_path, pcmconfig.rate, pcmconfig.format, pcmconfig.channels);
 
             if (pcm_start(aproxy->spkamp_playback) == 0) {
-                ALOGI("proxy-%s: SPKAMP Playback PCM Device(%s) with SR(%u) PF(%d) CC(%d) is opened & started",
+                ALOGI("proxy-%s: SPKAMP Playback PCM Device(%s) with SR(%u) PF(%d) CC(%d) is started",
                       __func__, pcm_path, pcmconfig.rate, pcmconfig.format, pcmconfig.channels);
             } else {
                 ALOGE("proxy-%s: SPKAMP Playback PCM Device(%s) with SR(%u) PF(%d) CC(%d) cannot be started as error(%s)",
@@ -931,201 +666,59 @@ err_open:
     return ;
 }
 
-static void disable_btsco_erap(void *proxy, int i)
+static void disable_btsco_playback(void *proxy)
 {
     struct audio_proxy *aproxy = proxy;
     char pcm_path[MAX_PCM_PATH_LEN];
 
     if (aproxy->support_btsco) {
-        char type = 'p';
-        if ((btsco_erap_flag[i] & PCM_IN) != 0)
-            type = 'c';
-
         snprintf(pcm_path, sizeof(pcm_path), "/dev/snd/pcmC%uD%u%c",
-                 btsco_erap_device[i][0], btsco_erap_device[i][1], type);
+                 BTSCO_PLAYBACK_CARD, BTSCO_PLAYBACK_DEVICE, 'p');
 
         /* Disables BT-SCO Playback Path */
-        if (aproxy->btsco_erap[i]) {
-            pcm_stop(aproxy->btsco_erap[i]);
-            pcm_close(aproxy->btsco_erap[i]);
-            aproxy->btsco_erap[i] = NULL;
+        if (aproxy->btsco_playback) {
+            pcm_stop(aproxy->btsco_playback);
+            pcm_close(aproxy->btsco_playback);
+            aproxy->btsco_playback = NULL;
 
-            ALOGI("proxy-%s: BTSCO ERAP PCM Device(%s) is stopped & closed!", __func__, pcm_path);
+            ALOGI("proxy-%s: BTSCO Playback PCM Device(%s) is stopped & closed!", __func__, pcm_path);
         }
     }
 
     return ;
 }
 
-static void enable_btsco_erap(void *proxy, int i)
+static void enable_btsco_playback(void *proxy)
 {
     struct audio_proxy *aproxy = proxy;
-    struct pcm_config pcmconfig = pcm_config_btsco;
+    struct pcm_config pcmconfig = pcm_config_btsco_playback;
     char pcm_path[MAX_PCM_PATH_LEN];
 
     if (aproxy->support_btsco) {
-        char type = 'p';
-        if ((btsco_erap_flag[i] & PCM_IN) != 0)
-            type = 'c';
-
         snprintf(pcm_path, sizeof(pcm_path), "/dev/snd/pcmC%uD%u%c",
-                 btsco_erap_device[i][0], btsco_erap_device[i][1], type);
+                 BTSCO_PLAYBACK_CARD, BTSCO_PLAYBACK_DEVICE, 'p');
 
         /* Enables BT-SCO Playback Path */
-        if (aproxy->btsco_erap[i] == NULL) {
-            pcmconfig.rate = aproxy->btsco_samplerate;
-
-            aproxy->btsco_erap[i] = pcm_open(btsco_erap_device[i][0], btsco_erap_device[i][1],
-                                              btsco_erap_flag[i], &pcmconfig);
-            if (aproxy->btsco_erap[0] && !pcm_is_ready(aproxy->btsco_erap[i])) {
-                /* pcm_open does always return pcm structure, not NULL */
-                ALOGE("proxy-%s: BTSCO ERAP PCM Device(%s) with SR(%u) PF(%d) CC(%d) is not ready as error(%s)",
-                      __func__, pcm_path, pcmconfig.rate, pcmconfig.format, pcmconfig.channels,
-                      pcm_get_error(aproxy->btsco_erap[i]));
-                goto err_open;
-            }
-            ALOGVV("proxy-%s: BTSCO ERAP PCM Device(%s) with SR(%u) PF(%d) CC(%d) is opened",
-                  __func__, pcm_path, pcmconfig.rate, pcmconfig.format, pcmconfig.channels);
-
-            if (pcm_start(aproxy->btsco_erap[i]) == 0) {
-                ALOGI("proxy-%s: BTSCO ERAP PCM Device(%s) with SR(%u) PF(%d) CC(%d) is opened & started",
-                      __func__, pcm_path, pcmconfig.rate, pcmconfig.format, pcmconfig.channels);
-            } else {
-                ALOGE("proxy-%s: BTSCO ERAP PCM Device(%s) with SR(%u) PF(%d) CC(%d) cannot be started as error(%s)",
-                      __func__, pcm_path, pcmconfig.rate, pcmconfig.format, pcmconfig.channels,
-                      pcm_get_error(aproxy->btsco_erap[i]));
-                goto err_open;
-            }
-        }
-    }
-
-    return ;
-
-err_open:
-    disable_btsco_erap(proxy, i);
-    return ;
-}
-
-#ifdef SUPPORT_BTA2DP_OFFLOAD
-static void disable_bta2dp_out_loopback(void *proxy)
-{
-    struct audio_proxy *aproxy = proxy;
-    char pcm_path[MAX_PCM_PATH_LEN];
-
-    if (aproxy->support_bta2dp) {
-        snprintf(pcm_path, sizeof(pcm_path), "/dev/snd/pcmC%uD%u%c",
-                 BTA2DP_OUT_LOOPBACK_CARD, BTA2DP_OUT_LOOPBACK_DEVICE, 'c');
-
-        /* Disables BT-A2DP Out Loopback Path */
-        if (aproxy->bta2dp_out_loopback) {
-            snprintf(pcm_path, sizeof(pcm_path), "/dev/snd/pcmC%uD%u%c",
-                     BTA2DP_OUT_LOOPBACK_CARD, BTA2DP_OUT_LOOPBACK_DEVICE, 'c');
-            pcm_stop(aproxy->bta2dp_out_loopback);
-            pcm_close(aproxy->bta2dp_out_loopback);
-            aproxy->bta2dp_out_loopback = NULL;
-
-            ALOGI("proxy-%s: BT A2DP Out Loopback PCM Device(%s) is stopped & closed!", __func__, pcm_path);
-        }
-    }
-
-    return;
-}
-
-static void enable_bta2dp_out_loopback(void *proxy)
-{
-    struct audio_proxy *aproxy = proxy;
-    struct pcm_config pcmconfig = pcm_config_bta2dp_out_loopback;
-    char pcm_path[MAX_PCM_PATH_LEN];
-
-    if (aproxy->support_bta2dp) {
-        snprintf(pcm_path, sizeof(pcm_path), "/dev/snd/pcmC%uD%u%c",
-                 BTA2DP_OUT_LOOPBACK_CARD, BTA2DP_OUT_LOOPBACK_DEVICE, 'c');
-
-        /* Enables BT-A2DP Out Loopback Path */
-        if (aproxy->bta2dp_out_loopback == NULL) {
-            aproxy->bta2dp_out_loopback = pcm_open(BTA2DP_OUT_LOOPBACK_CARD, BTA2DP_OUT_LOOPBACK_DEVICE,
-                                                 PCM_IN | PCM_MONOTONIC, &pcmconfig);
-            if (aproxy->bta2dp_out_loopback && !pcm_is_ready(aproxy->bta2dp_out_loopback)) {
-                /* pcm_open does always return pcm structure, not NULL */
-                ALOGE("proxy-%s: BT A2DP Out Loopback PCM Device(%s) with SR(%u) PF(%d) CC(%d) is not ready as error(%s)",
-                      __func__, pcm_path, pcmconfig.rate, pcmconfig.format, pcmconfig.channels,
-                      pcm_get_error(aproxy->bta2dp_out_loopback));
-                goto err_open;
-            }
-            ALOGI("proxy-%s: BT A2DP Out Loopback PCM Device(%s) with SR(%u) PF(%d) CC(%d) is opened",
-                  __func__, pcm_path, pcmconfig.rate, pcmconfig.format, pcmconfig.channels);
-
-            if (pcm_start(aproxy->bta2dp_out_loopback) == 0) {
-                ALOGI("proxy-%s: BT A2DP Out Loopback PCM Device(%s) with SR(%u) PF(%d) CC(%d) is started",
-                      __func__, pcm_path, pcmconfig.rate, pcmconfig.format, pcmconfig.channels);
-            } else {
-                ALOGE("proxy-%s: BT A2DP Out Loopback PCM Device(%s) with SR(%u) PF(%d) CC(%d) cannot be started as error(%s)",
-                      __func__, pcm_path, pcmconfig.rate, pcmconfig.format, pcmconfig.channels,
-                      pcm_get_error(aproxy->bta2dp_out_loopback));
-                goto err_open;
-            }
-        }
-    }
-
-    return;
-
-err_open:
-    disable_bta2dp_out_loopback(aproxy);
-}
-
-static void disable_bta2dp_playback(void *proxy)
-{
-    struct audio_proxy *aproxy = proxy;
-    char pcm_path[MAX_PCM_PATH_LEN];
-
-    if (aproxy->support_bta2dp) {
-        snprintf(pcm_path, sizeof(pcm_path), "/dev/snd/pcmC%uD%u%c",
-                 BTA2DP_PLAYBACK_CARD, BTA2DP_PLAYBACK_DEVICE, 'p');
-
-        /* Disables BT-SCO Playback Path */
-        if (aproxy->bta2dp_playback) {
-            pcm_stop(aproxy->bta2dp_playback);
-            pcm_close(aproxy->bta2dp_playback);
-            aproxy->bta2dp_playback = NULL;
-
-            ALOGI("proxy-%s: BTA2DP Playback PCM Device(%s) is stopped & closed!", __func__, pcm_path);
-        }
-    }
-
-    return ;
-}
-
-static void enable_bta2dp_playback(void *proxy)
-{
-    struct audio_proxy *aproxy = proxy;
-    struct pcm_config pcmconfig = pcm_config_bta2dp_playback;
-    char pcm_path[MAX_PCM_PATH_LEN];
-
-    if (aproxy->support_bta2dp) {
-        snprintf(pcm_path, sizeof(pcm_path), "/dev/snd/pcmC%uD%u%c",
-                 BTA2DP_PLAYBACK_CARD, BTA2DP_PLAYBACK_DEVICE, 'p');
-
-        /* Enables BT-SCO Playback Path */
-        if (aproxy->bta2dp_playback == NULL) {
-            aproxy->bta2dp_playback = pcm_open(BTA2DP_PLAYBACK_CARD, BTA2DP_PLAYBACK_DEVICE,
+        if (aproxy->btsco_playback == NULL) {
+            aproxy->btsco_playback = pcm_open(BTSCO_PLAYBACK_CARD, BTSCO_PLAYBACK_DEVICE,
                                               PCM_OUT | PCM_MONOTONIC, &pcmconfig);
-            if (aproxy->bta2dp_playback && !pcm_is_ready(aproxy->bta2dp_playback)) {
+            if (aproxy->btsco_playback && !pcm_is_ready(aproxy->btsco_playback)) {
                 /* pcm_open does always return pcm structure, not NULL */
-                ALOGE("proxy-%s: BTA2DP Playback PCM Device(%s) with SR(%u) PF(%d) CC(%d) is not ready as error(%s)",
+                ALOGE("proxy-%s: BTSCO Playback PCM Device(%s) with SR(%u) PF(%d) CC(%d) is not ready as error(%s)",
                       __func__, pcm_path, pcmconfig.rate, pcmconfig.format, pcmconfig.channels,
-                      pcm_get_error(aproxy->bta2dp_playback));
+                      pcm_get_error(aproxy->btsco_playback));
                 goto err_open;
             }
-            ALOGI("proxy-%s: BTA2DP Playback PCM Device(%s) with SR(%u) PF(%d) CC(%d) is opened",
+            ALOGI("proxy-%s: BTSCO Playback PCM Device(%s) with SR(%u) PF(%d) CC(%d) is opened",
                   __func__, pcm_path, pcmconfig.rate, pcmconfig.format, pcmconfig.channels);
 
-            if (pcm_start(aproxy->bta2dp_playback) == 0) {
-                ALOGI("proxy-%s: BTA2DP Playback PCM Device(%s) with SR(%u) PF(%d) CC(%d) is started",
+            if (pcm_start(aproxy->btsco_playback) == 0) {
+                ALOGI("proxy-%s: BTSCO Playback PCM Device(%s) with SR(%u) PF(%d) CC(%d) is started",
                       __func__, pcm_path, pcmconfig.rate, pcmconfig.format, pcmconfig.channels);
             } else {
-                ALOGE("proxy-%s: BTA2DP Playback PCM Device(%s) with SR(%u) PF(%d) CC(%d) cannot be started as error(%s)",
+                ALOGE("proxy-%s: BTSCO Playback PCM Device(%s) with SR(%u) PF(%d) CC(%d) cannot be started as error(%s)",
                       __func__, pcm_path, pcmconfig.rate, pcmconfig.format, pcmconfig.channels,
-                      pcm_get_error(aproxy->bta2dp_playback));
+                      pcm_get_error(aproxy->btsco_playback));
                 goto err_open;
             }
         }
@@ -1134,38 +727,9 @@ static void enable_bta2dp_playback(void *proxy)
     return ;
 
 err_open:
-    disable_bta2dp_playback(proxy);
+    disable_btsco_playback(proxy);
+    return ;
 }
-
-/* modified by samsung convgergence */
-void set_a2dp_suspend_mixer(int a2dp_suspend)
-{
-    struct audio_proxy *aproxy = getInstance();
-    uint32_t value[MIXER_CTL_ABOX_A2DP_SUSPEND_PARAMS_CNT] = {0, };
-
-    ALOGI("proxy-%s: a2dp-suspend[%d]", __func__, a2dp_suspend);
-
-    value[0] = a2dp_suspend;
-
-    proxy_set_mixer_value_array(aproxy, MIXER_CTL_ABOX_A2DP_SUSPEND_PARAMS, value,
-                                MIXER_CTL_ABOX_A2DP_SUSPEND_PARAMS_CNT);
-
-    /* Forcefully disonnect A2DP to RDMA6 connection to fix BTSCO switching */
-    if (is_active_playback_device_bta2dp(aproxy)) {
-        if (a2dp_suspend == MIXER_ON) {
-            proxy_set_mixer_value_string(aproxy, "ABOX SPUS OUT6", "RESERVED");
-            ALOGI("proxy-%s: set ABOX SPUS OUT6 to RESERVED", __func__);
-            proxy_set_mixer_value_string(aproxy, "ABOX SIFS2", "RESERVED");
-            ALOGI("proxy-%s: set ABOX SIFS2 to RESERVED", __func__);
-        } else {
-            proxy_set_mixer_value_string(aproxy, "ABOX SPUS OUT6", "SIFS2");
-            ALOGI("proxy-%s: set ABOX SPUS OUT6 to SIFS2", __func__);
-            proxy_set_mixer_value_string(aproxy, "ABOX SIFS2", "SPUS OUT6");
-            ALOGI("proxy-%s: set ABOX SIFS2 to SPUS OUT6", __func__);
-        }
-    }
-}
-#endif
 
 // Specific Mixer Control Functions for Internal Loopback Handling
 void proxy_set_mixercontrol(struct audio_proxy *aproxy, erap_trigger type, int value)
@@ -1199,471 +763,62 @@ void proxy_set_mixercontrol(struct audio_proxy *aproxy, erap_trigger type, int v
     return ;
 }
 
-/* Enable usb playback new Modifier */
-static void set_usb_playback_modifier(void *proxy)
-{
-    struct audio_proxy *aproxy = proxy;
-    struct mixer_ctl *ctrl = NULL;
-    int ret, val = 0;
-
-    pthread_rwlock_rdlock(&aproxy->mixer_update_lock);
-
-    /* Mixer out sample rate configuration */
-    ctrl = mixer_get_ctl_by_name(aproxy->mixer, ABOX_SAMPLE_RATE_MIXER_NAME);
-    if (ctrl) {
-        val = proxy_usb_get_playback_samplerate(aproxy->usb_aproxy);
-        ALOGI("proxy-%s: configured SR(%d)", __func__, val);
-        ret = mixer_ctl_set_value(ctrl, 0, val);
-        if (ret != 0)
-            ALOGE("proxy-%s: failed to set %s", __func__, ABOX_SAMPLE_RATE_MIXER_NAME);
-    } else {
-        ALOGE("proxy-%s: cannot find %s Mixer Control", __func__, ABOX_SAMPLE_RATE_MIXER_NAME);
-    }
-
-    /* Mixer out channels configuration */
-    ctrl = mixer_get_ctl_by_name(aproxy->mixer, ABOX_CHANNELS_MIXER_NAME);
-    if (ctrl) {
-        val = proxy_usb_get_playback_channels(aproxy->usb_aproxy);
-        /* check if connected USB headset's highest channel count is 6, then forcelly
-          * change it to 8 channels as A-Box HW cannot support 6 channel conversion */
-        if (val == ABOX_UNSUPPORTED_CHANNELS) {
-            ALOGI("proxy-%s: supported CH is(%d) Changed to (%d)", __func__, val,
-                ABOX_SUPPORTED_MAX_CHANNELS);
-            val = ABOX_SUPPORTED_MAX_CHANNELS;
-        }
-        ALOGI("proxy-%s: configured CH(%d)", __func__, val);
-        ret = mixer_ctl_set_value(ctrl, 0, val);
-        if (ret != 0)
-            ALOGE("proxy-%s: failed to set %s", __func__, ABOX_CHANNELS_MIXER_NAME);
-    } else {
-        ALOGE("proxy-%s: cannot find %s Mixer Control", __func__, ABOX_CHANNELS_MIXER_NAME);
-    }
-
-    /* Mixer out bit width configuration */
-    ctrl = mixer_get_ctl_by_name(aproxy->mixer, ABOX_BIT_WIDTH_MIXER_NAME);
-    if (ctrl) {
-        val = proxy_usb_get_playback_bitwidth(aproxy->usb_aproxy);
-        ALOGI("proxy-%s: configured BW(%d)", __func__, val);
-        ret = mixer_ctl_set_value(ctrl, 0, val);
-        if (ret != 0)
-            ALOGE("proxy-%s: failed to set %s", __func__, ABOX_BIT_WIDTH_MIXER_NAME);
-    } else {
-        ALOGE("proxy-%s: cannot find %s Mixer Control", __func__, ABOX_BIT_WIDTH_MIXER_NAME);
-    }
-
-#ifdef SUPPORT_DIRECT_RCVSPK_PATH
-        /*
-         * SIFS0 switch control is required to reconfigure all running DMA ASRC configurations
-        */
-        proxy_set_mixer_value_int(proxy, MIXER_CTL_ABOX_SIFS0_SWITCH, MIXER_OFF);
-        proxy_set_mixer_value_int(proxy, MIXER_CTL_ABOX_SIFS0_SWITCH, MIXER_ON);
-        ALOGI("proxy-%s: control SIFS0 Off/On", __func__);
-#endif
-
-    pthread_rwlock_unlock(&aproxy->mixer_update_lock);
-
-    return ;
-}
-
-/* Resset Modifier to default values */
-static void reset_playback_modifier(void *proxy)
-{
-    struct audio_proxy *aproxy = proxy;
-    struct mixer_ctl *ctrl = NULL;
-    int ret, val = 0;
-
-    pthread_rwlock_rdlock(&aproxy->mixer_update_lock);
-
-    /* Mixer out sample rate configuration */
-    ctrl = mixer_get_ctl_by_name(aproxy->mixer, ABOX_SAMPLE_RATE_MIXER_NAME);
-    if (ctrl) {
-        val = DEFAULT_MEDIA_SAMPLING_RATE;
-        ALOGI("proxy-%s: configured SR(%d)", __func__, val);
-        ret = mixer_ctl_set_value(ctrl, 0, val);
-        if (ret != 0)
-            ALOGE("proxy-%s: failed to set %s", __func__, ABOX_SAMPLE_RATE_MIXER_NAME);
-    } else {
-        ALOGE("proxy-%s: cannot find %s Mixer Control", __func__, ABOX_SAMPLE_RATE_MIXER_NAME);
-    }
-
-    /* Mixer out channels configuration */
-    ctrl = mixer_get_ctl_by_name(aproxy->mixer, ABOX_CHANNELS_MIXER_NAME);
-    if (ctrl) {
-        val = DEFAULT_MEDIA_CHANNELS;
-        ALOGI("proxy-%s: configured CH(%d)", __func__, val);
-        ret = mixer_ctl_set_value(ctrl, 0, val);
-        if (ret != 0)
-            ALOGE("proxy-%s: failed to set %s", __func__, ABOX_CHANNELS_MIXER_NAME);
-    } else {
-        ALOGE("proxy-%s: cannot find %s Mixer Control", __func__, ABOX_CHANNELS_MIXER_NAME);
-    }
-
-    /* Mixer out bit width configuration */
-    ctrl = mixer_get_ctl_by_name(aproxy->mixer, ABOX_BIT_WIDTH_MIXER_NAME);
-    if (ctrl) {
-        val = DEFAULT_MEDIA_BITWIDTH;
-        ALOGI("proxy-%s: configured BW(%d)", __func__, val);
-        ret = mixer_ctl_set_value(ctrl, 0, val);
-        if (ret != 0)
-            ALOGE("proxy-%s: failed to set %s", __func__, ABOX_BIT_WIDTH_MIXER_NAME);
-    } else {
-        ALOGE("proxy-%s: cannot find %s Mixer Control", __func__, ABOX_BIT_WIDTH_MIXER_NAME);
-    }
-
-#ifdef SUPPORT_DIRECT_RCVSPK_PATH
-    /*
-     * SIFS0 switch control is required to reconfigure all running DMA ASRC configurations
-    */
-    proxy_set_mixer_value_int(proxy, MIXER_CTL_ABOX_SIFS0_SWITCH, MIXER_OFF);
-    proxy_set_mixer_value_int(proxy, MIXER_CTL_ABOX_SIFS0_SWITCH, MIXER_ON);
-    ALOGI("proxy-%s: control SIFS0 Off/On", __func__);
-#endif
-
-    pthread_rwlock_unlock(&aproxy->mixer_update_lock);
-
-    return ;
-}
-
-#ifdef SUPPORT_BTA2DP_OFFLOAD
-/* BT A2DP Audio Specific Functions */
-static void bta2dp_playback_start(struct audio_proxy *aproxy)
-{
-    audio_format_t codec_type = AUDIO_FORMAT_SBC;   // SBC is Max Size Structure, so it is default
-    audio_sbc_encoder_config codec_info;
-    int ret = 0;
-
-    if (aproxy && aproxy->a2dp_out_enabled) {
-        ret = proxy_a2dp_start();
-        if (ret == 0) {
-            ALOGI("proxy-%s: started BT A2DP", __func__);
-
-            ret = proxy_a2dp_get_config((uint32_t *)&codec_type, (void *)&codec_info);
-            if (ret == 0) {
-                if (codec_type == AUDIO_FORMAT_SBC) {
-                    struct sbc_enc_cfg_t config;
-                    audio_sbc_encoder_config *sbc_config = (audio_sbc_encoder_config *)&codec_info;
-                    memset(&config, 0, sizeof(struct sbc_enc_cfg_t));
-
-                    config.enc_format   = ENC_MEDIA_FMT_SBC;
-                    config.num_subbands = (uint32_t)sbc_config->subband;
-                    config.blk_len      = (uint32_t)sbc_config->blk_len;
-                    config.channel_mode = (uint32_t)sbc_config->channels;
-                    config.alloc_method = (uint32_t)sbc_config->alloc;
-                    config.bit_rate     = (uint32_t)sbc_config->bitrate;
-                    config.sample_rate  = (uint32_t)sbc_config->sampling_rate;
-
-                    proxy_set_mixer_value_array(aproxy, ABOX_A2DP_OFFLOAD_SET_PARAMS_NAME,
-                                               &config, ABOX_A2DP_OFFLOAD_SET_PARAMS_COUNT);
-                    ALOGI("proxy-%s: set A2DP SBC Encoder Configurations", __func__);
-
-                    // Default SBC Latency = 150ms
-                    aproxy->a2dp_default_delay = 150;
-                } else if (codec_type == AUDIO_FORMAT_APTX) {
-                    struct aptx_enc_cfg_t config;
-                    audio_aptx_encoder_config *aptx_config = (audio_aptx_encoder_config *)&codec_info;
-                    memset(&config, 0, sizeof(struct aptx_enc_cfg_t));
-
-                    config.enc_format   = ENC_MEDIA_FMT_APTX;
-                    config.sample_rate  = (uint32_t)aptx_config->sampling_rate;
-                    config.num_channels = (uint32_t)aptx_config->channels;
-                    switch (config.num_channels) {
-                        case 1:
-                            config.channel_mapping[0] = PCM_CHANNEL_C;
-                            break;
-                        case 2:
-                        default:
-                            config.channel_mapping[0] = PCM_CHANNEL_L;
-                            config.channel_mapping[1] = PCM_CHANNEL_R;
-                    }
-
-                    proxy_set_mixer_value_array(aproxy, ABOX_A2DP_OFFLOAD_SET_PARAMS_NAME,
-                                               &config, ABOX_A2DP_OFFLOAD_SET_PARAMS_COUNT);
-                    ALOGI("proxy-%s: set A2DP APTX Encoder Configurations", __func__);
-
-                    // Default APTX Latency = 200ms
-                    aproxy->a2dp_default_delay = 200;
-                }
-            } else
-                ALOGE("proxy-%s: failed to get BT A2DP Codec Configurations", __func__);
-        }
-    }
-
-    return ;
-}
-
-static void bta2dp_playback_stop(struct audio_proxy *aproxy)
-{
-    int ret = 0;
-
-    if (aproxy && aproxy->a2dp_out_enabled) {
-        ret = proxy_a2dp_stop();
-        if (ret == 0)
-            ALOGI("proxy-%s: stopped stream for BT A2DP", __func__);
-    }
-
-    return ;
-}
-
-static void disable_a2dp_mute_playback(void *proxy)
-{
-    struct audio_proxy *aproxy = proxy;
-    char pcm_path[MAX_PCM_PATH_LEN];
-
-    if (aproxy->support_bta2dp) {
-        snprintf(pcm_path, sizeof(pcm_path), "/dev/snd/pcmC%uD%u%c",
-                 A2DPMUTE_PLAYBACK_CARD, A2DPMUTE_PLAYBACK_DEVICE, 'p');
-
-        /* Disables a2dp mute playback Path */
-        if (aproxy->a2dp_mute_playback) {
-            pcm_stop(aproxy->a2dp_mute_playback);
-            pcm_close(aproxy->a2dp_mute_playback);
-            aproxy->a2dp_mute_playback = NULL;
-
-            ALOGI("proxy-%s: A2DP Mute playback PCM Device(%s) is stopped & closed!", __func__, pcm_path);
-        }
-    }
-
-    return ;
-}
-
-static void enable_a2dp_mute_playback(void *proxy)
-{
-    struct audio_proxy *aproxy = proxy;
-    struct pcm_config pcmconfig = pcm_config_a2dp_mute_playback;
-    char pcm_path[MAX_PCM_PATH_LEN];
-
-    if (aproxy->support_bta2dp) {
-        snprintf(pcm_path, sizeof(pcm_path), "/dev/snd/pcmC%uD%u%c",
-                 A2DPMUTE_PLAYBACK_CARD, A2DPMUTE_PLAYBACK_DEVICE, 'p');
-
-        /* Enables A2DP Mute playback path */
-        if (aproxy->a2dp_mute_playback == NULL) {
-            aproxy->a2dp_mute_playback = pcm_open(A2DPMUTE_PLAYBACK_CARD, A2DPMUTE_PLAYBACK_DEVICE,
-                                               PCM_OUT | PCM_MONOTONIC, &pcmconfig);
-            if (aproxy->a2dp_mute_playback && !pcm_is_ready(aproxy->a2dp_mute_playback)) {
-                /* pcm_open does always return pcm structure, not NULL */
-                ALOGE("proxy-%s: A2DP Mute playback PCM Device(%s) with SR(%u) PF(%d) CC(%d) is not ready as error(%s)",
-                      __func__, pcm_path, pcmconfig.rate, pcmconfig.format, pcmconfig.channels,
-                      pcm_get_error(aproxy->a2dp_mute_playback));
-                goto err_open;
-            }
-            ALOGI("proxy-%s: A2DP Mute playback PCM Device(%s) with SR(%u)PF(%d) CC(%d) PdSz(%d) PdCnt(%d) is opened",
-                  __func__, pcm_path, pcmconfig.rate, pcmconfig.format, pcmconfig.channels,
-                  pcmconfig.period_size, pcmconfig.period_count);
-
-            if (pcm_start(aproxy->a2dp_mute_playback) == 0) {
-                ALOGI("proxy-%s: A2DP Mute playback PCM Device(%s) with SR(%u) PF(%d) CC(%d) is opened & started",
-                      __func__, pcm_path, pcmconfig.rate, pcmconfig.format, pcmconfig.channels);
-            } else {
-                ALOGE("proxy-%s: A2DP Mute playback PCM Device(%s) with SR(%u) PF(%d) CC(%d) cannot be started as error(%s)",
-                      __func__, pcm_path, pcmconfig.rate, pcmconfig.format, pcmconfig.channels,
-                      pcm_get_error(aproxy->a2dp_mute_playback));
-                goto err_open;
-            }
-        }
-    }
-
-    return ;
-
-err_open:
-    disable_a2dp_mute_playback(proxy);
-    return ;
-}
-#endif
-
-static void enable_internal_path(void *proxy, int ausage, device_type target_device)
+static void enable_internal_path(void *proxy, device_type target_device)
 {
     struct audio_proxy *aproxy = proxy;
 
-    /* skip internal pcm controls for VoiceCall bandwidth change */
-    if (aproxy->skip_internalpath) {
-        ALOGI("proxy-%s: skip enabling internal path", __func__);
-        return;
-    }
-
-    if (target_device == DEVICE_EARPIECE ||
-        target_device == DEVICE_SPEAKER || target_device == DEVICE_SPEAKER2 ||
-        target_device == DEVICE_SPEAKER_DUAL || target_device == DEVICE_SPEAKER_DEX ||
-        target_device == DEVICE_SPEAKER_AND_HEADSET || target_device == DEVICE_SPEAKER_AND_HEADPHONE) {
-#ifdef SUPPORT_DIRECT_RCVSPK_PATH
-            if (is_playback_device_speaker_dualpath(target_device)
-                || ausage == AUSAGE_FM_RADIO_CAPTURE
-                || ausage == AUSAGE_FM_RADIO_TUNER)
-#endif
-            {
-                enable_spkamp_playback(aproxy);
-                enable_erap_in(aproxy, target_device);
-            }
+    if (target_device == DEVICE_SPEAKER || target_device == DEVICE_SPEAKER_AND_HEADSET ||
+        target_device == DEVICE_SPEAKER_AND_HEADPHONE) {
+        enable_spkamp_playback(aproxy);
         enable_spkamp_reference(aproxy);
-#ifdef SUPPORT_BTA2DP_OFFLOAD
-    } else if (target_device == DEVICE_BT_A2DP_HEADPHONE ||
-               target_device == DEVICE_SPEAKER_AND_BT_A2DP_HEADPHONE) {
-        /* Transit BT A2DP Status */
-        pthread_mutex_lock(&aproxy->a2dp_lock);
-        // Case : Audio Path changed from Others to A2DP Device
-        //        BT A2DP need to be started
-        bta2dp_playback_start(aproxy);
-        pthread_mutex_unlock(&aproxy->a2dp_lock);
-
-        if (target_device == DEVICE_SPEAKER_AND_BT_A2DP_HEADPHONE) {
-            enable_erap_in(aproxy, target_device);
-            enable_spkamp_reference(aproxy);
-            enable_spkamp_playback(aproxy);
-        }
-        enable_bta2dp_playback(aproxy);
-        enable_bta2dp_out_loopback(aproxy);
-
-        // Start A2DP Mute playback node
-        enable_a2dp_mute_playback(proxy);
-#endif
+        enable_erap_in(aproxy);
     } else if (target_device == DEVICE_BT_HEADSET || target_device == DEVICE_SPEAKER_AND_BT_HEADSET) {
         if (target_device == DEVICE_SPEAKER_AND_BT_HEADSET) {
-            enable_spkamp_reference(aproxy);
-            enable_erap_in(aproxy, target_device);
             enable_spkamp_playback(aproxy);
-        } else {
-            enable_erap_in(aproxy, target_device);
+            enable_spkamp_reference(aproxy);
         }
-        enable_btsco_erap(aproxy, BTSCO_SPK_ERAP_IDX);
+        enable_btsco_playback(aproxy);
+        enable_erap_in(aproxy);
     } else if (target_device == DEVICE_HEADSET || target_device == DEVICE_HEADPHONE ||
-               target_device == DEVICE_CALL_FWD) {
-        /* In cases of CP/AP Calland Loopback, ERAP Path is needed for SE */
-        // In case of Normal Media, ERAP Path is not needed
-        if (is_active_usage_CPCall(aproxy) || is_active_usage_APCall(aproxy) ||
-            is_usage_Loopback(ausage))
-            enable_erap_in(aproxy, target_device);
-    } else if (target_device == DEVICE_USB_HEADSET ||
-               target_device == DEVICE_SPEAKER_AND_USB_HEADSET) {
-        /* Prepare USB device configuration based upon usage */
-        if (aproxy->usb_aproxy) {
-            /* USB output playback constraints
-             * Full configuration for all modes except CP Call mode
-             * CP Call mode: fix configuration to 48KHz 16bit or
-             * supported configuration */
-            if (is_usage_CPCall(ausage) &&
-                !proxy_is_usb_playback_CPCall_prepared(aproxy->usb_aproxy)) {
-                /* prepare for cp call playback with fixed configuration */
-                proxy_usb_playback_prepare(aproxy->usb_aproxy, false);
-            } else if (!is_usage_CPCall(ausage) &&
-                proxy_is_usb_playback_CPCall_prepared(aproxy->usb_aproxy)) {
-                /* prepare for playback with default configuration */
-                proxy_usb_playback_prepare(aproxy->usb_aproxy, true);
-            }
-            proxy_usb_open_out_proxy(aproxy->usb_aproxy);
-        }
-
-        /* set USB playback modifier controls */
-        set_usb_playback_modifier(aproxy);
-
-        if (target_device == DEVICE_SPEAKER_AND_USB_HEADSET) {
+               target_device == DEVICE_EARPIECE|| target_device == DEVICE_CALL_FWD) {
+        if ((aproxy->audio_mode != AUDIO_MODE_IN_CALL) && (target_device == DEVICE_EARPIECE)) {
             enable_spkamp_playback(aproxy);
             enable_spkamp_reference(aproxy);
         }
-        // In cases of CP/AP Call, Internal Loop & ERAP Path is needed for SE
-        // In case of Normal Media, No Paths are needed
-        if (target_device == DEVICE_SPEAKER_AND_USB_HEADSET ||
-            is_active_usage_CPCall(aproxy) || is_active_usage_APCall(aproxy) ||
-            is_usage_Loopback(ausage)) {
-            enable_erap_in(aproxy, target_device);
-        }
 
-        enable_usb_out_loopback(aproxy);
-    } else if (is_usb_mic_device(target_device)) {
-        // Check whether USB device is single clocksource, and match samplerate
-        // with playback
-        if (aproxy->is_usb_single_clksrc)
-            proxy_usb_capture_prepare(aproxy->usb_aproxy, true);
-
-        if (aproxy->usb_aproxy)
-            proxy_usb_open_in_proxy(aproxy->usb_aproxy);
-        enable_usb_in_loopback(proxy);
+        // In cases of CP/AP Calland Loopback, ERAP Path is needed for SE
+        // In case of Normal Media, ERAP Path is not needed
+        if (is_active_usage_CPCall(aproxy) || is_active_usage_APCall(aproxy))
+            enable_erap_in(aproxy);
+        else if (is_usage_Loopback(aproxy->active_playback_ausage) && (target_device == DEVICE_EARPIECE))
+            enable_erap_in(aproxy);
     }
 
-    return;
+    return ;
 }
 
-static void disable_internal_path(void *proxy, int ausage, device_type target_device)
+static void disable_internal_path(void *proxy, device_type target_device)
 {
     struct audio_proxy *aproxy = proxy;
 
-    /* skip internal pcm controls for VoiceCall bandwidth change */
-    if (aproxy->skip_internalpath) {
-        ALOGI("proxy-%s: skip disabling internal path", __func__);
-        return;
-    }
-
-    if (target_device == DEVICE_SPEAKER ||
-        target_device == DEVICE_SPEAKER2 || target_device == DEVICE_SPEAKER_DUAL ||
-        target_device == DEVICE_EARPIECE || target_device == DEVICE_SPEAKER_DEX ||
+    if (target_device == DEVICE_SPEAKER || target_device == DEVICE_EARPIECE ||
         target_device == DEVICE_SPEAKER_AND_HEADSET || target_device == DEVICE_SPEAKER_AND_HEADPHONE) {
-#ifdef SUPPORT_DIRECT_RCVSPK_PATH
-        if (is_playback_device_speaker_dualpath(target_device)
-            || ausage == AUSAGE_FM_RADIO_CAPTURE
-            || ausage == AUSAGE_FM_RADIO_TUNER)
-#endif
-        {
-            disable_erap_in(aproxy);
-            disable_spkamp_playback(aproxy);
-        }
-        disable_spkamp_reference(aproxy);
-#ifdef SUPPORT_BTA2DP_OFFLOAD
-    } else if (target_device == DEVICE_BT_A2DP_HEADPHONE ||
-               target_device == DEVICE_SPEAKER_AND_BT_A2DP_HEADPHONE) {
-        /* Transit BT A2DP Status */
-        pthread_mutex_lock(&aproxy->a2dp_lock);
-        // Case : Audio Path reset for A2DP Device
-        //        BT A2DP need to be stoped
-        bta2dp_playback_stop(aproxy);
-        pthread_mutex_unlock(&aproxy->a2dp_lock);
-
-        // Stop A2DP Mute playback node
-        disable_a2dp_mute_playback(proxy);
-
-        if (target_device == DEVICE_SPEAKER_AND_BT_A2DP_HEADPHONE) {
-            disable_spkamp_playback(aproxy);
-            disable_spkamp_reference(aproxy);
-            disable_erap_in(aproxy);
-        }
-        disable_bta2dp_out_loopback(aproxy);
-        disable_bta2dp_playback(aproxy);
-#endif
-    } else if (target_device == DEVICE_BT_HEADSET || target_device == DEVICE_SPEAKER_AND_BT_HEADSET) {
-        disable_btsco_erap(aproxy, BTSCO_SPK_ERAP_IDX);
-        if (target_device == DEVICE_SPEAKER_AND_BT_HEADSET) {
-            disable_spkamp_playback(aproxy);
-            disable_spkamp_reference(aproxy);
-        }
         disable_erap_in(aproxy);
-
-        /* reset Mixp configuration to default values when path is disabled */
-        reset_playback_modifier(aproxy);
-    } else if (target_device == DEVICE_HEADSET || target_device == DEVICE_HEADPHONE ||
-               target_device == DEVICE_CALL_FWD) {
-        if (is_active_usage_CPCall(aproxy) || is_active_usage_APCall(aproxy) ||
-            is_usage_Loopback(ausage))
-            disable_erap_in(aproxy);
-    } else if (target_device == DEVICE_USB_HEADSET ||
-                target_device == DEVICE_SPEAKER_AND_USB_HEADSET) {
-        if (target_device == DEVICE_SPEAKER_AND_USB_HEADSET ||
-            is_active_usage_CPCall(aproxy) || is_active_usage_APCall(aproxy) ||
-            is_usage_Loopback(ausage)) {
-            disable_erap_in(aproxy);
-        }
-
-        if (target_device == DEVICE_SPEAKER_AND_USB_HEADSET) {
-            disable_spkamp_playback(aproxy);
+        disable_spkamp_reference(aproxy);
+        disable_spkamp_playback(aproxy);
+    } else if (target_device == DEVICE_BT_HEADSET || target_device == DEVICE_SPEAKER_AND_BT_HEADSET) {
+        disable_erap_in(aproxy);
+        disable_btsco_playback(aproxy);
+        if (target_device == DEVICE_SPEAKER_AND_BT_HEADSET) {
             disable_spkamp_reference(aproxy);
+            disable_spkamp_playback(aproxy);
         }
-        disable_usb_out_loopback(aproxy);
-        if (aproxy->usb_aproxy)
-            proxy_usb_close_out_proxy(aproxy->usb_aproxy);
-
-        /* reset Mixp configuration to default values when path is disabled */
-        reset_playback_modifier(aproxy);
-    } else if (is_usb_mic_device(target_device)) {
-        disable_usb_in_loopback(proxy);
-        if (aproxy->usb_aproxy)
-            proxy_usb_close_in_proxy(aproxy->usb_aproxy);
+    } else if (target_device == DEVICE_HEADSET || target_device == DEVICE_HEADPHONE ||
+               target_device == DEVICE_EARPIECE || target_device == DEVICE_CALL_FWD) {
+        if (is_active_usage_CPCall(aproxy) || is_active_usage_APCall(aproxy))
+            disable_erap_in(aproxy);
+        else if (is_usage_Loopback(aproxy->active_playback_ausage) && (target_device == DEVICE_EARPIECE))
+            disable_erap_in(aproxy);
     }
 
     return ;
@@ -1706,11 +861,11 @@ static int voice_rx_start(struct audio_proxy *aproxy)
                   pcm_get_error(aproxy->call_rx));
             goto err_open;
         }
-        ALOGVV("proxy-%s: Voice Call RX PCM Device(%s) with SR(%u) PF(%d) CC(%d) is opened",
+        ALOGI("proxy-%s: Voice Call RX PCM Device(%s) with SR(%u) PF(%d) CC(%d) is opened",
               __func__, pcm_path, pcmconfig.rate, pcmconfig.format, pcmconfig.channels);
 
         if (pcm_start(aproxy->call_rx) == 0) {
-            ALOGI("proxy-%s: Voice Call RX PCM Device(%s) with SR(%u) PF(%d) CC(%d) is opened & started",
+            ALOGI("proxy-%s: Voice Call RX PCM Device(%s) with SR(%u) PF(%d) CC(%d) is started",
                   __func__, pcm_path, pcmconfig.rate, pcmconfig.format, pcmconfig.channels);
         } else {
             ALOGE("proxy-%s: Voice Call RX PCM Device(%s) with SR(%u) PF(%d) CC(%d) cannot be started as error(%s)",
@@ -1744,18 +899,11 @@ static void voice_tx_stop(struct audio_proxy *aproxy)
 
 static int voice_tx_start(struct audio_proxy *aproxy)
 {
-    struct pcm_config pcmconfig;
+    struct pcm_config pcmconfig = pcm_config_voicetx_capture;
     char pcm_path[MAX_PCM_PATH_LEN];
 
     /* Enables Voice Call TX Capture Stream */
     if (aproxy->call_tx == NULL) {
-#ifdef SUPPORT_QUAD_MIC
-        if (is_quad_mic_device(aproxy->active_capture_device)) {
-            pcmconfig = pcm_config_quad_mic_voicetx_capture;
-            ALOGI("proxy-%s: Quad-Mic config for Voice Call TX", __func__);
-        } else
-#endif
-            pcmconfig = pcm_config_voicetx_capture;
         snprintf(pcm_path, sizeof(pcm_path), "/dev/snd/pcmC%uD%u%c",
                  VTX_CAPTURE_CARD, VTX_CAPTURE_DEVICE, 'c');
 
@@ -1768,11 +916,11 @@ static int voice_tx_start(struct audio_proxy *aproxy)
                   pcm_get_error(aproxy->call_tx));
             goto err_open;
         }
-        ALOGVV("proxy-%s: Voice Call TX PCM Device(%s) with SR(%u) PF(%d) CC(%d) is opened",
+        ALOGI("proxy-%s: Voice Call TX PCM Device(%s) with SR(%u) PF(%d) CC(%d) is opened",
               __func__, pcm_path, pcmconfig.rate, pcmconfig.format, pcmconfig.channels);
 
         if (pcm_start(aproxy->call_tx) == 0) {
-            ALOGI("proxy-%s: Voice Call TX PCM Device(%s) with SR(%u) PF(%d) CC(%d) is opened & started",
+            ALOGI("proxy-%s: Voice Call TX PCM Device(%s) with SR(%u) PF(%d) CC(%d) is started",
                   __func__, pcm_path, pcmconfig.rate, pcmconfig.format, pcmconfig.channels);
         } else {
             ALOGE("proxy-%s: Voice Call TX PCM Device(%s) with SR(%u) PF(%d) CC(%d) cannot be started as error(%s)",
@@ -1825,11 +973,11 @@ static int fmradio_playback_start(struct audio_proxy *aproxy)
                   pcm_get_error(aproxy->fm_playback));
             goto err_open;
         }
-        ALOGVV("proxy-%s: FM Radio Playback PCM Device(%s) with SR(%u) PF(%d) CC(%d) is opened",
+        ALOGI("proxy-%s: FM Radio Playback PCM Device(%s) with SR(%u) PF(%d) CC(%d) is opened",
               __func__, pcm_path, pcmconfig.rate, pcmconfig.format, pcmconfig.channels);
 
         if (pcm_start(aproxy->fm_playback) == 0) {
-            ALOGI("proxy-%s: FM Radio Playback PCM Device(%s) with SR(%u) PF(%d) CC(%d) is opened & started",
+            ALOGI("proxy-%s: FM Radio Playback PCM Device(%s) with SR(%u) PF(%d) CC(%d) is started",
                   __func__, pcm_path, pcmconfig.rate, pcmconfig.format, pcmconfig.channels);
         } else {
             ALOGE("proxy-%s: FM Radio Playback PCM Device(%s) with SR(%u) PF(%d) CC(%d) cannot be started as error(%s)",
@@ -1853,7 +1001,7 @@ static void fmradio_capture_stop(struct audio_proxy *aproxy)
     /* Disables FM Radio Capture Stream */
     if (aproxy->fm_capture) {
         snprintf(pcm_path, sizeof(pcm_path), "/dev/snd/pcmC%uD%u%c",
-                 VC_FMRADIO_CAPTURE_CARD, VC_FMRADIO_CAPTURE_DEVICE, 'c');
+                 FMRADIO_CAPTURE_CARD, FMRADIO_CAPTURE_DEVICE, 'c');
 
         pcm_stop(aproxy->fm_capture);
         pcm_close(aproxy->fm_capture);
@@ -1865,16 +1013,16 @@ static void fmradio_capture_stop(struct audio_proxy *aproxy)
 
 static int fmradio_capture_start(struct audio_proxy *aproxy)
 {
-    struct pcm_config pcmconfig = pcm_config_vc_fmradio_capture;
+    struct pcm_config pcmconfig = pcm_config_fmradio_capture;
     char pcm_path[MAX_PCM_PATH_LEN];
 
     /* Enables RM Radio Capture Stream */
     if (aproxy->fm_capture == NULL) {
         snprintf(pcm_path, sizeof(pcm_path), "/dev/snd/pcmC%uD%u%c",
-                 VC_FMRADIO_CAPTURE_CARD, VC_FMRADIO_CAPTURE_DEVICE, 'c');
+                 FMRADIO_CAPTURE_CARD, FMRADIO_CAPTURE_DEVICE, 'c');
 
-        aproxy->fm_capture = pcm_open(VC_FMRADIO_CAPTURE_CARD, VC_FMRADIO_CAPTURE_DEVICE,
-                                                           PCM_IN | PCM_MONOTONIC, &pcmconfig);
+        aproxy->fm_capture = pcm_open(FMRADIO_CAPTURE_CARD, FMRADIO_CAPTURE_DEVICE,
+                                      PCM_IN | PCM_MONOTONIC, &pcmconfig);
         if (aproxy->fm_capture && !pcm_is_ready(aproxy->fm_capture)) {
             /* pcm_open does always return pcm structure, not NULL */
             ALOGE("proxy-%s: FM Radio Capture PCM Device(%s) with SR(%u) PF(%d) CC(%d) is not ready as error(%s)",
@@ -1882,11 +1030,11 @@ static int fmradio_capture_start(struct audio_proxy *aproxy)
                   pcm_get_error(aproxy->fm_capture));
             goto err_open;
         }
-        ALOGVV("proxy-%s: FM Radio Capture PCM Device(%s) with SR(%u) PF(%d) CC(%d) is opened",
+        ALOGI("proxy-%s: FM Radio Capture PCM Device(%s) with SR(%u) PF(%d) CC(%d) is opened",
               __func__, pcm_path, pcmconfig.rate, pcmconfig.format, pcmconfig.channels);
 
         if (pcm_start(aproxy->fm_capture) == 0) {
-            ALOGI("proxy-%s: FM Radio Capture PCM Device(%s) with SR(%u) PF(%d) CC(%d) is opened & started",
+            ALOGI("proxy-%s: FM Radio Capture PCM Device(%s) with SR(%u) PF(%d) CC(%d) is started",
                   __func__, pcm_path, pcmconfig.rate, pcmconfig.format, pcmconfig.channels);
         } else {
             ALOGE("proxy-%s: FM Radio Capture PCM Device(%s) with SR(%u) PF(%d) CC(%d) cannot be started as error(%s)",
@@ -2086,14 +1234,11 @@ static void set_reroute(void *proxy, audio_usage old_ausage, device_type old_dev
     // 1. Unset Active Route
     make_path(old_ausage, old_device, path_name);
     add_dual_path(aproxy, path_name);
-    /* Updated to reset_and_update to match Q audio-route changes
-     * otherwise noise issue happened in alarm/ringtone scenarios
-     */
-    audio_route_reset_and_update_path(aproxy->aroute, path_name);
+    audio_route_reset_path(aproxy->aroute, path_name);
     ALOGI("proxy-%s: unrouted %s", __func__, path_name);
 
     make_gain(path_name, gain_name);
-    audio_route_reset_and_update_path(aproxy->aroute, gain_name);
+    audio_route_reset_path(aproxy->aroute, gain_name);
     ALOGI("proxy-%s: reset gain %s", __func__, gain_name);
 
     // 2. Set New Route
@@ -2195,14 +1340,8 @@ static void reset_modifier(void *proxy, modifier_type modifier)
 static void do_operations_by_playback_route_set(struct audio_proxy *aproxy,
                                                 audio_usage routed_ausage, device_type routed_device)
 {
-    /* skip internal pcm controls */
-    if (aproxy->skip_internalpath) {
-        ALOGI("proxy-%s: skip internal path pcm controls", __func__);
-        return;
-    }
-
     /* Open/Close FM Radio PCM node based on Enable/disable */
-    if (routed_ausage != AUSAGE_FM_RADIO_CAPTURE && routed_ausage != AUSAGE_FM_RADIO_TUNER) {
+    if (routed_ausage != AUSAGE_FM_RADIO_CAPTURE || routed_ausage !=  AUSAGE_FM_RADIO_TUNER) {
         fmradio_playback_stop(aproxy);
         fmradio_capture_stop(aproxy);
     }
@@ -2257,7 +1396,7 @@ static void __calliope_dump(int fd, const char *in_prefix, const char *in_file, 
 {
     static const int buf_size = 4096;
     char *buf, in_path[128], out_path[128];
-    int fd_in = -1, fd_out = -1, n;
+    int fd_in, fd_out, n;
     mode_t mask;
 
     ALOGV("proxy-%s", __func__);
@@ -2336,11 +1475,12 @@ static void calliope_ramdump(int fd)
     __calliope_dump(fd, CALLIOPE_DBG_PATH, CALLIOPE_LOG, ABOX_DUMP, str_time);
     __calliope_dump(fd, SYSFS_PREFIX ABOX_DEV ABOX_DEBUG, ABOX_SRAM, ABOX_DUMP, str_time);
     __calliope_dump(fd, SYSFS_PREFIX ABOX_DEV ABOX_DEBUG, ABOX_DRAM, ABOX_DUMP, str_time);
-    __calliope_dump(fd, ABOX_REGMAP_PATH, ABOX_REG_FILE, ABOX_DUMP, str_time);
+    __calliope_dump(fd, SYSFS_PREFIX ABOX_DEV ABOX_DEBUG, ABOX_IVA, ABOX_DUMP, str_time);
     write(fd, "Calliope snapshot done\n", strlen("Calliope snapshot done\n"));
 
     return ;
 }
+
 
 /******************************************************************************/
 /**                                                                          **/
@@ -2353,7 +1493,6 @@ static bool is_supported_compressed_format(audio_format_t format)
     switch (format & AUDIO_FORMAT_MAIN_MASK) {
     case AUDIO_FORMAT_MP3:
     case AUDIO_FORMAT_AAC:
-    case AUDIO_FORMAT_FLAC:
         return true;
     default:
         break;
@@ -2373,9 +1512,6 @@ static int get_snd_codec_id(audio_format_t format)
     case AUDIO_FORMAT_AAC:
         id = SND_AUDIOCODEC_AAC;
         break;
-    case AUDIO_FORMAT_FLAC:
-        id = SND_AUDIOCODEC_FLAC;
-        break;
     default:
             ALOGE("offload_out-%s: Unsupported audio format", __func__);
     }
@@ -2383,97 +1519,11 @@ static int get_snd_codec_id(audio_format_t format)
     return id;
 }
 
-static int check_direct_config_support(struct audio_proxy_stream *apstream)
-{
-    int i;
-    int ret = 0;
-
-    // Check Sampling Rate
-    for (i = 0; i < MAX_NUM_PLAYBACK_SR; i++) {
-        if (apstream->requested_sample_rate == supported_playback_samplingrate[i]) {
-            if (apstream->requested_sample_rate != apstream->pcmconfig.rate) {
-                apstream->pcmconfig.rate = apstream->requested_sample_rate;
-            }
-            apstream->pcmconfig.period_size = (apstream->pcmconfig.rate * PREDEFINED_USB_PLAYBACK_DURATION) / 1000;
-
-            // DMA in A-Box is 128-bit aligned, so period_size has to be multiple of 4 frames
-            apstream->pcmconfig.period_size &= 0xFFFFFFFC;
-            ALOGD("%s-%s: updates samplig rate to %u, period_size to %u", stream_table[apstream->stream_type],
-                __func__, apstream->pcmconfig.rate,
-                apstream->pcmconfig.period_size);
-            break;
-        }
-    }
-
-    if (i == MAX_NUM_PLAYBACK_SR) {
-        ALOGD("%s-%s: unsupported samplerate to %u", stream_table[apstream->stream_type], __func__,
-                                                apstream->requested_sample_rate);
-        ret = -EINVAL;
-        goto err;
-    }
-
-    // Check Channel Mask
-    for (i = 0; i < MAX_NUM_DIRECT_PLAYBACK_CM; i++) {
-        if (apstream->requested_channel_mask == supported_direct_playback_channelmask[i]) {
-            if (audio_channel_count_from_out_mask(apstream->requested_channel_mask)
-                != apstream->pcmconfig.channels) {
-                if (apstream->requested_channel_mask == AUDIO_CHANNEL_OUT_5POINT1) {
-                    ALOGD("%s-%s: channel padding needed from 6 Channels to %u channels",
-                        stream_table[apstream->stream_type], __func__,
-                        apstream->pcmconfig.channels);
-                    /* A-Box HW doesn't 6 channels therefore 2 channel padding is required */
-                    apstream->need_channelpadding = true;
-                } else {
-                    apstream->pcmconfig.channels =
-                        audio_channel_count_from_out_mask(apstream->requested_channel_mask);
-                    ALOGD("%s-%s: channel count updated to %u",
-                        stream_table[apstream->stream_type], __func__,
-                        apstream->pcmconfig.channels);
-                }
-            }
-            ALOGD("%s-%s: requested channel mask %u configured channels %d ",
-                stream_table[apstream->stream_type], __func__,
-                audio_channel_count_from_out_mask(apstream->requested_channel_mask),
-                apstream->pcmconfig.channels);
-            break;
-        }
-    }
-
-    if (i == MAX_NUM_DIRECT_PLAYBACK_CM) {
-        ALOGD("%s-%s: unsupported channel mask %u ", stream_table[apstream->stream_type],
-            __func__, audio_channel_count_from_out_mask(apstream->requested_channel_mask));
-        ret = -EINVAL;
-    }
-
-    // Check PCM Format
-    for (i = 0; i < MAX_NUM_PLAYBACK_PF; i++) {
-        if (apstream->requested_format == supported_playback_pcmformat[i]) {
-            if (pcm_format_from_audio_format(apstream->requested_format) !=
-                apstream->pcmconfig.format) {
-                apstream->pcmconfig.format =
-                    pcm_format_from_audio_format(apstream->requested_format);
-                ALOGD("%s-%s: updates PCM format to %d", stream_table[apstream->stream_type],
-                    __func__, apstream->pcmconfig.format);
-            }
-            break;
-        }
-    }
-
-    if (i == MAX_NUM_PLAYBACK_PF) {
-        ALOGD("%s-%s: unsupported format 0x%x", stream_table[apstream->stream_type],
-            __func__, apstream->requested_format);
-        ret = -EINVAL;
-        goto err;
-    }
-
-err:
-    return ret;
-}
-
 static void save_written_frames(struct audio_proxy_stream *apstream, int bytes)
 {
     apstream->frames += bytes / (apstream->pcmconfig.channels *
                 audio_bytes_per_sample(audio_format_from_pcm_format(apstream->pcmconfig.format)));
+
     ALOGVV("%s-%s: written = %u frames", stream_table[apstream->stream_type], __func__,
                                          (unsigned int)apstream->frames);
     return ;
@@ -2491,9 +1541,6 @@ static void skip_pcm_processing(struct audio_proxy_stream *apstream, int bytes)
 
 static void update_capture_pcmconfig(struct audio_proxy_stream *apstream)
 {
-#ifdef SUPPORT_QUAD_MIC
-    struct audio_proxy *aproxy = getInstance();
-#endif
     int i;
 
     // Check Sampling Rate
@@ -2525,19 +1572,9 @@ static void update_capture_pcmconfig(struct audio_proxy_stream *apstream)
         if (apstream->requested_channel_mask == supported_capture_channelmask[i]) {
             if (audio_channel_count_from_in_mask(apstream->requested_channel_mask)
                 != apstream->pcmconfig.channels) {
-#ifdef SUPPORT_QUAD_MIC
-                if ((is_active_usage_CPCall(aproxy) || is_active_usage_APCall(aproxy)
-                    || apstream->stream_usage == AUSAGE_CAMCORDER)
-                    && is_quad_mic_device(aproxy->active_capture_device)) {
-                    ALOGD("%s-%s: Skip channel count updating to %u", stream_table[apstream->stream_type],
-                                            __func__, apstream->pcmconfig.channels);
-                } else
-#endif
-                {
-                    apstream->pcmconfig.channels = audio_channel_count_from_in_mask(apstream->requested_channel_mask);
-                    ALOGD("%s-%s: updates channel count to %u", stream_table[apstream->stream_type],
-                                                                __func__, apstream->pcmconfig.channels);
-                }
+                apstream->pcmconfig.channels = audio_channel_count_from_in_mask(apstream->requested_channel_mask);
+                ALOGD("%s-%s: updates channel count to %u", stream_table[apstream->stream_type],
+                                                            __func__, apstream->pcmconfig.channels);
             }
             break;
         }
@@ -2598,8 +1635,8 @@ static int get_next_buffer(struct resampler_buffer_provider *buffer_provider,
             if (apstream->actual_read_buf != NULL) {
                 apstream->actual_read_status = pcm_read(apstream->pcm, (void*)apstream->actual_read_buf, size_in_bytes);
                 if (apstream->actual_read_status != 0) {
-                    ALOGE("%s-%s: pcm_read error %d(%s)", stream_table[apstream->stream_type],
-                        __func__, apstream->actual_read_status, pcm_get_error(apstream->pcm));
+                    ALOGE("%s-%s:  pcm_read error (%s)", stream_table[apstream->stream_type], __func__,
+                                                         pcm_get_error(apstream->pcm));
                     buffer->raw = NULL;
                     buffer->frame_count = 0;
                     return apstream->actual_read_status;
@@ -2623,7 +1660,7 @@ static int get_next_buffer(struct resampler_buffer_provider *buffer_provider,
                         else if (apstream->stream_usage == AUSAGE_INCALL_DOWNLINK){
                             data_mono = (*(vc_buf + 2*i));     // Rx
                         } else {
-                            data_mono = clamp16(((int32_t)*(vc_buf+2*i) + (int32_t)*(vc_buf+2*i+1))*0.7); // mix Rx/Tx
+                            data_mono = clamp16(((int32_t)*(vc_buf+2*i) + (int32_t)*(vc_buf+2*i+1))); // mix Rx/Tx
                         }
 
                         *(vc_buf + 2*i)     = data_mono;
@@ -2631,16 +1668,6 @@ static int get_next_buffer(struct resampler_buffer_provider *buffer_provider,
                     }
                 }
 
-                /* Convert A-Box's zero padded 24bit format to signed extension */
-                if (apstream->pcmconfig.format == PCM_FORMAT_S24_LE) {
-                    int *rd_buf = (int *)(apstream->actual_read_buf);
-
-                    for (unsigned int i = 0;
-                        i < (apstream->pcmconfig.period_size * apstream->pcmconfig.channels); i++) {
-                        if (*(rd_buf + i) & 0x800000)
-                            *(rd_buf + i) |= 0xFF000000;
-                    }
-                }
                 apstream->read_buf_frames = apstream->pcmconfig.period_size;
             } else {
                 ALOGE("%s-%s: failed to reallocate actual_read_buf",
@@ -2726,7 +1753,7 @@ static int read_and_process_frames(struct audio_proxy_stream *apstream, void* bu
     int num_req_channels = audio_channel_count_from_in_mask(apstream->requested_channel_mask);
 
     /* Prepare Channel Conversion Input Buffer */
-    if (apstream->need_channelconversion && (num_device_channels != num_req_channels)) {
+    if (apstream->need_monoconversion && (num_device_channels != num_req_channels)) {
         int src_buffer_size = frames_num * num_device_channels * bytes_per_sample;
 
         if (apstream->proc_buf_size < src_buffer_size) {
@@ -2747,7 +1774,7 @@ static int read_and_process_frames(struct audio_proxy_stream *apstream, void* bu
      * If platform wants Mono Channel Recording, AudioHAL has to support mono conversion.
      */
     if (apstream->actual_read_status == 0) {
-        if (apstream->need_channelconversion && (num_device_channels != num_req_channels)) {
+        if (apstream->need_monoconversion && (num_device_channels != num_req_channels)) {
             size_t ret = adjust_channels(proc_buf_out, num_device_channels,
                                          buffer, num_req_channels,
                                          bytes_per_sample, (frames_wr * num_device_channels * bytes_per_sample));
@@ -2766,21 +1793,15 @@ static void check_conversion(struct audio_proxy_stream *apstream)
     int request_cc = audio_channel_count_from_in_mask(apstream->requested_channel_mask);
 
     // Check Mono Conversion is needed or not
-    if ((request_cc == MEDIA_1_CHANNEL && apstream->pcmconfig.channels == DEFAULT_MEDIA_CHANNELS)
-#ifdef SUPPORT_QUAD_MIC
-        || ((request_cc == DEFAULT_MEDIA_CHANNELS || request_cc == MEDIA_1_CHANNEL)
-        && apstream->pcmconfig.channels == MEDIA_4_CHANNELS)
-#endif
-        ) {
-        // enable channel Conversion
-        apstream->need_channelconversion = true;
+    if (request_cc == 1 && apstream->pcmconfig.channels == 2) {
+        // Only support Stereo to Mono Conversion
+        apstream->need_monoconversion = true;
         ALOGD("%s-%s: needs re-channeling to %u from %u", stream_table[apstream->stream_type], __func__,
               request_cc, apstream->pcmconfig.channels);
     }
 
     // Check Re-Sampler is needed or not
-    if (apstream->requested_sample_rate &&
-        apstream->requested_sample_rate != apstream->pcmconfig.rate) {
+    if (apstream->requested_sample_rate != apstream->pcmconfig.rate) {
         // Only support Stereo Resampling
         if (apstream->resampler) {
             release_resampler(apstream->resampler);
@@ -2833,46 +1854,6 @@ static void adjust_mmap_period_count(struct audio_proxy_stream *apstream, struct
 
     ALOGV("%s-%s: requested config.period_count = %d", stream_table[apstream->stream_type], __func__,
                                                        config->period_count);
-}
-
-int get_mmap_data_fd(void *proxy_stream, audio_usage_type usage_type,
-                                                            int *fd, unsigned int *size)
-{
-    struct audio_proxy_stream *apstream = (struct audio_proxy_stream *)proxy_stream;
-    struct snd_pcm_mmap_fd mmapfd_info;
-    char dev_name[128];
-    int hw_fd = -1;
-    int ret = 0;
-    int hwdev_node = -1;
-
-    memset(&mmapfd_info, 0, sizeof(mmapfd_info));
-    mmapfd_info.dir = usage_type;
-
-    // get MMAP device node number based on usage direction
-    hwdev_node = ((usage_type ==  AUSAGE_PLAYBACK) ? MMAP_PLAYBACK_DEVICE :
-                            MMAP_CAPTURE_DEVICE);
-    snprintf(dev_name, sizeof(dev_name), "/dev/snd/hwC0D%d", hwdev_node);
-    hw_fd = open(dev_name, O_RDONLY);
-    if (hw_fd < 0) {
-        ALOGE("%s: hw %s node open failed", __func__, dev_name);
-        ret = -1;
-        goto err;
-    }
-
-    // get mmap fd for exclusive mode
-    if (ioctl(hw_fd, SNDRV_PCM_IOCTL_MMAP_DATA_FD, &mmapfd_info) < 0) {
-        ALOGE("%s-%s: get MMAP FD IOCTL failed",
-		   stream_table[apstream->stream_type], __func__);
-        ret = -1;
-        goto err;
-    }
-    *fd = mmapfd_info.fd;
-    *size = mmapfd_info.size;
-
-err:
-    if (hw_fd >= 0)
-        close(hw_fd);
-    return ret;
 }
 
 
@@ -3104,8 +2085,6 @@ void *proxy_create_playback_stream(void *proxy, int type, void *config, char *ad
             apstream->sound_card = OFFLOAD_PLAYBACK_CARD;
             apstream->sound_device = get_pcm_device_number(aproxy, apstream);
             apstream->comprconfig = compr_config_offload_playback;
-            /* dummy primary pcmconfig used for best match selection */
-            apstream->pcmconfig = pcm_config_primary_playback;
 
             if (is_supported_compressed_format(requested_config->offload_info.format)) {
                 apstream->comprconfig.codec = (struct snd_codec *)calloc(1, sizeof(struct snd_codec));
@@ -3160,36 +2139,6 @@ void *proxy_create_playback_stream(void *proxy, int type, void *config, char *ad
 
             break;
 
-        case ASTREAM_PLAYBACK_DIRECT:
-            apstream->sound_card = DIRECT_PLAYBACK_CARD;
-            apstream->sound_device = get_pcm_device_number(aproxy, apstream);
-            apstream->pcmconfig = pcm_config_direct_playback;
-
-            apstream->need_channelpadding = false;
-            apstream->proc_buf_out = NULL;
-            apstream->proc_buf_size = 0;
-
-            /* check whether connected USB device supports requested channels or not */
-            if (!(proxy_is_usb_playback_device_connected(aproxy->usb_aproxy) &&
-                (int)audio_channel_count_from_out_mask(apstream->requested_channel_mask) <=
-                proxy_usb_get_playback_highest_supported_channels(aproxy->usb_aproxy))) {
-                if (proxy_is_usb_playback_device_connected(aproxy->usb_aproxy))
-                    ALOGE("proxy-%s: Direct stream channel mismatch (request channels %u supported channels %u) ",
-                        __func__, audio_channel_count_from_out_mask(apstream->requested_channel_mask),
-                        proxy_usb_get_playback_highest_supported_channels(aproxy->usb_aproxy));
-                else
-                    ALOGE("proxy-%s: Direct stream is not supported for other output devices except USB ", __func__);
-                goto err_open;
-            }
-
-            /* check whether request configurations are supported by Direct
-             * stream or not, and update pcmconfig */
-            if (check_direct_config_support(apstream)) {
-                ALOGE("proxy-%s: Direct stream unsupported configuration ", __func__);
-                goto err_open;
-            }
-            break;
-
         default:
             ALOGE("proxy-%s: failed to open Proxy Stream as unknown stream type(%d)", __func__,
                                                                           apstream->stream_type);
@@ -3223,9 +2172,6 @@ void proxy_destroy_playback_stream(void *proxy_stream)
                 aproxy->primary_out = NULL;
         }
 
-        if (apstream->proc_buf_out)
-            free(apstream->proc_buf_out);
-
         free(apstream);
     }
 
@@ -3248,10 +2194,6 @@ int proxy_close_playback_stream(void *proxy_stream)
         if (apstream->pcm) {
             ret = pcm_close(apstream->pcm);
             apstream->pcm = NULL;
-        }
-        if (apstream->dma_pcm) {
-            pcm_close(apstream->dma_pcm);
-            apstream->dma_pcm = NULL;
         }
         ALOGI("%s-%s: closed PCM Device", stream_table[apstream->stream_type], __func__);
     }
@@ -3289,41 +2231,34 @@ int proxy_open_playback_stream(void *proxy_stream, int32_t min_size_frames, void
             }
 
             snprintf(pcm_path, sizeof(pcm_path), "/dev/snd/comprC%uD%u", sound_card, sound_device);
-            ALOGI("%s-%s: The opened Compress Device is %s with Sampling_Rate(%u) PCM_Format(%d) Fragment_Size(%u)",
+            ALOGI("%s-%s: The opened Compress Device is %s with Sampling_Rate(%u) PCM_Format(%d)",
                   stream_table[apstream->stream_type], __func__, pcm_path,
-                  apstream->comprconfig.codec->sample_rate, apstream->comprconfig.codec->format,
-                  apstream->comprconfig.fragment_size);
+                  apstream->comprconfig.codec->sample_rate, apstream->comprconfig.codec->format);
 
             apstream->pcm = NULL;
         }
     } else {
         if (apstream->pcm == NULL) {
-            struct pcm_config *ppcmconfig = &apstream->pcmconfig;
-
             if (apstream->stream_type == ASTREAM_PLAYBACK_MMAP) {
                 flags = PCM_OUT | PCM_MMAP | PCM_NOIRQ | PCM_MONOTONIC;
 
-                adjust_mmap_period_count(apstream, ppcmconfig, min_size_frames);
+                adjust_mmap_period_count(apstream, &apstream->pcmconfig, min_size_frames);
             } else
                 flags = PCM_OUT | PCM_MONOTONIC;
 
-            apstream->dma_pcm = pcm_open(sound_card, sound_device, flags, ppcmconfig);
-            if (apstream->dma_pcm && !pcm_is_ready(apstream->dma_pcm)) {
+            apstream->pcm = pcm_open(sound_card, sound_device, flags, &apstream->pcmconfig);
+            if (apstream->pcm && !pcm_is_ready(apstream->pcm)) {
                 /* pcm_open does always return pcm structure, not NULL */
                 ALOGE("%s-%s: PCM Device is not ready with Sampling_Rate(%u) error(%s)!",
-                      stream_table[apstream->stream_type], __func__, ppcmconfig->rate,
-                      pcm_get_error(apstream->dma_pcm));
+                      stream_table[apstream->stream_type], __func__, apstream->pcmconfig.rate,
+                      pcm_get_error(apstream->pcm));
                 goto err_open;
             }
 
             snprintf(pcm_path, sizeof(pcm_path), "/dev/snd/pcmC%uD%u%c", sound_card, sound_device ,'p');
-            ALOGI("%s-%s: The opened PCM Device is %s with Sampling_Rate(%u) PCM_Format(%d)  PCM_start-threshold(%d) PCM_stop-threshold(%d)",
+            ALOGI("%s-%s: The opened PCM Device is %s with Sampling_Rate(%u) PCM_Format(%d)",
                   stream_table[apstream->stream_type], __func__, pcm_path,
-                  ppcmconfig->rate, ppcmconfig->format,
-                  ppcmconfig->start_threshold, ppcmconfig->stop_threshold);
-
-            apstream->pcm = apstream->dma_pcm;
-            apstream->dma_pcm = NULL;
+                  apstream->pcmconfig.rate, apstream->pcmconfig.format);
 
             apstream->compress = NULL;
 
@@ -3340,6 +2275,7 @@ int proxy_open_playback_stream(void *proxy_stream, int32_t min_size_frames, void
                     info->buffer_size_frames = pcm_get_buffer_size(apstream->pcm);
                     buf_size = pcm_frames_to_bytes(apstream->pcm, info->buffer_size_frames);
                     info->burst_size_frames = apstream->pcmconfig.period_size;
+
                     // get mmap buffer fd
                     ret = get_mmap_data_fd(proxy_stream, AUSAGE_PLAYBACK,
                                                             &info->shared_memory_fd, &mmap_size);
@@ -3464,48 +2400,11 @@ int proxy_write_playback_buffer(void *proxy_stream, void* buffer, int bytes)
         }
     } else {
         if (apstream->pcm) {
-            void *proc_buf_out = buffer;
-            int dst_buffer_size = bytes;
-
-            /* Direct stream volume control & channel expanding if needed */
-            if (apstream->stream_type == ASTREAM_PLAYBACK_DIRECT && apstream->need_channelpadding) {
-                unsigned int bytes_per_src_sample = audio_bytes_per_sample(apstream->requested_format);
-                unsigned int bytes_per_dst_sample = (pcm_format_to_bits(apstream->pcmconfig.format) >> 3);
-                int num_device_channels = proxy_get_actual_channel_count(apstream);
-                int num_req_channels = audio_channel_count_from_out_mask(apstream->requested_channel_mask);
-
-                int frames_num = bytes / (num_req_channels *
-                    audio_bytes_per_sample(apstream->requested_format));
-
-                /* Prepare Channel Conversion output Buffer */
-                dst_buffer_size = frames_num * num_device_channels * bytes_per_dst_sample;
-
-                if (apstream->proc_buf_size < dst_buffer_size) {
-                    apstream->proc_buf_size = dst_buffer_size;
-                    apstream->proc_buf_out = realloc(apstream->proc_buf_out, dst_buffer_size);
-                    ALOGI("%s-%s: alloc expand channel buffer with %d bytes req_channels %d device_channels %d",
-                              stream_table[apstream->stream_type], __func__, dst_buffer_size, num_req_channels, num_device_channels);
-                    ALOGI("%s-%s: Channel adjust src-channels %d to %d, bytes per sample src-bytes %d to %d ",
-                              stream_table[apstream->stream_type], __func__, num_req_channels,
-                              num_device_channels, bytes_per_src_sample, bytes_per_dst_sample);
-                }
-
-                /* Assigned allocated buffer as output buffer for channel expanding */
-                proc_buf_out = apstream->proc_buf_out;
-
-                /* Adjust channels by adding zeros to audio frame end, for Direct output stream */
-                ret = adjust_channels(buffer, num_req_channels,
-                            proc_buf_out, num_device_channels,
-                            bytes_per_src_sample, bytes);
-                if (ret != dst_buffer_size)
-                    ALOGE("%s-%s: channel convert failed", stream_table[apstream->stream_type], __func__);
-
-            }
-
-            ret = pcm_write(apstream->pcm, (void *)proc_buf_out, (unsigned int)dst_buffer_size);
+            ret = pcm_write(apstream->pcm, (void *)buffer, (unsigned int)bytes);
             if (ret == 0) {
                 ALOGVV("%s-%s: writed %u bytes to PCM Device", stream_table[apstream->stream_type],
                                                                __func__, (unsigned int)bytes);
+
             } else {
                 ALOGE("%s-%s: failed to write to PCM Device with %s",
                       stream_table[apstream->stream_type], __func__, pcm_get_error(apstream->pcm));
@@ -3566,55 +2465,9 @@ int proxy_reconfig_playback_stream(void *proxy_stream, int type, void *config)
         return -1;
 }
 
-#ifdef SUPPORT_BTA2DP_OFFLOAD
-// dummy update of playback buffer for calculating presentation position
-int proxy_update_playback_buffer(void *proxy_stream, void *buffer, int bytes)
-{
-    struct audio_proxy *aproxy = getInstance();
-    struct audio_proxy_stream *apstream = (struct audio_proxy_stream *)proxy_stream;
-
-    // if bt offload on & suspend state or compr case, skip to use temp add routine
-    if ((aproxy->a2dp_out_enabled)
-            || (apstream->stream_type == ASTREAM_PLAYBACK_COMPR_OFFLOAD)) {
-        return 0;
-    }
-
-    skip_pcm_processing(apstream, 0);
-    save_written_frames(apstream, bytes);
-
-    ALOGE("%s-%s: failed to write and just update written buffer byte (%d), apstream->frames (%u)",
-          stream_table[apstream->stream_type], __func__, bytes, (unsigned int)apstream->frames);
-
-    return bytes;
-}
-
-// dummy calculation of presentation position
-int proxy_get_presen_position_temp(void *proxy_stream, uint64_t *frames, struct timespec *timestamp)
-{
-    struct audio_proxy *aproxy = getInstance();
-    struct audio_proxy_stream *apstream = (struct audio_proxy_stream *)proxy_stream;
-    int ret = -ENODATA;
-
-    if (aproxy->a2dp_out_enabled) {
-         // if bt offload on & suspend state, then get original position from hw
-         ret = proxy_get_presen_position(proxy_stream, frames, timestamp);
-    } else {
-        // use bt offload disbaled state only
-        *frames = apstream->frames;
-        clock_gettime(CLOCK_MONOTONIC, timestamp);
-        ret = 0;
-    }
-    return ret;
-}
-#endif
-
 int proxy_get_render_position(void *proxy_stream, uint32_t *frames)
 {
-    struct audio_proxy *aproxy = getInstance();
     struct audio_proxy_stream *apstream = (struct audio_proxy_stream *)proxy_stream;
-    uint32_t presented_frames = 0;
-
-    unsigned long hw_frames;
     unsigned int sample_rate = 0;
     int ret = -ENODATA;
 
@@ -3623,31 +2476,10 @@ int proxy_get_render_position(void *proxy_stream, uint32_t *frames)
 
         if (apstream->stream_type == ASTREAM_PLAYBACK_COMPR_OFFLOAD) {
             if (apstream->compress) {
-                ret = compress_get_tstamp(apstream->compress, &hw_frames, &sample_rate);
-                if (ret == 0) {
+                ret = compress_get_tstamp(apstream->compress, (unsigned long *)frames, &sample_rate);
+                if (ret == 0)
                     ALOGVV("%s-%s: rendered frames %u with sample_rate %u",
                            stream_table[apstream->stream_type], __func__, *frames, sample_rate);
-
-                    presented_frames = (uint32_t)hw_frames;
-#ifdef SUPPORT_BTA2DP_OFFLOAD
-                    if (aproxy->a2dp_out_enabled && is_active_playback_device_bta2dp(aproxy)) {
-                        uint32_t a2dp_delay = 0;
-                        if (aproxy->a2dp_delay > aproxy->a2dp_default_delay)
-                            a2dp_delay = aproxy->a2dp_delay;
-                        else
-                            a2dp_delay = aproxy->a2dp_default_delay;
-                        uint32_t latency_frames = (a2dp_delay *
-                                                   proxy_get_actual_sampling_rate(apstream)) / 1000;
-
-                        if (presented_frames > latency_frames)
-                            *frames = presented_frames - latency_frames;
-                        else
-                            ret = -ENODATA;
-                    } else
-#endif
-                        *frames = presented_frames;
-                } else
-                    ret = -ENODATA;
             }
         }
     } else {
@@ -3661,10 +2493,7 @@ int proxy_get_render_position(void *proxy_stream, uint32_t *frames)
 
 int proxy_get_presen_position(void *proxy_stream, uint64_t *frames, struct timespec *timestamp)
 {
-    struct audio_proxy *aproxy = getInstance();
     struct audio_proxy_stream *apstream = (struct audio_proxy_stream *)proxy_stream;
-    uint64_t presented_frames = 0;
-
     unsigned long hw_frames;
     unsigned int sample_rate = 0;
     unsigned int avail = 0;
@@ -3680,28 +2509,9 @@ int proxy_get_presen_position(void *proxy_stream, uint64_t *frames, struct times
                     ALOGVV("%s-%s: presented frames %lu with sample_rate %u",
                        stream_table[apstream->stream_type], __func__, hw_frames, sample_rate);
 
-                    presented_frames = (uint64_t)hw_frames;
-#ifdef SUPPORT_BTA2DP_OFFLOAD
-                    if (aproxy->a2dp_out_enabled && is_active_playback_device_bta2dp(aproxy)) {
-                        uint32_t a2dp_delay = 0;
-                        if (aproxy->a2dp_delay > aproxy->a2dp_default_delay)
-                            a2dp_delay = aproxy->a2dp_delay;
-                        else
-                            a2dp_delay = aproxy->a2dp_default_delay;
-                        uint32_t latency_frames = (a2dp_delay *
-                                                   proxy_get_actual_sampling_rate(apstream)) / 1000;
-
-                        if (presented_frames > latency_frames)
-                            *frames = presented_frames - latency_frames;
-                        else
-                            ret = -ENODATA;
-                    } else
-#endif
-                        *frames = presented_frames;
-
+                    *frames = (uint64_t)hw_frames;
                     clock_gettime(CLOCK_MONOTONIC, timestamp);
-                } else
-                    ret = -ENODATA;
+                }
             }
         } else {
             if (apstream->pcm) {
@@ -3713,31 +2523,13 @@ int proxy_get_presen_position(void *proxy_stream, uint64_t *frames, struct times
 
                     // Real frames which played out to device
                     int64_t signed_frames = apstream->frames - kernel_buffer_size + avail;
-                    if (signed_frames >= 0) {
-                        presented_frames = (uint64_t)signed_frames;
-#ifdef SUPPORT_BTA2DP_OFFLOAD
-                        if (aproxy->a2dp_out_enabled && is_active_playback_device_bta2dp(aproxy)) {
-                            uint32_t a2dp_delay = 0;
-                            if (aproxy->a2dp_delay > aproxy->a2dp_default_delay)
-                                a2dp_delay = aproxy->a2dp_delay;
-                            else
-                                a2dp_delay = aproxy->a2dp_default_delay;
-                            uint32_t latency_frames = (a2dp_delay *
-                                                  proxy_get_actual_sampling_rate(apstream)) / 1000;
 
-                            if (presented_frames > latency_frames)
-                                *frames = presented_frames - latency_frames;
-                            else
-                                ret = -ENODATA;
-                        } else
-#endif
-                            *frames = presented_frames;
-                    } else {
+                    if (signed_frames >= 0)
+                        *frames = (uint64_t)signed_frames;
+                    else
                         ret = -ENODATA;
-                    }
-                } else {
-                    ret = -ENODATA;
-                }
+                } else
+                        ret = -ENODATA;
             }
         }
     } else {
@@ -3752,48 +2544,41 @@ int proxy_get_presen_position(void *proxy_stream, uint64_t *frames, struct times
 int proxy_getparam_playback_stream(void *proxy_stream, void *query_params, void *reply_params)
 {
     struct audio_proxy_stream *apstream = (struct audio_proxy_stream *)proxy_stream;
-    struct audio_proxy *aproxy = getInstance();
     struct str_parms *query = (struct str_parms *)query_params;
     struct str_parms *reply = (struct str_parms *)reply_params;
 
-    if (apstream->stream_type == ASTREAM_PLAYBACK_NO_ATTRIBUTE &&
-        proxy_is_usb_playback_device_connected(aproxy->usb_aproxy)) {
-        // get USB playback param information
-        proxy_usb_getparam_playback_stream(aproxy->usb_aproxy, query, reply);
-    } else {
-        /*
-         * Supported Audio Configuration can be different as Target Project.
-         * AudioHAL engineers have to modify these codes based on Target Project.
-         */
-        // supported audio formats
-        if (str_parms_has_key(query, AUDIO_PARAMETER_STREAM_SUP_FORMATS)) {
-            char formats_list[256];
+    /*
+     * Supported Audio Configuration can be different as Target Project.
+     * AudioHAL engineers have to modify these codes based on Target Project.
+     */
+    // supported audio formats
+    if (str_parms_has_key(query, AUDIO_PARAMETER_STREAM_SUP_FORMATS)) {
+        char formats_list[256];
 
-            memset(formats_list, 0, 256);
-            strncpy(formats_list, stream_format_table[apstream->stream_type],
-                           strlen(stream_format_table[apstream->stream_type]));
-            str_parms_add_str(reply, AUDIO_PARAMETER_STREAM_SUP_FORMATS, formats_list);
-        }
+        memset(formats_list, 0, 256);
+        strncpy(formats_list, stream_format_table[apstream->stream_type],
+                       strlen(stream_format_table[apstream->stream_type]));
+        str_parms_add_str(reply, AUDIO_PARAMETER_STREAM_SUP_FORMATS, formats_list);
+    }
 
-        // supported audio channel masks
-        if (str_parms_has_key(query, AUDIO_PARAMETER_STREAM_SUP_CHANNELS)) {
-            char channels_list[256];
+    // supported audio channel masks
+    if (str_parms_has_key(query, AUDIO_PARAMETER_STREAM_SUP_CHANNELS)) {
+        char channels_list[256];
 
-            memset(channels_list, 0, 256);
-            strncpy(channels_list, stream_channel_table[apstream->stream_type],
-                            strlen(stream_channel_table[apstream->stream_type]));
-            str_parms_add_str(reply, AUDIO_PARAMETER_STREAM_SUP_CHANNELS, channels_list);
-        }
+        memset(channels_list, 0, 256);
+        strncpy(channels_list, stream_channel_table[apstream->stream_type],
+                        strlen(stream_channel_table[apstream->stream_type]));
+        str_parms_add_str(reply, AUDIO_PARAMETER_STREAM_SUP_CHANNELS, channels_list);
+    }
 
-        // supported audio samspling rates
-        if (str_parms_has_key(query, AUDIO_PARAMETER_STREAM_SUP_SAMPLING_RATES)) {
-            char rates_list[256];
+    // supported audio samspling rates
+    if (str_parms_has_key(query, AUDIO_PARAMETER_STREAM_SUP_SAMPLING_RATES)) {
+        char rates_list[256];
 
-            memset(rates_list, 0, 256);
-            strncpy(rates_list, stream_rate_table[apstream->stream_type],
-                         strlen(stream_rate_table[apstream->stream_type]));
-            str_parms_add_str(reply, AUDIO_PARAMETER_STREAM_SUP_SAMPLING_RATES, rates_list);
-        }
+        memset(rates_list, 0, 256);
+        strncpy(rates_list, stream_rate_table[apstream->stream_type],
+                     strlen(stream_rate_table[apstream->stream_type]));
+        str_parms_add_str(reply, AUDIO_PARAMETER_STREAM_SUP_SAMPLING_RATES, rates_list);
     }
 
     return 0;
@@ -3846,14 +2631,8 @@ uint32_t proxy_get_playback_latency(void *proxy_stream)
 
     // Total Latency = ALSA Buffer latency + HW Latency
     if (apstream->stream_type == ASTREAM_PLAYBACK_COMPR_OFFLOAD) {
-        /*
-         * Offload HW latency
-         * - A-Box firmware triggers offload play once two buffers of 20msec each are decoded - 20msec
-         * - Post processing of decoded data - 10 msec
-         * - 20msec extra is provided considering scheduling delays
-         * therefore total offload HW latency will 50msec
-         */
-        latency = 50;
+        /* need to check it */
+        latency = 100;
     } else {
         latency = (apstream->pcmconfig.period_count * apstream->pcmconfig.period_size * 1000) / (apstream->pcmconfig.rate);
         latency += 0;   // Need to check HW Latency
@@ -3864,88 +2643,27 @@ uint32_t proxy_get_playback_latency(void *proxy_stream)
 
 // select best pcmconfig among requested two configs
 bool proxy_select_best_playback_pcmconfig(
-    void *proxy,
-    void *cur_proxy_stream,
-    int compr_upscaler)
+    void *proxy __unused,
+    void *cur_proxy_stream __unused,
+    int compr_upscaler __unused)
 {
-    struct audio_proxy *aproxy = proxy;
-    struct audio_proxy_stream *cur_apstream = (struct audio_proxy_stream *)cur_proxy_stream;
-
-    /* need to update compress stream's dummy pcmconfig based upon upscaler value
-     * before selecting best pcmconfig
-     * compress offload-upscaler values are defined as shown
-     * 0: 48KHz, 16bit
-     * 1: 192KHz, 24bit
-     * 2: 48KHz, 24bit
-     */
-    if (cur_apstream->stream_type == ASTREAM_PLAYBACK_COMPR_OFFLOAD) {
-        if (compr_upscaler == 2)
-            cur_apstream->pcmconfig = pcm_config_deep_playback;
-        else if (compr_upscaler == 1)
-            cur_apstream->pcmconfig = pcm_config_deep_playback_uhqa;
-        else
-            cur_apstream->pcmconfig = pcm_config_primary_playback;
-
-        ALOGI("%s-%s: upscaler: %d pcmconfig rate[%d] format[%d]",
-            stream_table[cur_apstream->stream_type], __func__, compr_upscaler,
-            cur_apstream->pcmconfig.rate, cur_apstream->pcmconfig.format);
-    }
-
-    return proxy_usb_out_pick_best_pcmconfig(aproxy->usb_aproxy, cur_apstream->pcmconfig);
+    // dummy function need to updated once usb offload best-fit implemented
+    return false;
 }
 
 /* selecting best playback pcm config to configure USB device */
-void proxy_set_best_playback_pcmconfig(void *proxy, void *proxy_stream)
+void proxy_set_best_playback_pcmconfig(
+    void *proxy __unused,
+    void *proxy_stream __unused)
 {
-    struct audio_proxy *aproxy = proxy;
-    struct audio_proxy_stream *apstream = (struct audio_proxy_stream *)proxy_stream;
-    bool reprepare_needed = false;
-
-    if (!aproxy->usb_aproxy) {
-        ALOGI("%s-%s: USB audio offload is not initialized",
-            stream_table[apstream->stream_type], __func__);
-        return;
-    }
-
-    /* update & check whether USB device re-configuraiton is required for best config */
-    reprepare_needed = proxy_usb_out_reconfig_needed(aproxy->usb_aproxy);
-
-    if ((aproxy->active_playback_device == DEVICE_USB_HEADSET
-        || aproxy->active_playback_device == DEVICE_SPEAKER_AND_USB_HEADSET)
-        && !aproxy->is_usb_single_clksrc && !is_usage_CPCall(aproxy->active_playback_ausage)
-        && reprepare_needed) {
-        /* steps for re-configuring USB device configuration
-         * - Close WDMA6 & usb out pcm,
-         * - prepare usb for new config,
-         * - modify sifs0 setting to new selected PCM config
-         * - open wdma6 & usb out pcm
-         */
-        /* close loopback and USB pcm nodes */
-        disable_usb_out_loopback(aproxy);
-        proxy_usb_close_out_proxy(aproxy->usb_aproxy);
-
-        /* Prepare USB device for new configuraiton */
-        proxy_usb_playback_prepare(aproxy->usb_aproxy, true);
-        set_usb_playback_modifier(aproxy);
-
-        /* re-open loopback and USB pcm nodes */
-        proxy_usb_open_out_proxy(aproxy->usb_aproxy);
-        enable_usb_out_loopback(aproxy);
-        ALOGI("%s-%s: USB Device re-configured",
-            stream_table[apstream->stream_type], __func__);
-    }
-
+    // dummy function need to updated once usb offload best-fit implemented
     return;
 }
 
 /* reset playback pcm config for USB device default */
-void proxy_reset_playback_pcmconfig(void *proxy)
+void proxy_reset_playback_pcmconfig(void *proxy __unused)
 {
-    struct audio_proxy *aproxy = proxy;
-
-    /* reset USB playback config to default values */
-    proxy_usb_out_reset_config(aproxy->usb_aproxy);
-
+    // dummy function need to updated once usb offload best-fit implemented
     return;
 }
 
@@ -4015,7 +2733,7 @@ void *proxy_create_capture_stream(void *proxy, int type, int usage, void *config
     apstream->stream_usage = stream_usage;
 
     // Initialize Post-Processing
-    apstream->need_channelconversion = false;
+    apstream->need_monoconversion = false;
     apstream->need_resampling = false;
 
     apstream->actual_read_buf = NULL;
@@ -4040,21 +2758,21 @@ void *proxy_create_capture_stream(void *proxy, int type, int usage, void *config
             break;
 
         case ASTREAM_CAPTURE_PRIMARY:
-            apstream->sound_card = PRIMARY_CAPTURE_CARD;
-            apstream->sound_device = get_pcm_device_number(aproxy, apstream);
-#ifdef SUPPORT_QUAD_MIC
-            if (((is_active_usage_CPCall(aproxy) && aproxy->active_capture_ausage != AUSAGE_CALL_FORWARDING_PRIMARY
-                && aproxy->active_capture_ausage != AUSAGE_SPECTRO)
-                || is_active_usage_APCall(aproxy)
-                || apstream->stream_usage == AUSAGE_CAMCORDER)
-                && is_quad_mic_device(aproxy->active_capture_device)) {
-                apstream->pcmconfig = pcm_config_primary_quad_mic_capture;
-                ALOGE("proxy-%s: Primary reconfig as Quad-Mic", __func__);
-            } else
-#endif
+            if (is_audiomode_incall(aproxy)) {
+                apstream->sound_card = CALLMIC_CAPTURE_CARD;
+                apstream->sound_device = get_pcm_device_number(aproxy, apstream);
+                apstream->pcmconfig = pcm_config_callmic_capture;
+                ALOGI("proxy-%s: set CALLMIC config Stream(%s)", __func__,
+                    stream_table[apstream->stream_type]);
+            } else {
+                apstream->sound_card = PRIMARY_CAPTURE_CARD;
+                apstream->sound_device = get_pcm_device_number(aproxy, apstream);
                 apstream->pcmconfig = pcm_config_primary_capture;
+                update_capture_pcmconfig(apstream);
+                ALOGI("proxy-%s: set PRIMARY config Stream(%s)", __func__,
+                    stream_table[apstream->stream_type]);
+            }
 
-            update_capture_pcmconfig(apstream);
             check_conversion(apstream);
             break;
 
@@ -4081,8 +2799,8 @@ void *proxy_create_capture_stream(void *proxy, int type, int usage, void *config
             apstream->pcmconfig = pcm_config_mmap_capture;
 
             /* update HW PCM configuration with requested config, as MMAP usage cann't
-                use software conversions for sample rate and channels, format is fixed to
-                16bit */
+                use software conversions for sample rate, Channels & format are fixed to
+                stereo & 16bit respectively */
             if (apstream->requested_sample_rate != apstream->pcmconfig.rate) {
                 apstream->pcmconfig.rate = apstream->requested_sample_rate;
                 // Adjust period_size according to sample rate
@@ -4093,13 +2811,6 @@ void *proxy_create_capture_stream(void *proxy, int type, int usage, void *config
                 ALOGD("%s-%s: updates samplig rate to %u, period_size to %u",
                     stream_table[apstream->stream_type], __func__,
                     apstream->pcmconfig.rate, apstream->pcmconfig.period_size);
-            }
-
-            if (audio_channel_count_from_in_mask(apstream->requested_channel_mask)
-                != apstream->pcmconfig.channels) {
-                apstream->pcmconfig.channels = audio_channel_count_from_in_mask(apstream->requested_channel_mask);
-                ALOGD("%s-%s: updates channel count to %u", stream_table[apstream->stream_type],
-                                                            __func__, apstream->pcmconfig.channels);
             }
             break;
 
@@ -4195,13 +2906,9 @@ int proxy_close_capture_stream(void *proxy_stream)
     if (apstream->pcm) {
         ret = pcm_close(apstream->pcm);
         apstream->pcm = NULL;
+
+        apstream->cpcall_rec_skipcnt = 0;
     }
-    if (apstream->dma_pcm) {
-        pcm_close(apstream->dma_pcm);
-        apstream->dma_pcm = NULL;
-    }
-    if (aproxy->btsco_erap[BTSCO_MIC_ERAP_IDX])
-        disable_btsco_erap(aproxy, BTSCO_MIC_ERAP_IDX);
     ALOGI("%s-%s: closed PCM Device", stream_table[apstream->stream_type], __func__);
 
     return ret;
@@ -4271,29 +2978,19 @@ int proxy_open_capture_stream(void *proxy_stream, int32_t min_size_frames, void 
         } else
             flags = PCM_IN | PCM_MONOTONIC;
 
-        /* open WDMA pcm first to trigger DMA */
-        apstream->dma_pcm = pcm_open(sound_card, sound_device, flags, &apstream->pcmconfig);
-        if (apstream->dma_pcm && !pcm_is_ready(apstream->dma_pcm)) {
+        apstream->pcm = pcm_open(sound_card, sound_device, flags, &apstream->pcmconfig);
+        if (apstream->pcm && !pcm_is_ready(apstream->pcm)) {
             /* pcm_open does always return pcm structure, not NULL */
             ALOGE("%s-%s: PCM Device is not ready with Sampling_Rate(%u) error(%s)!",
                   stream_table[apstream->stream_type], __func__, apstream->pcmconfig.rate,
-                  pcm_get_error(apstream->dma_pcm));
+                  pcm_get_error(apstream->pcm));
             goto err_open;
         }
 
         snprintf(pcm_path, sizeof(pcm_path), "/dev/snd/pcmC%uD%u%c", sound_card, sound_device, 'c');
-
         ALOGI("%s-%s: The opened PCM Device is %s with Sampling_Rate(%u) PCM_Format(%d) Channel(%d)",
               stream_table[apstream->stream_type], __func__, pcm_path,
               apstream->pcmconfig.rate, apstream->pcmconfig.format, apstream->pcmconfig.channels);
-
-        if (aproxy->active_capture_device == DEVICE_BT_HEADSET_MIC
-                || aproxy->active_capture_device == DEVICE_BT_NREC_HEADSET_MIC) {
-            enable_btsco_erap(aproxy, BTSCO_MIC_ERAP_IDX);
-        }
-
-        apstream->pcm = apstream->dma_pcm;
-        apstream->dma_pcm = NULL;
 
         apstream->compress = NULL;
 
@@ -4310,6 +3007,7 @@ int proxy_open_capture_stream(void *proxy_stream, int32_t min_size_frames, void 
                 info->buffer_size_frames = pcm_get_buffer_size(apstream->pcm);
                 buf_size = pcm_frames_to_bytes(apstream->pcm, info->buffer_size_frames);
                 info->burst_size_frames = apstream->pcmconfig.period_size;
+
                 // get mmap buffer fd
                 ret = get_mmap_data_fd(proxy_stream, AUSAGE_CAPTURE,
                                                         &info->shared_memory_fd, &mmap_size);
@@ -4319,7 +3017,7 @@ int proxy_open_capture_stream(void *proxy_stream, int32_t min_size_frames, void 
                     ALOGI("%s-%s: PCM Device MMAP Exclusive mode not support",
                         stream_table[apstream->stream_type], __func__);
                 } else {
-                    if (mmap_size < buf_size) {
+                   if (mmap_size < buf_size) {
                         ALOGE("%s-%s: PCM Device MMAP buffer size not matching",
                               stream_table[apstream->stream_type], __func__);
                         goto err_open;
@@ -4345,16 +3043,6 @@ int proxy_open_capture_stream(void *proxy_stream, int32_t min_size_frames, void 
                       stream_table[apstream->stream_type], __func__, pcm_get_error(apstream->pcm));
                 goto err_open;
             }
-        }
-
-        /* HACK for MMAP/Low-latency capture path routing, normal recording uses virtualPCM DAI
-        * firmware component but MMAP/Low-latency case for reducing latency we have to capture
-        * data directly from WDMA, therefore VirtualPCM DAI is disabled after routing */
-        if (apstream->stream_type == ASTREAM_CAPTURE_MMAP ||
-            apstream->stream_type == ASTREAM_CAPTURE_LOW_LATENCY) {
-            proxy_set_mixer_value_string(aproxy, MIXER_CTL_ABOX_CATPURE_VPCMDAI_INSRC, "None");
-            ALOGI("%s-%s: MMAP VPCMIN_DAI0 component disconnect forcefully",
-                        stream_table[apstream->stream_type], __func__);
         }
     } else
         ALOGW("%s-%s: PCM Device is already opened!", stream_table[apstream->stream_type], __func__);
@@ -4395,6 +3083,7 @@ int proxy_start_capture_stream(void *proxy_stream)
 int proxy_read_capture_buffer(void *proxy_stream, void *buffer, int bytes)
 {
     struct audio_proxy_stream *apstream = (struct audio_proxy_stream *)proxy_stream;
+    struct audio_proxy *aproxy = getInstance();
     int frames_request = bytes / proxy_get_requested_frame_size(apstream);
     int frames_actual = -1;
 
@@ -4405,7 +3094,6 @@ int proxy_read_capture_buffer(void *proxy_stream, void *buffer, int bytes)
 
 #ifdef SUPPORT_STHAL_INTERFACE
     int ret = 0, read = 0;
-    struct audio_proxy *aproxy = getInstance();
     if (apstream->stream_type == ASTREAM_CAPTURE_HOTWORD) {
         if (aproxy->sound_trigger_read_samples) {
             if (apstream->soundtrigger_handle > 0) {
@@ -4436,9 +3124,21 @@ int proxy_read_capture_buffer(void *proxy_stream, void *buffer, int bytes)
     } else
 #endif
     {
-        frames_actual = read_and_process_frames(apstream, buffer, frames_request);
-        ALOGVV("%s-%s: requested read frames = %d vs. actual processed read frames = %d",
-               stream_table[apstream->stream_type], __func__, frames_request, frames_actual);
+        if (((apstream->cpcall_rec_skipcnt < 10) && is_audiomode_incall(aproxy) &&
+            apstream->sound_card == SOUND_CARD1) ||
+            (!is_audiomode_incall(aproxy) &&
+            apstream->sound_card == SOUND_CARD1)) {
+            memset(buffer, 0, bytes);
+            usleep(CALLMIC_MUTE_DATA_SLEEP_DURATION * 1000); // 20msec
+            frames_actual = 0;
+            apstream->cpcall_rec_skipcnt++;
+            ALOGVV("%s-%s: Mute data PCM Device(%d)", stream_table[apstream->stream_type], __func__,
+                apstream->sound_device);
+        } else {
+            frames_actual = read_and_process_frames(apstream, buffer, frames_request);
+            ALOGVV("%s-%s: requested read frames = %d vs. actual processed read frames = %d",
+                   stream_table[apstream->stream_type], __func__, frames_request, frames_actual);
+        }
     }
 
     if (frames_actual < 0) {
@@ -4510,29 +3210,24 @@ int proxy_reconfig_capture_usage(void *proxy_stream, int type, int usage)
 
      switch (stream_type) {
         case ASTREAM_CAPTURE_PRIMARY:
-            apstream->stream_type = stream_type;
-            apstream->sound_card = PRIMARY_CAPTURE_CARD;
-            apstream->sound_device = get_pcm_device_number(aproxy, apstream);
-
-#ifdef SUPPORT_QUAD_MIC
-            if (((is_active_usage_CPCall(aproxy) && aproxy->active_capture_ausage != AUSAGE_CALL_FORWARDING_PRIMARY
-                && aproxy->active_capture_ausage != AUSAGE_SPECTRO)
-                || is_active_usage_APCall(aproxy)
-                || apstream->stream_usage == AUSAGE_CAMCORDER)
-                && is_quad_mic_device(aproxy->active_capture_device)) {
-                apstream->pcmconfig = pcm_config_primary_quad_mic_capture;
-                ALOGE("proxy-%s: Primary reconfig as Quad-Mic", __func__);
-            } else
-#endif
+            if (is_audiomode_incall(aproxy)) {
+                apstream->stream_type = stream_type;
+                apstream->sound_card = CALLMIC_CAPTURE_CARD;
+                apstream->sound_device = get_pcm_device_number(aproxy, apstream);
+                apstream->pcmconfig = pcm_config_callmic_capture;
+                ALOGI("proxy-%s: set CALLMIC config Stream(%s)", __func__,
+                    stream_table[apstream->stream_type]);
+            } else {
+                apstream->stream_type = stream_type;
+                apstream->sound_card = PRIMARY_CAPTURE_CARD;
+                apstream->sound_device = get_pcm_device_number(aproxy, apstream);
                 apstream->pcmconfig = pcm_config_primary_capture;
+                update_capture_pcmconfig(apstream);
+                ALOGI("proxy-%s: set PRIMARY config Stream(%s)", __func__,
+                    stream_table[apstream->stream_type]);
+            }
 
-            update_capture_pcmconfig(apstream);
-
-            /*
-            ** Reset previous configurations and release resampler if running
-            ** for reconfiguration purpose
-            */
-            apstream->need_channelconversion = false;
+            /* Release already running resampler for reconfiguration purpose */
             if (apstream->resampler) {
                 ALOGI("%s-%s: released resampler", stream_table[apstream->stream_type], __func__);
                 release_resampler(apstream->resampler);
@@ -4547,6 +3242,13 @@ int proxy_reconfig_capture_usage(void *proxy_stream, int type, int usage)
             apstream->sound_card = CALL_RECORD_CARD;
             apstream->sound_device = get_pcm_device_number(aproxy, apstream);
             apstream->pcmconfig = pcm_config_call_record;
+
+            /* Release already running resampler for reconfiguration purpose */
+             if (apstream->resampler) {
+                 ALOGI("%s-%s: released resampler", stream_table[apstream->stream_type], __func__);
+                 release_resampler(apstream->resampler);
+                 apstream->resampler = NULL;
+             }
 
             check_conversion(apstream);
             break;
@@ -4621,18 +3323,18 @@ int proxy_get_active_microphones(void *proxy_stream, void *array, int *count)
                     for (int i = 0; i < 2; i++) {
                         mic_array[i] = aproxy->mic_info[i];
                         ALOGD("%s-%s: %dth MIC = %s", stream_table[apstream->stream_type], __func__,
-                                                      i+1, mic_array[i].device_id);
+                                                                      i+1, mic_array[i].device_id);
                         actual_mic_count++;
                     }
                 } else if (active_device == DEVICE_MAIN_MIC) {
                         mic_array[0] = aproxy->mic_info[0];
-                        ALOGD("%s-%s: Active MIC = %s", stream_table[apstream->stream_type], __func__,
-                                                        mic_array[0].device_id);
+                        ALOGD("%s-%s: Active MIC = %s", stream_table[apstream->stream_type],
+                                                        __func__, mic_array[0].device_id);
                         actual_mic_count = 1;
                 } else if (active_device == DEVICE_SUB_MIC) {
                         mic_array[0] = aproxy->mic_info[1];
-                        ALOGD("%s-%s: Active MIC = %s", stream_table[apstream->stream_type], __func__,
-                                                        mic_array[0].device_id);
+                        ALOGD("%s-%s: Active MIC = %s", stream_table[apstream->stream_type],
+                                                        __func__, mic_array[0].device_id);
                         actual_mic_count = 1;
                 } else {
                     ALOGE("%s-%s: Abnormal active device(%s)", stream_table[apstream->stream_type],
@@ -4658,47 +3360,41 @@ int proxy_get_active_microphones(void *proxy_stream, void *array, int *count)
 int proxy_getparam_capture_stream(void *proxy_stream, void *query_params, void *reply_params)
 {
     struct audio_proxy_stream *apstream = (struct audio_proxy_stream *)proxy_stream;
-    struct audio_proxy *aproxy = getInstance();
     struct str_parms *query = (struct str_parms *)query_params;
     struct str_parms *reply = (struct str_parms *)reply_params;
 
-    if (proxy_is_usb_capture_device_connected(aproxy->usb_aproxy)) {
-        // get USB capture param information
-        proxy_usb_getparam_capture_stream(getInstance()->usb_aproxy, query, reply);
-    } else {
-        /*
-         * Supported Audio Configuration can be different as Target Project.
-         * AudioHAL engineers have to modify these codes based on Target Project.
-         */
-        // supported audio formats
-        if (str_parms_has_key(query, AUDIO_PARAMETER_STREAM_SUP_FORMATS)) {
-            char formats_list[256];
+    /*
+     * Supported Audio Configuration can be different as Target Project.
+     * AudioHAL engineers have to modify these codes based on Target Project.
+     */
+    // supported audio formats
+    if (str_parms_has_key(query, AUDIO_PARAMETER_STREAM_SUP_FORMATS)) {
+        char formats_list[256];
 
-            memset(formats_list, 0, 256);
-            strncpy(formats_list, stream_format_table[apstream->stream_type],
-                           strlen(stream_format_table[apstream->stream_type]));
-            str_parms_add_str(reply, AUDIO_PARAMETER_STREAM_SUP_FORMATS, formats_list);
-        }
+        memset(formats_list, 0, 256);
+        strncpy(formats_list, stream_format_table[apstream->stream_type],
+                       strlen(stream_format_table[apstream->stream_type]));
+        str_parms_add_str(reply, AUDIO_PARAMETER_STREAM_SUP_FORMATS, formats_list);
+    }
 
-        // supported audio channel masks
-        if (str_parms_has_key(query, AUDIO_PARAMETER_STREAM_SUP_CHANNELS)) {
-            char channels_list[256];
+    // supported audio channel masks
+    if (str_parms_has_key(query, AUDIO_PARAMETER_STREAM_SUP_CHANNELS)) {
+        char channels_list[256];
 
-            memset(channels_list, 0, 256);
-            strncpy(channels_list, stream_channel_table[apstream->stream_type],
-                            strlen(stream_channel_table[apstream->stream_type]));
-            str_parms_add_str(reply, AUDIO_PARAMETER_STREAM_SUP_CHANNELS, channels_list);
-        }
+        memset(channels_list, 0, 256);
+        strncpy(channels_list, stream_channel_table[apstream->stream_type],
+                        strlen(stream_channel_table[apstream->stream_type]));
+        str_parms_add_str(reply, AUDIO_PARAMETER_STREAM_SUP_CHANNELS, channels_list);
+    }
 
-        // supported audio samspling rates
-        if (str_parms_has_key(query, AUDIO_PARAMETER_STREAM_SUP_SAMPLING_RATES)) {
-            char rates_list[256];
+    // supported audio samspling rates
+    if (str_parms_has_key(query, AUDIO_PARAMETER_STREAM_SUP_SAMPLING_RATES)) {
+        char rates_list[256];
 
-            memset(rates_list, 0, 256);
-            strncpy(rates_list, stream_rate_table[apstream->stream_type],
-                         strlen(stream_rate_table[apstream->stream_type]));
-            str_parms_add_str(reply, AUDIO_PARAMETER_STREAM_SUP_SAMPLING_RATES, rates_list);
-        }
+        memset(rates_list, 0, 256);
+        strncpy(rates_list, stream_rate_table[apstream->stream_type],
+                     strlen(stream_rate_table[apstream->stream_type]));
+        str_parms_add_str(reply, AUDIO_PARAMETER_STREAM_SUP_SAMPLING_RATES, rates_list);
     }
 
     return 0;
@@ -4707,13 +3403,7 @@ int proxy_getparam_capture_stream(void *proxy_stream, void *query_params, void *
 int proxy_setparam_capture_stream(void *proxy_stream, void *parameters)
 {
     struct audio_proxy_stream *apstream = (struct audio_proxy_stream *)proxy_stream;
-    struct audio_proxy *aproxy = getInstance();
     int ret = 0;
-
-    if (proxy_is_usb_capture_device_connected(aproxy->usb_aproxy)) {
-        /* Set USB parameters */
-        ret = proxy_usb_setparam_capture_stream(aproxy->usb_aproxy, parameters);
-    }
 
     return ret;
 }
@@ -4762,11 +3452,8 @@ int proxy_get_mmap_position(void *proxy_stream, void *pos)
         struct timespec ts = { 0, 0 };
 
         ret = pcm_mmap_get_hw_ptr(apstream->pcm, (unsigned int *)&position->position_frames, &ts);
-        if (ret < 0) {
-            ALOGE("proxy-%s: get_hw_ptr error %s ", __func__, pcm_get_error(apstream->pcm));
-        } else if (ret == 0) {
-             position->time_nanoseconds = audio_utils_ns_from_timespec(&ts);
-        }
+        if (ret == 0)
+            position->time_nanoseconds = audio_utils_ns_from_timespec(&ts);
     }
 
     return ret;
@@ -4860,8 +3547,8 @@ void proxy_deinit_route(void *proxy)
 bool proxy_update_route(void *proxy, int ausage, int device)
 {
     struct audio_proxy *aproxy = proxy;
-    audio_usage __unused routed_ausage = (audio_usage)ausage;
-    device_type __unused routed_device = (device_type)device;
+    audio_usage routed_ausage = (audio_usage)ausage;
+    device_type routed_device = (device_type)device;
 
     // Temp
     if (aproxy != NULL) {
@@ -4875,53 +3562,20 @@ bool proxy_update_route(void *proxy, int ausage, int device)
 bool proxy_set_route(void *proxy, int ausage, int device, int modifier, bool set)
 {
     struct audio_proxy *aproxy = proxy;
-    char path_name[MAX_PATH_NAME_LEN];
 
     audio_usage   routed_ausage = (audio_usage)ausage;
     device_type   routed_device = (device_type)device;
-    audio_usage   active_ausage = AUSAGE_NONE;
-    device_type   active_device = DEVICE_NONE;
 
     modifier_type routed_modifier = (modifier_type)modifier;
 
     if (set) {
-        /* check whether path routing is for AP/CP call bandwidth or speaker/DEX Device Change */
-        if (routed_device < DEVICE_MAIN_MIC) {
-            active_ausage = aproxy->active_playback_ausage;
-            active_device = aproxy->active_playback_device;
-        } else {
-            active_ausage = aproxy->active_capture_ausage;
-            active_device = aproxy->active_capture_device;
-        }
-
-        if (is_usage_Call(active_ausage) &&
-                is_usage_Call(routed_ausage)) {
-            /* check whether internal path nodes close/re-open should be skipped,
-             * for following scenarios
-             * - cp call bandwidth change
-             * - Dex speaker device state change during ap/cp call
-            */
-            if (((active_ausage != routed_ausage) && (active_device == routed_device) &&
-                (is_usage_CPCall(active_ausage) && is_usage_CPCall(routed_ausage))) ||
-                ((active_ausage == routed_ausage) && (active_device != routed_device) &&
-                is_device_speaker(routed_device) && is_device_speaker(active_device))) {
-                ALOGI("proxy-%s: skip output path loopback PCMs re-open",
-                    __func__);
-                ALOGI("proxy-%s: active-device(%s) requested-device(%s)", __func__,
-                    device_table[active_device],
-                    device_table[routed_device]);
-                aproxy->skip_internalpath = true;
-            }
-        }
-
         if (routed_device < DEVICE_MAIN_MIC) {
             /* Do Specific Operation based on Audio Path */
             do_operations_by_playback_route_set(aproxy, routed_ausage, routed_device);
 
             if (aproxy->active_playback_ausage != AUSAGE_NONE &&
                 aproxy->active_playback_device != DEVICE_NONE) {
-                disable_internal_path(aproxy, aproxy->active_playback_ausage,
-                                        aproxy->active_playback_device);
+                disable_internal_path(aproxy, aproxy->active_playback_device);
                 set_reroute(aproxy, aproxy->active_playback_ausage, aproxy->active_playback_device,
                                     routed_ausage, routed_device);
             } else
@@ -4939,17 +3593,10 @@ bool proxy_set_route(void *proxy, int ausage, int device, int modifier, bool set
             } else if (routed_modifier == MODIFIER_NONE && aproxy->active_playback_modifier != MODIFIER_NONE)
                 reset_modifier(aproxy, aproxy->active_playback_modifier);
 
-            if (routed_device == DEVICE_USB_HEADSET ||
-                routed_device == DEVICE_SPEAKER_AND_USB_HEADSET) {
-                /* set USB gain controls if required */
-                make_path(routed_ausage, routed_device, path_name);
-                proxy_usb_set_gain(aproxy->usb_aproxy, path_name);
-            }
-
             aproxy->active_playback_modifier = routed_modifier;
 
             // Set Loopback for Playback Path
-            enable_internal_path(aproxy, routed_ausage, routed_device);
+            enable_internal_path(aproxy, routed_device);
 
             if (ausage == AUSAGE_FM_RADIO_CAPTURE || ausage == AUSAGE_FM_RADIO_TUNER) {
                 /* Open/Close FM Radio PCM node based on Enable/disable */
@@ -4959,8 +3606,7 @@ bool proxy_set_route(void *proxy, int ausage, int device, int modifier, bool set
             // Audio Path Routing for Capture Path
             if (aproxy->active_capture_ausage != AUSAGE_NONE &&
                 aproxy->active_capture_device != DEVICE_NONE) {
-                disable_internal_path(aproxy, aproxy->active_capture_ausage,
-                                        aproxy->active_capture_device);
+                disable_internal_path(aproxy, aproxy->active_capture_device);
                 set_reroute(aproxy, aproxy->active_capture_ausage, aproxy->active_capture_device,
                                     routed_ausage, routed_device);
             } else {
@@ -4982,16 +3628,10 @@ bool proxy_set_route(void *proxy, int ausage, int device, int modifier, bool set
             } else if (routed_modifier == MODIFIER_NONE && aproxy->active_capture_modifier != MODIFIER_NONE)
                 reset_modifier(aproxy, aproxy->active_capture_modifier);
 
-            if (is_usb_mic_device(routed_device)) {
-                /* set USB gain controls if required */
-                make_path(routed_ausage, routed_device, path_name);
-                proxy_usb_set_gain(aproxy->usb_aproxy, path_name);
-            }
-
             aproxy->active_capture_modifier = routed_modifier;
 
             // Set Loopback for Capture Path
-            enable_internal_path(aproxy, routed_ausage, routed_device);
+            enable_internal_path(aproxy, routed_device);
         }
     } else {
         /* Do Specific Operation based on Audio Path */
@@ -4999,7 +3639,7 @@ bool proxy_set_route(void *proxy, int ausage, int device, int modifier, bool set
             do_operations_by_playback_route_reset(aproxy);
 
         // Reset Loopback
-        disable_internal_path(aproxy, routed_ausage, routed_device);
+        disable_internal_path(aproxy, routed_device);
 
         // Audio Path Modifier
         if (routed_modifier != MODIFIER_NONE) {
@@ -5014,14 +3654,6 @@ bool proxy_set_route(void *proxy, int ausage, int device, int modifier, bool set
             aproxy->active_capture_modifier = MODIFIER_NONE;
         }
 
-        if (routed_device == DEVICE_USB_HEADSET ||
-            routed_device == DEVICE_SPEAKER_AND_USB_HEADSET ||
-            is_usb_mic_device(routed_device)) {
-            /* reset USB gain controls */
-            make_path(routed_ausage, routed_device, path_name);
-            proxy_usb_reset_gain(aproxy->usb_aproxy, path_name);
-        }
-
         // Audio Path Routing
         reset_route(aproxy, routed_ausage, routed_device);
 
@@ -5033,9 +3665,6 @@ bool proxy_set_route(void *proxy, int ausage, int device, int modifier, bool set
             aproxy->active_capture_device = DEVICE_NONE;
         }
     }
-
-    /* reset voicecall bandwidth change flag */
-    aproxy->skip_internalpath = false;
 
     return true;
 }
@@ -5049,8 +3678,6 @@ void  proxy_stop_voice_call(void *proxy)
     struct audio_proxy *aproxy = (struct audio_proxy *)proxy;
     voice_rx_stop(aproxy);
     voice_tx_stop(aproxy);
-    if (aproxy->btsco_erap[BTSCO_MIC_ERAP_IDX])
-        disable_btsco_erap(proxy, BTSCO_MIC_ERAP_IDX);
 
     return ;
 }
@@ -5060,11 +3687,6 @@ void proxy_start_voice_call(void *proxy)
     struct audio_proxy *aproxy = (struct audio_proxy *)proxy;
 
     voice_rx_start(aproxy);
-
-    if (aproxy->active_capture_device == DEVICE_BT_HEADSET_MIC
-            || aproxy->active_capture_device == DEVICE_BT_NREC_HEADSET_MIC) {
-        enable_btsco_erap(proxy, BTSCO_MIC_ERAP_IDX);
-    }
 
     /*
     ** Voice TX and FM Radio are sharing same WDMA.
@@ -5207,9 +3829,6 @@ void proxy_set_mixer_value_array(void *proxy, const char *name, const void *valu
     struct mixer_ctl *ctrl = NULL;
     int ret = 0;
 
-    if (aproxy == NULL)
-        aproxy = getInstance();
-
     if (name == NULL)
         return ;
 
@@ -5225,67 +3844,6 @@ void proxy_set_mixer_value_array(void *proxy, const char *name, const void *valu
     }
 
     pthread_rwlock_unlock(&aproxy->mixer_update_lock);
-
-    return ;
-}
-
-void proxy_set_audio_interface(void *proxy, unsigned int interface, unsigned int sample_rate,
-                               unsigned int bit_width, unsigned int channel)
-{
-    struct audio_proxy *aproxy = proxy;
-
-    if (aproxy == NULL)
-        return ;
-
-    if (interface == UAIF0) {
-        proxy_set_mixer_value_int(proxy, MIXER_CTL_ABOX_UAIF0_SWITCH, MIXER_OFF);
-        /* SIFS0 Switch Off/On control is required only when SISF0 connected to UAIF0 */
-        if (aproxy->active_playback_device == DEVICE_HEADPHONE ||
-            aproxy->active_playback_device == DEVICE_HEADSET ||
-            aproxy->active_playback_device == DEVICE_SPEAKER_AND_HEADPHONE ||
-            aproxy->active_playback_device == DEVICE_SPEAKER_AND_HEADSET)
-            proxy_set_mixer_value_int(proxy, MIXER_CTL_ABOX_SIFS0_SWITCH, MIXER_OFF);
-
-        proxy_set_mixer_value_int(proxy, MIXER_CTL_ABOX_UAIF0_SAMPLERATE, sample_rate);
-        proxy_set_mixer_value_int(proxy, MIXER_CTL_ABOX_UAIF0_WIDTH, bit_width);
-        proxy_set_mixer_value_int(proxy, MIXER_CTL_ABOX_UAIF0_CHANNEL, channel);
-
-        /* skip SIFS0 configuration for USB device */
-        if (!(aproxy->active_playback_device == DEVICE_USB_HEADSET ||
-            aproxy->active_playback_device == DEVICE_SPEAKER_AND_USB_HEADSET)) {
-            proxy_set_mixer_value_int(proxy, MIXER_CTL_ABOX_SIFS0_SAMPLERATE, sample_rate);
-            proxy_set_mixer_value_int(proxy, MIXER_CTL_ABOX_SIFS0_WIDTH, bit_width);
-            proxy_set_mixer_value_int(proxy, MIXER_CTL_ABOX_SIFS0_CHANNEL, channel);
-        } else {
-            ALOGI("proxy-%s: skip SIFS0 config for %d", __func__, aproxy->active_playback_device);
-        }
-
-        if (aproxy->active_playback_device == DEVICE_HEADPHONE ||
-            aproxy->active_playback_device == DEVICE_HEADSET ||
-            aproxy->active_playback_device == DEVICE_SPEAKER_AND_HEADPHONE ||
-            aproxy->active_playback_device == DEVICE_SPEAKER_AND_HEADSET)
-            proxy_set_mixer_value_int(proxy, MIXER_CTL_ABOX_SIFS0_SWITCH, MIXER_ON);
-
-        proxy_set_mixer_value_int(proxy, MIXER_CTL_ABOX_UAIF0_SWITCH, MIXER_ON);
-    } else if (interface == UAIF1) {
-        proxy_set_mixer_value_int(proxy, MIXER_CTL_ABOX_UAIF1_SWITCH, MIXER_OFF);
-        proxy_set_mixer_value_int(proxy, MIXER_CTL_ABOX_UAIF1_SAMPLERATE, sample_rate);
-        proxy_set_mixer_value_int(proxy, MIXER_CTL_ABOX_UAIF1_WIDTH, bit_width);
-        proxy_set_mixer_value_int(proxy, MIXER_CTL_ABOX_UAIF1_CHANNEL, channel);
-        proxy_set_mixer_value_int(proxy, MIXER_CTL_ABOX_UAIF1_SWITCH, MIXER_ON);
-    } else if (interface == UAIF2) {
-        proxy_set_mixer_value_int(proxy, MIXER_CTL_ABOX_UAIF2_SWITCH, MIXER_OFF);
-        proxy_set_mixer_value_int(proxy, MIXER_CTL_ABOX_UAIF2_SAMPLERATE, sample_rate);
-        proxy_set_mixer_value_int(proxy, MIXER_CTL_ABOX_UAIF2_WIDTH, bit_width);
-        proxy_set_mixer_value_int(proxy, MIXER_CTL_ABOX_UAIF2_CHANNEL, channel);
-        proxy_set_mixer_value_int(proxy, MIXER_CTL_ABOX_UAIF2_SWITCH, MIXER_ON);
-    } else if (interface == UAIF3) {
-        proxy_set_mixer_value_int(proxy, MIXER_CTL_ABOX_UAIF3_SWITCH, MIXER_OFF);
-        proxy_set_mixer_value_int(proxy, MIXER_CTL_ABOX_UAIF3_SAMPLERATE, sample_rate);
-        proxy_set_mixer_value_int(proxy, MIXER_CTL_ABOX_UAIF3_WIDTH, bit_width);
-        proxy_set_mixer_value_int(proxy, MIXER_CTL_ABOX_UAIF3_CHANNEL, channel);
-        proxy_set_mixer_value_int(proxy, MIXER_CTL_ABOX_UAIF3_SWITCH, MIXER_ON);
-    }
 
     return ;
 }
@@ -5491,7 +4049,6 @@ int proxy_set_parameters(void *proxy, void *parameters)
 {
     struct audio_proxy *aproxy = (struct audio_proxy *)proxy;
     struct str_parms *parms = (struct str_parms *)parameters;
-    char value[256];
     int val;
     int ret = 0;     // for parameter handling
     int status = 0;  // for return value
@@ -5505,37 +4062,14 @@ int proxy_set_parameters(void *proxy, void *parameters)
                 aproxy->sound_trigger_headset_status(true);
             }
 #endif
-        } else if ((audio_devices_t)val == AUDIO_DEVICE_OUT_BLUETOOTH_A2DP ||
-                   (audio_devices_t)val == AUDIO_DEVICE_OUT_BLUETOOTH_A2DP_HEADPHONES ||
-                   (audio_devices_t)val == AUDIO_DEVICE_OUT_BLUETOOTH_A2DP_SPEAKER) {
-            ALOGI("proxy-%s: connected BT A2DP Out Device", __func__);
-#ifdef SUPPORT_BTA2DP_OFFLOAD
-            if (aproxy->support_bta2dp) {
-                ret = str_parms_get_int(parms, AUDIO_PARAMETER_STREAM_FORMAT, &val);
-                if (ret >= 0) {
-                    if (audio_is_bt_offload_format((audio_format_t)val)) {
-                        pthread_mutex_lock(&aproxy->a2dp_lock);
-                        if (!aproxy->a2dp_out_enabled) {
-                            status = proxy_a2dp_open();
-                            if (status == 0) {
-                                aproxy->a2dp_out_enabled = true;
-                                ALOGI("proxy-%s: set BT A2DP Offload Enabled & Open A2DP", __func__);
-                                if (aproxy->a2dp_suspend) {
-                                    // a2dp suspend off -> bt offlaod on case
-                                    ALOGI("proxy-%s: set A2DP Suspend Flag", __func__);
-                                    proxy_a2dp_suspend(true); // set suspend a2dp open
-                                    /* modified by samsung convgergence */
-                                    set_a2dp_suspend_mixer(MIXER_ON);
-                                } else if (is_active_playback_device_bta2dp(aproxy)) {
-                                    bta2dp_playback_start(aproxy);  // bt path already enabled, then bta2dp_playback_start hear
-                                }
-                            }
-                        }
-                        pthread_mutex_unlock(&aproxy->a2dp_lock);
-                    }
-                }
-            }
-#endif
+        } else if ((audio_devices_t)val == AUDIO_DEVICE_OUT_USB_ACCESSORY ||
+                   (audio_devices_t)val == AUDIO_DEVICE_OUT_USB_DEVICE ||
+                   (audio_devices_t)val == AUDIO_DEVICE_OUT_USB_HEADSET) {
+            ALOGI("proxy-%s: connected USB Out Device", __func__);
+        } else if ((audio_devices_t)val == AUDIO_DEVICE_IN_USB_ACCESSORY ||
+                   (audio_devices_t)val == AUDIO_DEVICE_IN_USB_DEVICE ||
+                   (audio_devices_t)val == AUDIO_DEVICE_IN_USB_HEADSET) {
+            ALOGI("proxy-%s: connected USB In Device", __func__);
         }
     }
 
@@ -5548,130 +4082,16 @@ int proxy_set_parameters(void *proxy, void *parameters)
                 aproxy->sound_trigger_headset_status(false);
             }
 #endif
-        } else if ((audio_devices_t)val == AUDIO_DEVICE_OUT_BLUETOOTH_A2DP ||
-                   (audio_devices_t)val == AUDIO_DEVICE_OUT_BLUETOOTH_A2DP_HEADPHONES ||
-                   (audio_devices_t)val == AUDIO_DEVICE_OUT_BLUETOOTH_A2DP_SPEAKER) {
-            ALOGI("proxy-%s: disconnected BT A2DP Out Device", __func__);
-#ifdef SUPPORT_BTA2DP_OFFLOAD
-            if (aproxy->support_bta2dp) {
-                pthread_mutex_lock(&aproxy->a2dp_lock);
-                if (aproxy->a2dp_out_enabled) {
-                    status = proxy_a2dp_close();
-                    if (status == 0) {
-                        aproxy->a2dp_out_enabled = false;
-                        aproxy->a2dp_delay = 0;
-                        ALOGI("proxy-%s: set BT A2DP Offload Disabled & Close A2DP", __func__);
-                    }
-                }
-                pthread_mutex_unlock(&aproxy->a2dp_lock);
-            }
-#endif
+        } else if ((audio_devices_t)val == AUDIO_DEVICE_OUT_USB_ACCESSORY ||
+                   (audio_devices_t)val == AUDIO_DEVICE_OUT_USB_DEVICE ||
+                   (audio_devices_t)val == AUDIO_DEVICE_OUT_USB_HEADSET) {
+            ALOGI("proxy-%s: disconnected USB Out Device", __func__);
+        } else if ((audio_devices_t)val == AUDIO_DEVICE_IN_USB_ACCESSORY ||
+                   (audio_devices_t)val == AUDIO_DEVICE_IN_USB_DEVICE ||
+                   (audio_devices_t)val == AUDIO_DEVICE_IN_USB_HEADSET) {
+            ALOGI("proxy-%s: disconnected USB In Device", __func__);
         }
     }
-#ifdef SUPPORT_BTA2DP_OFFLOAD
-    /* BT A2DP Specific */
-    ret = str_parms_get_str(parms, "A2dpSuspended", value, sizeof(value));
-    if (ret >= 0 && aproxy->support_bta2dp) {
-        pthread_mutex_lock(&aproxy->a2dp_lock);
-        bool cur_state = proxy_a2dp_is_suspended();
-        if(strncmp(value, "true", 4) == 0) {
-            if (aproxy->a2dp_out_enabled) {  // send suspend call to hidl, only a2dp_offload ON
-                proxy_a2dp_suspend(true);
-                ALOGI("proxy-%s: set A2DP Suspend Flag", __func__);
-            }
-            /* modified by samsung convgergence */
-            set_a2dp_suspend_mixer(MIXER_ON);
-            aproxy->a2dp_suspend = true;
-        } else {
-            proxy_a2dp_suspend(false);
-            if (is_active_playback_device_bta2dp(aproxy) && cur_state) {
-                bta2dp_playback_start(aproxy);  // start bt a2dp on suspend t -> f state
-            }
-            ALOGI("proxy-%s: cleared A2DP Suspend Flag", __func__);
-            /* modified by samsung convgergence */
-            set_a2dp_suspend_mixer(MIXER_OFF);
-            aproxy->a2dp_suspend = false;
-        }
-        pthread_mutex_unlock(&aproxy->a2dp_lock);
-    }
-
-    ret = str_parms_get_str(parms, "bt_offload_enable", value, sizeof(value));
-    if (ret >= 0 && aproxy->support_bta2dp) {
-        pthread_mutex_lock(&aproxy->a2dp_lock);
-        val = atoi(value);
-        if (val == 1 && aproxy->a2dp_out_enabled == false) {
-            status = proxy_a2dp_open();
-            if (status == 0) {
-                aproxy->a2dp_out_enabled = true;
-                ALOGI("proxy-%s: set BT A2DP Offload Enabled & Open A2DP", __func__);
-                if (aproxy->a2dp_suspend) {
-                    // a2dp suspend off -> bt offlaod on case
-                    ALOGI("proxy-%s: set A2DP Suspend Flag", __func__);
-                    proxy_a2dp_suspend(true); // set suspend a2dp open
-                    /* modified by samsung convgergence */
-                    set_a2dp_suspend_mixer(MIXER_ON);
-                } else if (is_active_playback_device_bta2dp(aproxy)) {
-                    bta2dp_playback_start(aproxy);  // bt path already enabled, then bta2dp_playback_start hear
-                }
-            }
-        } else if (val == 0 && aproxy->a2dp_out_enabled == true) {
-            status = proxy_a2dp_close();
-            if (status == 0) {
-                aproxy->a2dp_out_enabled = false;
-                aproxy->a2dp_delay = 0;
-                ALOGI("proxy-%s: set BT A2DP Offload Disabled & Close A2DP", __func__);
-            }
-        }
-        pthread_mutex_unlock(&aproxy->a2dp_lock);
-    }
-
-    ret = str_parms_get_str(parms, "A2dpDelayReport", value, sizeof(value));
-    if (ret >= 0 && aproxy->support_bta2dp) {
-        pthread_mutex_lock(&aproxy->a2dp_lock);
-        val = atoi(value);
-        /* adjustment value to make presentation position as fast as adjust_latency(ms) */
-        if (val > A2DP_CAL_LATENCY_VAL)
-            val = val - A2DP_CAL_LATENCY_VAL;
-        else
-            val = 0;
-
-        ALOGI("proxy-%s: set BT A2DP Delay as %d ms", __func__, val);
-        aproxy->a2dp_delay = (uint32_t)val;
-        pthread_mutex_unlock(&aproxy->a2dp_lock);
-    }
-
-    ret = str_parms_get_str(parms, AUDIO_PARAMETER_RECONFIG_A2DP, value, sizeof(value));
-    if (ret >= 0 && aproxy->support_bta2dp) {
-        pthread_mutex_lock(&aproxy->a2dp_lock);
-        if (aproxy->a2dp_out_enabled) {
-            if(strncmp(value, "true", 4) == 0 && is_active_playback_device_bta2dp(aproxy)) {
-                bta2dp_playback_stop(aproxy);
-                bta2dp_playback_start(aproxy);
-            }
-        }
-        pthread_mutex_unlock(&aproxy->a2dp_lock);
-    }
-#endif
-
-    // BT SCO WideBand Configuration
-    ret = str_parms_get_str(parms, AUDIO_PARAMETER_KEY_BT_SCO_WB, value, sizeof(value));
-    if (ret >= 0) {
-        if (!strcmp(value, AUDIO_PARAMETER_VALUE_ON)) {
-            aproxy->btsco_samplerate = WB_SAMPLING_RATE;
-
-            ALOGI("%s BT SCO WBS device connected [%d]", __func__, aproxy->btsco_samplerate);
-        } else if (!strcmp(value, AUDIO_PARAMETER_VALUE_OFF)) {
-            aproxy->btsco_samplerate = NB_SAMPLING_RATE;
-
-            ALOGI("%s BT SC NBS device connected [%d]", __func__, aproxy->btsco_samplerate);
-        }
-
-        str_parms_del(parms, AUDIO_PARAMETER_KEY_BT_SCO_WB);
-    }
-
-
-    /* Check USB parameters */
-    status = proxy_usb_set_parameters((void *)aproxy->usb_aproxy, parameters);
 
     return status;
 }
@@ -5723,7 +4143,7 @@ void proxy_update_uhqa_playback_stream(void *proxy_stream, int hq_mode)
                 apstream->pcmconfig.format = DEFAULT_MEDIA_FORMAT;
             }
             apstream->requested_format = get_pcmformat_from_alsaformat(apstream->pcmconfig.format);
-        } else if (apstream->stream_type == ASTREAM_PLAYBACK_DEEP_BUFFER) {
+        } else if (apstream->stream_type == ASTREAM_PLAYBACK_PRIMARY) {
             struct pcm_config pcm_config_map[AUDIO_QUALITY_CNT] = {
                     pcm_config_deep_playback,
                     pcm_config_deep_playback_uhqa,
@@ -5801,8 +4221,7 @@ void proxy_set_stream_channel(void *proxy_stream, int new_channel, bool skip)
         apstream->pcmconfig.channels = new_channel;
     }
     apstream->skip_ch_convert = skip;
-    apstream->need_channelconversion = !skip;
-    ALOGI("%s: new_channel %d, skip_ch_convert %d", __func__, new_channel, apstream->skip_ch_convert);
+    apstream->need_monoconversion = !skip;
 }
 
 void proxy_set_spk_ampL_power(void* proxy, bool state)
@@ -5819,34 +4238,6 @@ bool proxy_get_spk_ampL_power(void* proxy)
     struct audio_proxy *aproxy = proxy;
     return aproxy->spk_ampL_powerOn;
 }
-
-void proxy_set_primary_mute(void* proxy, int count)
-{
-    struct audio_proxy *aproxy = proxy;
-    struct mixer_ctl *ctrl = NULL;
-    char mixer_name[MAX_MIXER_NAME_LEN];
-    int ret = 0, val = count;
-
-    pthread_rwlock_rdlock(&aproxy->mixer_update_lock);
-
-    ctrl = mixer_get_ctl_by_name(aproxy->mixer, ABOX_MUTE_CONTROL_NAME);
-    snprintf(mixer_name, sizeof(mixer_name), ABOX_MUTE_CONTROL_NAME);
-
-    if (ctrl) {
-        ret = mixer_ctl_set_value(ctrl, 0,val);
-        if (ret != 0)
-            ALOGE("proxy-%s: failed to set primary mute(%s)", __func__, mixer_name);
-        else
-            ALOGI("proxy-%s: set set primary mute(%s) to %d", __func__, mixer_name, val);
-    } else {
-        ALOGE("proxy-%s: cannot find primary mute", __func__);
-    }
-
-    pthread_rwlock_unlock(&aproxy->mixer_update_lock);
-
-    return ;
-}
-
 
 /*
  *  Proxy Dump
@@ -5939,6 +4330,17 @@ static void check_configurations(struct audio_proxy *aproxy)
         ALOGI("proxy-%s: The USB Device is supported by USB AudioHAL", __func__);
     }
 
+    // BT A2DP Device
+    memset(property, 0, PROPERTY_VALUE_MAX);
+    property_get(A2DPBYPRIMARY_PROPERTY, property, A2DPBYPRIMARY_DEFAULT);
+    if (strcmp(property, "yes") == 0) {
+        aproxy->a2dp_by_primary = true;
+        ALOGI("proxy-%s: The BT A2DP Device is supported by Primary AudioHAL", __func__);
+    } else {
+        aproxy->a2dp_by_primary = false;
+        ALOGI("proxy-%s: The BT A2DP Device is supported by BT A2DP AudioHAL", __func__);
+    }
+
     return ;
 }
 
@@ -5960,7 +4362,7 @@ static void set_microphone_info(struct audio_microphone_characteristic_t *microp
 {
     uint32_t curIdx = 0;
     uint32_t array_cnt = 0;
-    float f_value[3] = {0, };
+    float f_value[3];
     char *ptr = NULL;
 
     if (strcmp(attr[curIdx++], "device_id") == 0)
@@ -6062,10 +4464,8 @@ static void start_tag(void *data, const XML_Char *tag_name, const XML_Char **att
     if (strcmp(tag_name, "microphone_characteristics") == 0) {
         set_info = MICROPHONE_CHARACTERISTIC;
     } else if (strcmp(tag_name, "microphone") == 0) {
-        if (set_info != MICROPHONE_CHARACTERISTIC) {
-            ALOGE("proxy-%s: microphone tag should be supported with microphone_characteristics tag", __func__);
-            return ;
-        }
+        if (set_info != MICROPHONE_CHARACTERISTIC)
+            ALOGE("proxy-%s microphone tag should be supported with microphone_characteristics tag", __func__);
         set_microphone_info(&aproxy->mic_info[aproxy->num_mic++], attr);
     }
 }
@@ -6128,8 +4528,9 @@ bool proxy_is_initialized(void)
 void * proxy_init(void)
 {
     struct audio_proxy *aproxy;
+#ifdef SUPPORT_STHAL_INTERFACE
     char sound_trigger_hal_path[100] = {0, };
-
+#endif
     /* Creates the structure for audio_proxy. */
     aproxy = getInstance();
     if (!aproxy) {
@@ -6148,58 +4549,26 @@ void * proxy_init(void)
     aproxy->support_spkamp = true;
     aproxy->spkamp_reference = NULL;
     aproxy->spkamp_playback = NULL;
-#ifdef SUPPORT_BTA2DP_OFFLOAD
-    // BT A2DP Devices Support by Primary AudioHAL
-    pthread_mutex_init(&aproxy->a2dp_lock, (const pthread_mutexattr_t *) NULL);
 
-    pthread_mutex_lock(&aproxy->a2dp_lock);
-    proxy_a2dp_init();
-    aproxy->support_bta2dp = true;
-    aproxy->a2dp_out_enabled = false;
-    aproxy->a2dp_suspend = false;
-    aproxy->a2dp_delay = 0;
-    aproxy->a2dp_default_delay = 0;
-    aproxy->bta2dp_playback = NULL;
-    aproxy->bta2dp_out_loopback = NULL;
-    pthread_mutex_unlock(&aproxy->a2dp_lock);
-    aproxy->a2dp_mute_playback = NULL;
-#endif
     // In case of External BT-SCO Support, initializes Playback Stream
     aproxy->support_btsco = true;
-    for (int i = 0; i < BTSCO_MAX_ERAP_IDX; i++)
-        aproxy->btsco_erap[i] = NULL;
-    aproxy->btsco_samplerate = 8000;
+    aproxy->btsco_playback = NULL;
 
     // Voice Call PCM Devices
     aproxy->call_rx = NULL;
     aproxy->call_tx = NULL;
-    aproxy->call_tx_direct = NULL;
 
     // FM Radio PCM Devices
     aproxy->fm_playback = NULL;
     aproxy->fm_capture  = NULL;
 
-    aproxy->usb_aproxy = proxy_usb_init();
-    if (!aproxy->usb_aproxy) {
-        ALOGE("proxy-%s: failed to create audio_proxy_usb", __func__);
-        destroyInstance();
-        return NULL;
-    }
-
-    // In case of USB Input Loopback Support, initializes Out/In Loopback Streams
-    aproxy->support_usb_out_loopback = true;
-    aproxy->usb_out_loopback = NULL;
-    aproxy->support_usb_in_loopback = true;
-    aproxy->usb_in_loopback = NULL;
-
     // Call State
     aproxy->call_state = false;
-    aproxy->skip_internalpath = false;
 
     /* Audio Mode */
     aproxy->audio_mode = AUDIO_MODE_NORMAL;
 
-    // STHAL interface initialization
+    //ST HAL interface initialization
 #ifdef SUPPORT_STHAL_INTERFACE
     aproxy->sthal_state = 0;
 
@@ -6262,9 +4631,10 @@ void * proxy_init(void)
     aproxy->offload_effect_lib_update = NULL;
     aproxy->spk_ampL_powerOn = false;
 
-#ifdef SUPPORT_DUAL_SPEAKER
+    // Force dual speaker
     aproxy->support_dualspk = true;
-#endif
+
+    proxy_set_board_info(aproxy);
 
     ALOGI("proxy-%s: opened & initialized Audio Proxy", __func__);
     return (void *)aproxy;
@@ -6275,19 +4645,6 @@ void proxy_deinit(void *proxy)
     struct audio_proxy *aproxy = (struct audio_proxy *)proxy;
 
     if (aproxy) {
-#ifdef SUPPORT_BTA2DP_OFFLOAD
-        // BT A2DP Devices Support by Primary AudioHAL
-        if (aproxy->support_bta2dp) {
-            pthread_mutex_lock(&aproxy->a2dp_lock);
-            proxy_a2dp_deinit();
-            pthread_mutex_unlock(&aproxy->a2dp_lock);
-
-            pthread_mutex_destroy(&aproxy->a2dp_lock);
-        }
-#endif
-        // USB Devices Support by Primary AudioHAL
-        proxy_usb_deinit(aproxy->usb_aproxy);
-
         destroyInstance();
         ALOGI("proxy-%s: destroyed for audio_proxy", __func__);
     }

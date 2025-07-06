@@ -49,9 +49,6 @@ struct audio_proxy_stream
     int sound_card;
     int sound_device;
 
-    /* DMA pcm handle is required for triggering Virtual node use-case */
-    struct pcm *dma_pcm;
-    /* Can be actual DMA handle or virtual pcm depends upon scenario */
     struct pcm *pcm;
     struct pcm_config pcmconfig;
 
@@ -62,10 +59,6 @@ struct audio_proxy_stream
     int nonblock_flag;
     int ready_new_metadata;
     struct compr_gapless_mdata offload_metadata;
-
-    // USB Specific
-    alsa_device_profile *usb_profile;
-    alsa_device_proxy   *usb_proxy;
 
     // Common
     unsigned int            requested_sample_rate;
@@ -78,7 +71,7 @@ struct audio_proxy_stream
 
 
     // Channel Conversion & Resample for Recording
-    bool   need_channelconversion;
+    bool   need_monoconversion;
     bool   need_resampling;
 
     int16_t* actual_read_buf;
@@ -103,7 +96,7 @@ struct audio_proxy_stream
 
     bool   need_update_pcm_config;
     bool   skip_ch_convert;
-    bool   need_channelpadding;
+    int    cpcall_rec_skipcnt;
 };
 
 struct audio_proxy
@@ -150,22 +143,10 @@ struct audio_proxy
     /* Bluetooth Configuration */
     bool bt_internal;
     bool bt_external;
-
-#ifdef SUPPORT_BTA2DP_OFFLOAD
-    pthread_mutex_t a2dp_lock;
-    bool     support_bta2dp;
-    bool     a2dp_out_enabled;
-    bool     a2dp_suspend;
-    uint32_t a2dp_delay;
-    uint32_t a2dp_default_delay;
-    struct pcm *bta2dp_playback;
-    struct pcm *bta2dp_out_loopback;
-    struct pcm *a2dp_mute_playback;
-#endif
+    bool a2dp_by_primary;
 
     bool support_btsco;
-    struct pcm *btsco_erap[BTSCO_MAX_ERAP_IDX];
-    int btsco_samplerate;
+    struct pcm *btsco_playback;
 
     /* FM Radio Configuration */
     bool fm_internal;
@@ -176,27 +157,16 @@ struct audio_proxy
 
     /* USB Configuration */
     bool usb_by_primary;
-    bool is_usb_single_clksrc;   // USB device clock source info
-
-    void *usb_aproxy;
-
-    // PCM Devices for USB Audio
-    bool support_usb_out_loopback;
-    struct pcm *usb_out_loopback;
-    bool support_usb_in_loopback;
-    struct pcm *usb_in_loopback;
 
     /* PCM Devices for Voice Call */
     struct pcm *call_rx;    // CP to Output Devices
     struct pcm *call_tx;    // Input Devices to CP
-    struct pcm *call_tx_direct;    // Direct routing for Input Devices
 
     // Call State
     bool call_state;
 
     /* Audio Mode */
     int audio_mode;
-    bool skip_internalpath;     // flag to skip internal pcm close/re-open
 
     // Voice WakeUp
 #ifdef SUPPORT_STHAL_INTERFACE
@@ -225,15 +195,17 @@ struct audio_proxy
 
 #define MIXER_UPDATE_TIMEOUT    5  // 5 seconds
 
-#define STR(s) #s
-#define XSTR(s) STR(s)
+
+// Definition for MMAP Stream
+#define MMAP_PERIOD_SIZE (DEFAULT_MEDIA_SAMPLING_RATE/1000)
+#define MMAP_PERIOD_COUNT_MIN 32
+#define MMAP_PERIOD_COUNT_MAX 512
+#define MMAP_PERIOD_COUNT_DEFAULT (MMAP_PERIOD_COUNT_MAX)
 
 #ifdef SUPPORT_STHAL_INTERFACE
+#define STR(s) #s
+#define XSTR(s) STR(s)
 #define SOUND_TRIGGER_HAL_LIBRARY_PATH "sound_trigger.primary.%s.so"
-#endif
-
-#ifndef ENABLE_SPKAMP_PLAYBACK
-#define ENABLE_SPKAMP_PLAYBACK false
 #endif
 
 #endif /* AUDIO_PROXY_H */
