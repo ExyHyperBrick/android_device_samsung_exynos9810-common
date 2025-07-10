@@ -131,8 +131,6 @@ PRODUCT_COPY_FILES += \
     $(COMMON_PATH)/configs/init/ueventd.rc:$(TARGET_COPY_OUT_VENDOR)/etc/ueventd.rc \
     $(COMMON_PATH)/configs/init/wifi.rc:$(TARGET_COPY_OUT_VENDOR)/etc/init/wifi.rc
 
-#    $(COMMON_PATH)/configs/init/init.stune.rc:$(TARGET_COPY_OUT_VENDOR)/etc/init/init.stune.rc \
-
 # Keylayout
 PRODUCT_COPY_FILES += \
     $(COMMON_PATH)/configs/idc/sec_e-pen.idc:$(TARGET_COPY_OUT_VENDOR)/usr/idc/sec_e-pen.idc \
