@@ -31,6 +31,10 @@ dalvik.vm.lockprof.threshold=500
 # Fastbootd
 ro.fastbootd.available=true
 
+## Fingerprint
+ro.vendor.fingerprint.type=rear
+ro.vendor.fingerprint.supports_gestures=true
+
 # Frp
 ro.frp.pst=/dev/block/persistent
 
