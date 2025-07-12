@@ -18,7 +18,6 @@ soong_config_module_type {
     module_type: "cc_defaults",
     config_namespace: "exynos9810AudioVars",
     bool_variables: [
-        "use_bta2dp_offload",
         "use_direct_rcvspk_path",
         "use_dual_speaker",
         "use_soundtrigger_hal",
@@ -35,20 +34,6 @@ soong_config_module_type {
 audioproxy {
     name: "audioproxy_defaults",
     soong_config_variables: {
-        use_bta2dp_offload: {
-            cflags: ["-DSUPPORT_BTA2DP_OFFLOAD"],
-            shared_libs: [
-                "libbase",
-                "libhidlbase",
-                "libhidlmemory",
-                "libhwbinder",
-                "libutils",
-                "android.hidl.allocator@1.0",
-                "android.hidl.memory@1.0",
-                "vendor.samsung_slsi.hardware.ExynosA2DPOffload@1.0",
-            ],
-            srcs: ["audio_a2dp_proxy.cpp"],
-        },
         use_direct_rcvspk_path: {
             cflags: ["-DSUPPORT_DIRECT_RCVSPK_PATH"],
         },
