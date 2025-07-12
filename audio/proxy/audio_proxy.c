@@ -58,7 +58,7 @@
 #define NUM_EARPIECE_DEFAULT    "1"
 #define NUM_EARPIECE_PROPERTY   "ro.vendor.config.num_earpiece"
 
-#define NUM_SPEAKER_DEFAULT     "2"
+#define NUM_SPEAKER_DEFAULT     "1"
 #define NUM_SPEAKER_PROPERTY    "ro.vendor.config.num_speaker"
 
 #define NUM_PROXIMITY_DEFAULT   "1"
