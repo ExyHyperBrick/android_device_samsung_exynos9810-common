@@ -12,23 +12,12 @@
 vendor/etc/audio_board_info.xml
 vendor/etc/default_volume_tables.xml
 vendor/etc/usb_audio_policy_configuration.xml
-#vendor/lib/libSamsungPostProcessConvertor.so
-#vendor/lib/lib_SoundAlive_SRC384_ver320.so
-#vendor/lib/lib_soundaliveresampler.so
-#vendor/lib/libaboxpcmdump.so;DISABLE_CHECKELF
-#vendor/lib/libalsautils_sec.so
 vendor/lib/libaudio_soundtrigger.so;DISABLE_CHECKELF
-#vendor/lib/libaudiodebugfs.so
-#vendor/lib/libcodecdspdump.so;DISABLE_CHECKELF
 vendor/lib/libdatamod.so
-#vendor/lib/libfloatingfeature.so
+
+# Audio - Dolby Atmos
 vendor/lib/libprofileparamstorage.so
 vendor/lib/libsecaudiocoreutils.so
-#vendor/lib/libsecaudioinfo.so
-#vendor/lib/vndk/libaudioroute.so:vendor/lib/libaudioroute-samsung.so;;FIX_SONAME
-#vendor/lib/vndk/libtinyalsa.so:vendor/lib/libtinyalsa-samsung.so;;FIX_SONAME
-vendor/lib64/libfloatingfeature.so
-#vendor/lib64/libsecaudioinfo.so
 
 # Audio Firmware
 vendor/firmware/HFD.cfg.bin
@@ -177,10 +166,10 @@ vendor/etc/plmn_delta_hktw.bin|97a5a4747e8c32d463d8f26254257309b8a03a63
 vendor/etc/plmn_delta_usagsm.bin|9a25ec9e9da16ed2f8a9db07f037fe08283b24e5
 vendor/etc/plmn_se13.bin|6445f3c7ee35c59999de2fdd47c718048a3f550f
 vendor/bin/cbd|155f94ba40e72680d6125a93ad8d8c0445eff86a
-#vendor/lib/libaudio-ril.so|e0c6188cf6353a4bd1e70a24e119725613e68e5d
 vendor/lib/libsecril-client.so|4d5ee418f73e7f644220462f9c0eaefdcb54153a
 vendor/lib/libsemnativecarrierfeature.so|a25d959ddf046b26d678011b5e1d4dd1dc09f809
 vendor/lib64/libengmode_client.so|a7d678bad7a8c3b9729ff3d56cc35159ece548a3
+vendor/lib64/libfloatingfeature.so
 vendor/lib64/vendor.samsung.hardware.radio.bridge@2.0.so|4f803c313c74e161a871bac17581ee5f01d076ec
 vendor/lib64/vendor.samsung.hardware.radio.channel@2.0.so|38bc33189382277cd9ea0a44d2f9a8a13e91bf49
 

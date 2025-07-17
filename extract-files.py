@@ -50,12 +50,6 @@ lib_fixups: lib_fixups_user_type = {
 }
 
 blob_fixups: blob_fixups_user_type = {
-#    'vendor/lib/libaudio-ril.so': blob_fixup()
-#        .replace_needed('libvndsecril-client.so', 'libsecril-client.so'),
-
-#    'vendor/lib/libaudioroute-samsung.so': blob_fixup()
-#        .replace_needed('libtinyalsa.so', 'libtinyalsa-samsung.so'),
-
     (
         'vendor/lib/libsensorlistener.so',
         'vendor/lib64/libsensorlistener.so',
