@@ -309,7 +309,7 @@ PRODUCT_COPY_FILES += \
 
 # Touch
 PRODUCT_PACKAGES += \
-    vendor.lineage.touch@1.0-service.samsung
+    vendor.lineage.touch-service.samsung
 
 # Update
 AB_OTA_UPDATER := false
