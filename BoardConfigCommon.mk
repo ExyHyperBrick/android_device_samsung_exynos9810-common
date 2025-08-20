@@ -9,6 +9,9 @@ TARGET_SPECIFIC_HEADER_PATH := $(COMMON_PATH)/include
 # Inherit proprietary vendor configuration
 include vendor/samsung/exynos9810-common/BoardConfigVendor.mk
 
+# Needed by MindTheGapps
+BUILD_BROKEN_ELF_PREBUILT_PRODUCT_COPY_FILES := true
+
 # Audio
 $(call soong_config_set,exynos_audio,PREDEFINED_LOW_CAPTURE_DURATION,20)
 $(call soong_config_set,exynos_audio,PROXY_LIBRARY,//device/samsung/exynos9810-common:libaudioproxy)
