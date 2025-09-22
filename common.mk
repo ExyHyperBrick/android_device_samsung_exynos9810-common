@@ -311,6 +311,8 @@ PRODUCT_COPY_FILES += \
 # Touch
 PRODUCT_PACKAGES += \
     vendor.lineage.touch-service.samsung
+    
+$(call soong_config_set,SAMSUNG_LINEAGE_TOUCH_HAL,INCLUDE_DIR,$(LOCAL_PATH)/touch/include)
 
 # Update
 AB_OTA_UPDATER := false
