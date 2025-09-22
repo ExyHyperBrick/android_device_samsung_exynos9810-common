@@ -27,14 +27,6 @@
             <instance>default</instance>
         </interface>
     </hal>
-    <hal format="aidl">
-        <name>android.hardware.camera.provider</name>
-        <version>1</version>
-        <interface>
-            <name>ICameraProvider</name>
-            <instance>internal/0</instance>
-        </interface>
-    </hal>
     <hal format="hidl">
         <name>android.hardware.cas</name>
         <version>1.2</version>
