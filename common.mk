@@ -142,6 +142,8 @@ PRODUCT_COPY_FILES += \
 PRODUCT_PACKAGES += \
     android.hardware.keymaster@3.0-service \
     android.hardware.keymaster@3.0-impl
+    
+$(call soong_config_set,samsungVars,target_keymaster3_library,//vendor/samsung/exynos9810-common:libskeymaster3device)
 
 # Lights
 PRODUCT_PACKAGES += \
