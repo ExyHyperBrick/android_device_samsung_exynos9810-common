@@ -1,0 +1,4 @@
+# Restart audioserver once after boot, *after* ALSA controls exist
+on property:sys.boot_completed=1
+    wait /dev/snd/controlC0 10
+    restart audioserver
