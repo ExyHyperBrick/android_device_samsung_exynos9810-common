@@ -23,17 +23,15 @@ PRODUCT_ENFORCE_RRO_TARGETS += *
 
 # Audio
 PRODUCT_PACKAGES += \
+    audio.primary.exynos9810 \
     android.hardware.audio.effect@7.0-impl:32 \
-    android.hardware.audio@7.0-impl:32 \
+    android.hardware.audio@7.1-impl:32 \
     android.hardware.audio.service \
     android.hardware.bluetooth.audio-impl \
     android.hidl.allocator@1.0.vendor:32 \
     audio.bluetooth.default \
     audio.r_submix.default \
     audio.usb.default \
-    libaudioroute \
-    libtinyalsa \
-    libtinycompress \
     libprocessgroup.vendor
 
 PRODUCT_PACKAGES += \
@@ -304,7 +302,6 @@ PRODUCT_PACKAGES += \
 
 # Shims
 PRODUCT_PACKAGES += \
-    libshim_audioparams \
     libshim_sensorndkbridge
 
 # Speed profile services and wifi-service to reduce RAM and storage

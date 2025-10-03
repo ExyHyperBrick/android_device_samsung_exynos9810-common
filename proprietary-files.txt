@@ -4,23 +4,14 @@
 vendor/etc/audio_board_info.xml
 vendor/etc/default_volume_tables.xml
 vendor/etc/usb_audio_policy_configuration.xml
--vendor/lib/libSamsungPostProcessConvertor.so
--vendor/lib/lib_SoundAlive_SRC384_ver320.so
--vendor/lib/lib_soundaliveresampler.so
 -vendor/lib/libaboxpcmdump.so
--vendor/lib/libalsautils_sec.so
 -vendor/lib/libaudio_soundtrigger.so
 -vendor/lib/libaudiodebugfs.so
 -vendor/lib/libcodecdspdump.so
 -vendor/lib/libdatamod.so
--vendor/lib/libfloatingfeature.so
 -vendor/lib/libprofileparamstorage.so
 -vendor/lib/libsecaudiocoreutils.so
--vendor/lib/libsecaudioinfo.so
--vendor/lib/vndk/libaudioroute.so:vendor/lib/libaudioroute.so;MODULE=libaudioroute.exynos9810
--vendor/lib/vndk/libtinyalsa.so:vendor/lib/libtinyalsa.so;MODULE=libtinyalsa.exynos9810
 -vendor/lib64/libfloatingfeature.so
--vendor/lib64/libsecaudioinfo.so
 
 # Audio Firmware
 vendor/firmware/HFD.cfg.bin
@@ -179,7 +170,6 @@ vendor/etc/plmn_delta_usagsm.bin|9a25ec9e9da16ed2f8a9db07f037fe08283b24e5
 vendor/etc/plmn_se13.bin|cf144bf910b5e0f432fdedb50f5c544167f935dc
 -vendor/bin/cbd|702692aae172976476b697275711241927487b27
 -vendor/bin/hw/rild|4fce1d84582b1b34afd191a05b283a7377f5f073
--vendor/lib/libaudio-ril.so|a67b1818bb3be98a6e969f85ddbe7f40c11556c7
 -vendor/lib/libsec_semRil.so|56a094c45e21598e061a083b02dfb82dbeb4cacc
 -vendor/lib/libsecril-client.so;MODULE=libsecril-client.exynos9810|e6b801c15a1f8fe4d9d701b98f96fff4e1fbae1f
 -vendor/lib/libsecril-client.so:vendor/lib/libsecril-client-samsung.so|e6b801c15a1f8fe4d9d701b98f96fff4e1fbae1f

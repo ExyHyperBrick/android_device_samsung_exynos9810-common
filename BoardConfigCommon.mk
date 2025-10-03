@@ -12,6 +12,11 @@ TARGET_SPECIFIC_HEADER_PATH := $(COMMON_PATH)/include
 # Inherit proprietary vendor configuration
 include vendor/samsung/exynos9810-common/BoardConfigVendor.mk
 
+# Audio
+BOARD_LOW_LATENCY_CAPTURE_DURATION := 20
+$(call soong_config_set,exynos9810AudioVars,use_dual_speaker,true)
+$(call soong_config_set,exynos9810AudioVars,use_spkamp_playback,true)
+
 # APEX image
 DEXPREOPT_GENERATE_APEX_IMAGE := true
 

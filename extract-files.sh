@@ -60,9 +60,6 @@ fi
 
 function blob_fixup() {
     case "${1}" in
-        vendor/lib/libaudio-ril.so)
-                "${PATCHELF}" --replace-needed libsecril-client.so libsecril-client-samsung.so "${2}"
-                ;;
         vendor/lib*/libsensorlistener.so)
                 "${PATCHELF}" --add-needed libshim_sensorndkbridge.so "${2}"
                 ;;

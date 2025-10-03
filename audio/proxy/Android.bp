@@ -1,0 +1,91 @@
+// Copyright (C) 2017 The Android Open Source Project
+// Copyright (C) 2024 The LineageOS Project
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//      http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+soong_config_module_type {
+    name: "audioproxy",
+    module_type: "cc_defaults",
+    config_namespace: "exynos9810AudioVars",
+    bool_variables: [
+        "use_direct_rcvspk_path",
+        "use_dual_speaker",
+        "use_soundtrigger_hal",
+        "use_spkamp_playback",
+        "use_quad_mic",
+    ],
+    properties: [
+        "cflags",
+        "shared_libs",
+        "srcs",
+    ],
+}
+
+audioproxy {
+    name: "audioproxy_defaults",
+    soong_config_variables: {
+        use_direct_rcvspk_path: {
+            cflags: ["-DSUPPORT_DIRECT_RCVSPK_PATH"],
+        },
+        use_dual_speaker: {
+            cflags: ["-DSUPPORT_DUAL_SPEAKER"],
+        },
+        use_soundtrigger_hal: {
+            cflags: [
+                "-DSUPPORT_STHAL_INTERFACE",
+                "-DTARGET_SOC_NAME=exynos9810",
+            ],
+        },
+        use_spkamp_playback: {
+            cflags: ["-DENABLE_SPKAMP_PLAYBACK=true"],
+        },
+        use_quad_mic: {
+            cflags: ["-DSUPPORT_QUAD_MIC"],
+        },
+    },
+}
+
+cc_library_shared {
+    name: "libaudioproxy",
+    defaults: ["audioproxy_defaults"],
+    vendor: true,
+
+    srcs: [
+        "audio_proxy.c",
+    ],
+    include_dirs: [
+        "hardware/samsung_slsi-linaro/exynos/include/libaudio/audiohal",
+        "external/tinyalsa/include",
+        "external/tinycompress/include",
+        "external/kernel-headers/original/uapi/sound",
+        "external/expat/lib",
+    ],
+
+    header_libs: ["libhardware_headers"],
+    shared_libs: [
+        "liblog",
+        "libcutils",
+        "libtinyalsa",
+        "libtinycompress",
+        "libaudioutils",
+        "libaudioroute",
+        "libalsautils",
+        "libexpat",
+    ],
+    cflags: [
+        "-Wno-unused-parameter",
+        "-Wno-unused-variable",
+        "-Wno-unused-function",
+        "-DSUPPORT_MCD_FEATURE",
+    ],
+}
