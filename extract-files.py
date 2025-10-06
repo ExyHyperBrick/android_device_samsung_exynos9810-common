@@ -63,7 +63,7 @@ blob_fixups: blob_fixups_user_type = {
         'vendor/lib/sensors.grip.so',
         'vendor/lib64/sensors.grip.so',
     ): blob_fixup()
-        .replace_needed('libutils.so', 'libutils-v32.so'),
+        .add_needed('libutils-v32.so'),
 }
 
 module = ExtractUtilsModule(
