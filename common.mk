@@ -124,6 +124,7 @@ PRODUCT_COPY_FILES += \
     $(COMMON_PATH)/configs/init/audio_postboot.rc:$(TARGET_COPY_OUT_VENDOR)/etc/init/audio_postboot.rc \
     $(COMMON_PATH)/configs/init/mobicore.rc:$(TARGET_COPY_OUT_VENDOR)/etc/init/mobicore.rc \
     $(COMMON_PATH)/configs/init/init.baseband.rc:$(TARGET_COPY_OUT_VENDOR)/etc/init/init.baseband.rc \
+    $(COMMON_PATH)/configs/init/init.cpuset.rc:$(TARGET_COPY_OUT_VENDOR)/etc/init/init.cpuset.rc \
     $(COMMON_PATH)/configs/init/init.greenfix.rc:$(TARGET_COPY_OUT_VENDOR)/etc/init/init.greenfix.rc \
     $(COMMON_PATH)/configs/init/init.homekey.rc:$(TARGET_COPY_OUT_VENDOR)/etc/init/init.homekey.rc \
     $(COMMON_PATH)/configs/init/init.recovery.samsungexynos9810.rc:$(TARGET_COPY_OUT_RECOVERY)/root/init.recovery.samsungexynos9810.rc \
