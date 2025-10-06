@@ -182,7 +182,7 @@ on post-fs-data
 
     # [ Wi-Fi init
     # Create directory for hostapd
-    mkdir /data/hostapd 0770 system wifi
+    mkdir /data/vendor/wifi/hostapd 0770 system wifi
 
     # give system access to wpa_supplicant.conf for backup and restore
     mkdir /data/misc/wifi 0770 wifi system
@@ -193,8 +193,12 @@ on post-fs-data
     mkdir /data/misc/reboot 0700 system system
     chown system system /sys/kernel/ipv4/tcp_delack_seg
 
-    # Wi-Fi temporary log Directory for Android Global DE policy
-    mkdir /data/wifi/ 0770 system root
+    # for WIFI MAC address
+    mkdir /mnt/vendor/efs/wifi 0755 wifi wifi
+    chown wifi wifi /mnt/vendor/efs/wifi/.mac.info
+    chmod 0644 /mnt/vendor/efs/wifi/.mac.info
+    chown wifi wifi /mnt/vendor/efs/wifi/.mac.cob
+    chmod 0644 /mnt/vendor/efs/wifi/.mac.cob
 
     # change owner background io bigdata node for hqm write
     chown system system /sys/fs/fsio/bgiostat/sec_stat
