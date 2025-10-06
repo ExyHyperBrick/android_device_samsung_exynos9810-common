@@ -3,11 +3,6 @@ type log_data_file, file_type, data_file_type, core_data_file_type;
 type mediadrm_vendor_data_file, file_type, data_file_type;
 type nfc_vendor_data_file, file_type, data_file_type;
 
-# Debugfs
-type debugfs_ion, fs_type, debugfs_type;
-type debugfs_mali, fs_type, debugfs_type;
-type debugfs_mali_mem, fs_type, debugfs_type;
-
 # Proc
 type proc_swappiness, fs_type, proc_type;
 
