@@ -1,4 +1,5 @@
 <manifest version="2.0" type="device" target-level="5">
+    <kernel target-level="legacy" />
     <hal format="hidl">
         <name>android.hardware.audio</name>
         <transport>hwbinder</transport>
@@ -227,10 +228,9 @@
             <instance>default</instance>
         </interface>
     </hal>
-    <hal format="hidl">
+    <hal format="aidl">
         <name>vendor.lineage.livedisplay</name>
-        <transport>hwbinder</transport>
-        <version>2.0</version>
+        <version>1</version>
         <interface>
             <name>IDisplayColorCalibration</name>
             <instance>default</instance>
