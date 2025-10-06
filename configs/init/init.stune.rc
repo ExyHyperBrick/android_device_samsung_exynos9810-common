@@ -1,0 +1,43 @@
+on early-init
+    mount cgroup none /dev/stune schedtune
+    mkdir /dev/stune 0755 root root
+
+    # 8 groups: keep order in sync with kernel enum
+    mkdir /dev/stune/top-app         0755 system system
+    mkdir /dev/stune/foreground      0755 system system
+    mkdir /dev/stune/system          0755 system system
+    mkdir /dev/stune/background      0755 system system
+    mkdir /dev/stune/rt              0755 system system
+    mkdir /dev/stune/camera-daemon   0755 system system
+    mkdir /dev/stune/dex2oat         0755 system system
+    mkdir /dev/stune/restricted      0755 system system
+
+    write /dev/stune/schedtune.boost 0
+    write /dev/stune/schedtune.prefer_idle 0
+
+    write /dev/stune/top-app/schedtune.boost 22
+    write /dev/stune/top-app/schedtune.prefer_idle 1
+
+    write /dev/stune/foreground/schedtune.boost 10
+    write /dev/stune/foreground/schedtune.prefer_idle 1
+
+    write /dev/stune/system/schedtune.boost 0
+    write /dev/stune/system/schedtune.prefer_idle 0
+
+    write /dev/stune/background/schedtune.boost 0
+    write /dev/stune/background/schedtune.prefer_idle 0
+
+    write /dev/stune/rt/schedtune.boost 12
+    write /dev/stune/rt/schedtune.prefer_idle 1
+
+    write /dev/stune/camera-daemon/schedtune.boost 12
+    write /dev/stune/camera-daemon/schedtune.prefer_idle 1
+
+    write /dev/stune/dex2oat/schedtune.boost 5
+    write /dev/stune/dex2oat/schedtune.prefer_idle 0
+
+    write /dev/stune/restricted/schedtune.boost 0
+    write /dev/stune/restricted/schedtune.prefer_idle 0
+
+    chown system system /dev/stune/*/tasks
+    chmod 0664          /dev/stune/*/tasks
