@@ -31,7 +31,7 @@
 
 // Mixer Control for set MUTE Control
 #define ABOX_MUTE_CONTROL_NAME "ABOX ERAP info Mute Primary"
-#define ABOX_MUTE_CNT_FOR_PATH_CHANGE 15
+#define ABOX_MUTE_CNT_FOR_PATH_CHANGE 0
 
 // Mixer Control for set A-Box Early WakeUp Control
 #define ABOX_TICKLE_CONTROL_NAME "ABOX Tickle"
