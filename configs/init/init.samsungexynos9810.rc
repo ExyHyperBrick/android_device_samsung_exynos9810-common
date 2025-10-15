@@ -501,8 +501,6 @@ on post-fs-data
     chown clat clat /sys/kernel/clat/xlat_v4_addrs
   
 on boot
-    write /proc/sys/vm/swappiness 100
-
     setprop ro.radio.noril no
 
     setprop persist.vendor.members.cp_sup on
