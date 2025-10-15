@@ -56,9 +56,6 @@ vendor.hwc.exynos.vsync_mode=0
 # Keystore
 ro.hardware.keystore=mdfpp
 
-# Memory optimizations
-ro.config.avoid_gfx_accel=true
-
 ## Power HAL
 vendor.powerhal.disp.idle_support=false
 
