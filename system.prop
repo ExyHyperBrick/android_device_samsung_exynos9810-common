@@ -11,6 +11,9 @@ ro.charger.enable_suspend=true
 debug.sf.auto_latch_unsignaled=0
 ro.surface_flinger.enable_frame_rate_override=false
 
+# Memory optimizations
+ro.config.avoid_gfx_accel=true
+
 # Wi-Fi Direct
 wifi.direct.interface=p2p-dev-wlan0
 
