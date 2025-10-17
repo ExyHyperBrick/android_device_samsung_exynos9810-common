@@ -1,0 +1,8 @@
+android_app {
+    name: "ResDensityBinder",
+    srcs: ["src/**/*.kt"],
+    certificate: "platform",
+    privileged: true,
+    platform_apis: true,
+    optimize: { enabled: false },
+}
