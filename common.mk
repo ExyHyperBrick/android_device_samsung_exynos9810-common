@@ -283,6 +283,13 @@ PRODUCT_PACKAGES += \
 PRODUCT_COPY_FILES += \
     $(COMMON_PATH)/configs/linker/public.libraries.txt:$(TARGET_COPY_OUT_VENDOR)/etc/public.libraries.txt
 
+# Resolution Density Switcher
+PRODUCT_PACKAGES += \
+    ResDensityBinder
+
+PRODUCT_COPY_FILES += \
+    $(LOCAL_PATH)/resdensity/privapp-permissions-com.krazey.resdensity.xml:$(TARGET_COPY_OUT_SYSTEM)/etc/permissions/privapp-permissions-com.krazey.resdensity.xml
+
 # RIL
 PRODUCT_PACKAGES += \
     secril_config_svc
