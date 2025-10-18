@@ -55,8 +55,6 @@ blob_fixups: blob_fixups_user_type = {
         'vendor/lib64/libsensorlistener.so',
     ): blob_fixup()
         .add_needed('libshim_sensorndkbridge.so'),
-    'vendor/lib64/libsensorlistener.so': blob_fixup()
-        .add_needed('libshim_sensorndkbridge.so'),
     (
         'vendor/lib/sensors.bio.so',
         'vendor/lib64/sensors.bio.so',
