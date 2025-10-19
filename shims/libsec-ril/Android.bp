@@ -1,0 +1,27 @@
+cc_library_shared {
+    name: "libsec-ril",
+    vendor: true,
+    compile_multilib: "64",
+    srcs: ["libsec_ril_shim.cpp"],
+    cflags: [
+        "-Wall", "-Wextra", "-Werror",
+        "-DREAL_LIB_NAME=\"libsec-ril-impl.so\"",
+        "-DRIL_SHLIB",
+    ],
+    shared_libs: ["libbase", "libdl", "liblog"],
+    include_dirs: ["hardware/ril/include"],
+}
+
+cc_library_shared {
+    name: "libsec-ril-dsds",
+    vendor: true,
+    compile_multilib: "64",
+    srcs: ["libsec_ril_shim.cpp"],
+    cflags: [
+        "-Wall", "-Wextra", "-Werror",
+        "-DREAL_LIB_NAME=\"libsec-ril-dsds-impl.so\"",
+        "-DRIL_SHLIB",
+    ],
+    shared_libs: ["libbase", "libdl", "liblog"],
+    include_dirs: ["hardware/ril/include"],
+}

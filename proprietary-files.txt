@@ -176,8 +176,8 @@ vendor/lib64/vendor.samsung.hardware.radio.channel@2.0.so|38bc33189382277cd9ea0a
 # RIL - N770FXXS8EUL2 (R)
 vendor/bin/hw/rild|c77d17bde3312077a77a3a8238a62e649a996f44
 vendor/lib64/libril.so|cf62752d95d5bd16fe2613ee0b4ab1cb5328b37c
-vendor/lib64/libsec-ril.so|1956b2cf4fafc8c9ade6f227b5e0065f36a20b8b|70435309ef64f8fc5bee3f8ac36c00c468d28ec8
-vendor/lib64/libsec-ril-dsds.so|9ff3afd48584969f8a7590ca0f534ceb5a7d87d1|d4f419fe6372147671062f4f909d4b14de485358
+vendor/lib64/libsec-ril.so:vendor/lib64/libsec-ril-impl.so;FIX_SONAME|1956b2cf4fafc8c9ade6f227b5e0065f36a20b8b|7b806bce4e8ded497bf15d7a755e019eea48830b
+vendor/lib64/libsec-ril-dsds.so:vendor/lib64/libsec-ril-dsds-impl.so;FIX_SONAME|9ff3afd48584969f8a7590ca0f534ceb5a7d87d1|8c21697bb65617057900516aeb66380a1fd9329c
 vendor/lib64/libsecril-client.so|f63f4a658dec8e419f5316d3d0db086bdb17d595
 vendor/lib64/libsemnativecarrierfeature.so|b9663215a8cae356b4ddf86790359beda9c30f47
 
