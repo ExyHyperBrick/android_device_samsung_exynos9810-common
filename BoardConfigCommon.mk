@@ -127,6 +127,9 @@ include device/lineage/sepolicy/exynos/sepolicy.mk
 include device/samsung_slsi/sepolicy/sepolicy.mk
 BOARD_VENDOR_SEPOLICY_DIRS += $(COMMON_PATH)/sepolicy/vendor
 
+# Vendor Security Patch
+VENDOR_SECURITY_PATCH := 2022-07-01
+
 # Wi-Fi
 BOARD_WLAN_DEVICE := bcmdhd
 BOARD_WPA_SUPPLICANT_DRIVER := NL80211
