@@ -125,7 +125,7 @@ include device/samsung_slsi/sepolicy/sepolicy.mk
 BOARD_VENDOR_SEPOLICY_DIRS += $(COMMON_PATH)/sepolicy/vendor
 
 # Vendor Security Patch
-VENDOR_SECURITY_PATCH := 2022-07-01
+VENDOR_SECURITY_PATCH := 2023-02-01
 
 # Wi-Fi
 BOARD_WLAN_DEVICE := bcmdhd
