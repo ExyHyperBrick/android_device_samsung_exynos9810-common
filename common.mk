@@ -145,6 +145,9 @@ PRODUCT_PACKAGES += \
     android.hardware.keymaster@3.0-service \
     android.hardware.keymaster@3.0-impl
 
+PRODUCT_COPY_FILES += \
+    $(LOCAL_PATH)/configs/init/keymaster@3.0-override.rc:$(TARGET_COPY_OUT_VENDOR)/etc/init/keymaster@3.0-override.rc
+
 # Lights
 PRODUCT_PACKAGES += \
     android.hardware.light-service.samsung
