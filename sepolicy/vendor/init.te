@@ -4,3 +4,5 @@ allow init efs_file:dir mounton;
 allow init mnt_vendor_file:dir mounton;
 
 allow init kernel:system module_request;
+
+allow init sysfs_block_writable:file rw_file_perms;
