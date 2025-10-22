@@ -793,23 +793,69 @@ on boot
     write /dev/cpuset/restricted/cpus 0-2
 
 # FactoryApp(SensorHub)
-    chown system system /efs/FactoryApp/version
-    chown system system /efs/FactoryApp/predefine0
-    chown system system /efs/FactoryApp/predefine1
-    chown system system /efs/FactoryApp/predefine2
-    chown system system /efs/FactoryApp/predefine3
-    chown system system /efs/FactoryApp/predefine4
-    chown system system /efs/FactoryApp/predefine5
-    chown system system /efs/FactoryApp/predefine6
-    chown system system /efs/FactoryApp/predefine7
-    chown system system /efs/FactoryApp/predefine8
-    chown system system /efs/FactoryApp/predefine9
-    chown system system /efs/FactoryApp/predefine10
-    chown system system /efs/FactoryApp/predefine11
-    chown system system /efs/FactoryApp/predefine12
-    chown system system /efs/FactoryApp/predefine13
-    chown system system /efs/FactoryApp/predefine14
-    chown system system /efs/FactoryApp/predefine15
+    # Ensure EFS layout exists and is labeled
+    mkdir /efs/FactoryApp 0775 system system
+    restorecon_recursive /efs/FactoryApp
+    # Wait just in case EFS is a tiny bit late
+    wait /efs/FactoryApp 10
+
+    # version
+    write /efs/FactoryApp/version 0
+    chown system radio /efs/FactoryApp/version
+    chmod 0660 /efs/FactoryApp/version
+
+    # predefine0..15 — create stubs and set owner:group and perms
+    write /efs/FactoryApp/predefine0  0
+    chown system radio /efs/FactoryApp/predefine0
+    chmod 0660 /efs/FactoryApp/predefine0
+    write /efs/FactoryApp/predefine1  0
+    chown system radio /efs/FactoryApp/predefine1
+    chmod 0660 /efs/FactoryApp/predefine1
+    write /efs/FactoryApp/predefine2  0
+    chown system radio /efs/FactoryApp/predefine2
+    chmod 0660 /efs/FactoryApp/predefine2
+    write /efs/FactoryApp/predefine3  0
+    chown system radio /efs/FactoryApp/predefine3
+    chmod 0660 /efs/FactoryApp/predefine3
+    write /efs/FactoryApp/predefine4  0
+    chown system radio /efs/FactoryApp/predefine4
+    chmod 0660 /efs/FactoryApp/predefine4
+    write /efs/FactoryApp/predefine5  0
+    chown system radio /efs/FactoryApp/predefine5
+    chmod 0660 /efs/FactoryApp/predefine5
+    write /efs/FactoryApp/predefine6  0
+    chown system radio /efs/FactoryApp/predefine6
+    chmod 0660 /efs/FactoryApp/predefine6
+    write /efs/FactoryApp/predefine7  0
+    chown system radio /efs/FactoryApp/predefine7
+    chmod 0660 /efs/FactoryApp/predefine7
+    write /efs/FactoryApp/predefine8  0
+    chown system radio /efs/FactoryApp/predefine8
+    chmod 0660 /efs/FactoryApp/predefine8
+    write /efs/FactoryApp/predefine9  0
+    chown system radio /efs/FactoryApp/predefine9
+    chmod 0660 /efs/FactoryApp/predefine9
+    write /efs/FactoryApp/predefine10 0
+    chown system radio /efs/FactoryApp/predefine10
+    chmod 0660 /efs/FactoryApp/predefine10
+    write /efs/FactoryApp/predefine11 0
+    chown system radio /efs/FactoryApp/predefine11
+    chmod 0660 /efs/FactoryApp/predefine11
+    write /efs/FactoryApp/predefine12 0
+    chown system radio /efs/FactoryApp/predefine12
+    chmod 0660 /efs/FactoryApp/predefine12
+    write /efs/FactoryApp/predefine13 0
+    chown system radio /efs/FactoryApp/predefine13
+    chmod 0660 /efs/FactoryApp/predefine13
+    write /efs/FactoryApp/predefine14 0
+    chown system radio /efs/FactoryApp/predefine14
+    chmod 0660 /efs/FactoryApp/predefine14
+    write /efs/FactoryApp/predefine15 0
+    chown system radio /efs/FactoryApp/predefine15
+    chmod 0660 /efs/FactoryApp/predefine15
+
+    restorecon_recursive /efs/FactoryApp
+
     chown system system /efs/FactoryApp/baro_delta
     chown root system /efs/FactoryApp/gyro_cal_data
     chown root system /efs/FactoryApp/mag_cal_param
