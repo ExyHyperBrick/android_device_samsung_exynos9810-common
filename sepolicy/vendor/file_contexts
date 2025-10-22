@@ -23,8 +23,12 @@
 
 ## EFS
 /efs/FactoryApp(/.*)? u:object_r:app_efs_file:s0
+/efs/TEE(/.*)? u:object_r:prov_efs_file:s0
 
 ### Sysfs
+# Block
+/sys/devices/platform/(.*)/block/sda/queue/discard_max_bytes u:object_r:sysfs_block_writable:s0
+/sys/devices/platform/(.*)/block/sda/queue/read_ahead_kb u:object_r:sysfs_block_writable:s0
 # Camera
 /sys/devices/virtual/camera(/.*) u:object_r:sysfs_camera:s0
 /sys/devices/virtual/camera/flash/rear_flash u:object_r:sysfs_camera_writable:s0
