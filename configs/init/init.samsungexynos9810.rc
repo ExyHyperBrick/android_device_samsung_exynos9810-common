@@ -254,10 +254,10 @@ on post-fs
 
 on post-fs-data
 # Log data folder
-    mkdir /data/log 0771 radio system
-    mkdir /data/vendor 0771 radio system
-    mkdir /data/vendor/log 0771 radio system
+    mkdir /data/vendor 0771 root system
+    mkdir /data/vendor/log 0771 root system
     mkdir /data/vendor/log/abox 0771 audioserver system
+    mkdir /data/vendor/log/hwc 0771 system graphics
 
     setprop vold.post_fs_data_done 1
 
