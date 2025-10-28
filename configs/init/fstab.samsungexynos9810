@@ -4,7 +4,7 @@
 /dev/block/platform/11120000.ufs/by-name/ODM /odm ext4 ro wait,first_stage_mount
 /dev/block/platform/11120000.ufs/by-name/BOOT /boot emmc defaults recoveryonly
 /dev/block/platform/11120000.ufs/by-name/RECOVERY /recovery emmc defaults recoveryonly
-/dev/block/platform/11120000.ufs/by-name/CACHE /cache f2fs noatime,nosuid,nodev,discard,fsync_mode=nobarrier,inline_xattr,background_gc=on,flush_merge wait,check,formattable,recoveryonly
+/dev/block/platform/11120000.ufs/by-name/CACHE /cache f2fs noatime,nosuid,nodev,discard,fsync_mode=nobarrier,inline_xattr,background_gc=on,flush_merge wait,check,formattable
 /dev/block/platform/11120000.ufs/by-name/USERDATA /data f2fs noatime,nosuid,nodev,discard,usrquota,grpquota,fsync_mode=nobarrier,reserve_root=32768,resgid=5678,inlinecrypt latemount,wait,check,fileencryption=aes-256-xts:aes-256-cts:v2+inlinecrypt_optimized,reservedsize=128M,quota
 /dev/block/platform/11120000.ufs/by-name/EFS /mnt/vendor/efs ext4 noatime,nosuid,nodev,noauto_da_alloc,discard,journal_checksum,data=ordered,errors=panic wait,check
 /dev/block/platform/11120000.ufs/by-name/CPEFS /mnt/vendor/cpefs ext4 noatime,nosuid,nodev,noauto_da_alloc,discard,journal_checksum,data=ordered,errors=panic wait,check,nofail
