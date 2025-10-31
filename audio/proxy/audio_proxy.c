@@ -40,7 +40,6 @@
 #include <log/log.h>
 #include <cutils/str_parms.h>
 #include <cutils/properties.h>
-#include <string.h>
 
 #include <audio_utils/channels.h>
 #include <audio_utils/primitives.h>
@@ -402,32 +401,6 @@ static int get_pcm_device_number(void *proxy, void *proxy_stream)
     pthread_rwlock_unlock(&aproxy->mixer_update_lock);
 
     return pcm_device_number;
-}
-
-/*
- * Apply matching engine-* (if present) but ALWAYS finish with gain-* so volume wins.
- * gain_path should be something like "gain-incall_wb-speaker" or "gain-*-earpiece"
- */
-static inline void sync_engine_then_gain(struct audio_proxy *aproxy, const char *gain_path)
-{
-    if (!aproxy || !aproxy->aroute || !gain_path) return;
-
-    /* Build engine-* name from gain-* name */
-    char engine_path[128];
-    if (!strncmp(gain_path, "gain-", 5)) {
-        snprintf(engine_path, sizeof(engine_path), "engine-%s", gain_path + 5);
-    } else {
-        engine_path[0] = '\0';
-    }
-
-    /* First, try to apply engine preset (if it exists) */
-    if (engine_path[0]) {
-        audio_route_apply_and_update_path(aproxy->aroute, engine_path);
-        ALOGI("proxy: applied %s (engine preset)", engine_path);
-    }
-    /* Then ALWAYS apply the gain path last so volume takes effect */
-    audio_route_apply_and_update_path(aproxy->aroute, gain_path);
-    ALOGI("proxy: applied %s (volume)", gain_path);
 }
 
 /*
@@ -1242,14 +1215,6 @@ static void set_route(void *proxy, audio_usage ausage, device_type device)
     make_gain(path_name, gain_name);
     audio_route_apply_and_update_path(aproxy->aroute, gain_name);
     ALOGI("proxy-%s: set gain as %s", __func__, gain_name);
-    make_gain(path_name, gain_name);
-    /* On call routes, engine vs. gain order matters; finish with gain so we don't stay muted. */
-    if (is_usage_APCall(ausage) || is_usage_CPCall(ausage)) {
-        sync_engine_then_gain(aproxy, gain_name);
-    } else {
-        audio_route_apply_and_update_path(aproxy->aroute, gain_name);
-        ALOGI("proxy-%s: set gain as %s", __func__, gain_name);
-    }
 
     pthread_rwlock_unlock(&aproxy->mixer_update_lock);
 
@@ -1286,14 +1251,6 @@ static void set_reroute(void *proxy, audio_usage old_ausage, device_type old_dev
         make_gain(path_name, gain_name);
         audio_route_apply_and_update_path(aproxy->aroute, gain_name);
         ALOGI("proxy-%s: set gain as %s", __func__, gain_name);
-        /* On call routes, engine vs. gain order matters; finish with gain so we don't stay muted. */
-        make_gain(path_name, gain_name);
-        if (is_usage_APCall(new_ausage) || is_usage_CPCall(new_ausage)) {
-            sync_engine_then_gain(aproxy, gain_name);
-        } else {
-            audio_route_apply_and_update_path(aproxy->aroute, gain_name);
-            ALOGI("proxy-%s: set gain as %s", __func__, gain_name);
-        }
     }
 
     // 3. Update Mixers
