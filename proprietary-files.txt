@@ -10,7 +10,6 @@
 
 # Audio
 vendor/etc/audio_board_info.xml
-vendor/etc/default_volume_tables.xml
 vendor/etc/usb_audio_policy_configuration.xml
 vendor/lib/libaudio_soundtrigger.so;DISABLE_CHECKELF
 vendor/lib/libdatamod.so
