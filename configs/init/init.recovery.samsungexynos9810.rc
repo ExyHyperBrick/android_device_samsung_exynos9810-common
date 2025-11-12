@@ -7,6 +7,7 @@ on fs
     symlink /dev/block/bootdevice/by-name/VENDOR /dev/block/bootdevice/by-name/vendor
     symlink /dev/block/bootdevice/by-name/ODM /dev/block/bootdevice/by-name/odm
     symlink /dev/block/bootdevice/by-name/CACHE /dev/block/bootdevice/by-name/cache
+    symlink /dev/block/bootdevice/by-name/PERSISTENT /dev/block/persistent
 
 on init
     setprop sys.usb.configfs 1
