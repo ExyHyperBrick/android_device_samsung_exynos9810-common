@@ -14,8 +14,6 @@
 # Graphics
 /dev/g2d u:object_r:graphics_device:s0
 /dev/mali[0-9] u:object_r:gpu_device:s0
-# NFC
-/dev/sec-nfc u:object_r:nfc_device:s0
 # Secmem
 /dev/s5p-smem u:object_r:secmem_device:s0
 # ZRAM
