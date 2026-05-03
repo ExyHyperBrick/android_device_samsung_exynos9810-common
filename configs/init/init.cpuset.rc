@@ -18,7 +18,10 @@ on early-init
     write /dev/cpuset/top-app/cpuset.cpus 0-7
 
     write /dev/cpuset/foreground/cpuset.mems 0
-    write /dev/cpuset/foreground/cpuset.cpus 0-7
+    write /dev/cpuset/foreground/cpuset.cpus 0-5
+
+    write /dev/cpuset/foreground/boost/cpuset.mems 0
+    write /dev/cpuset/foreground/boost/cpuset.cpus 4-7
 
     write /dev/cpuset/background/cpuset.mems 0
     write /dev/cpuset/background/cpuset.cpus 0-2
