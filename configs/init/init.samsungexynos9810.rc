@@ -248,6 +248,50 @@ on init
     chmod 0664 /sys/kernel/ert/switch_rt_load_ratio
     write /sys/kernel/ert/rt_ratio_for_freq 0
 
+    # Group Balancer
+    chown system system /dev/stune/top-app/schedtune.gb_interval_us
+    chown system system /dev/stune/top-app/schedtune.gb_window_ms
+    chown system system /dev/stune/top-app/schedtune.gb_threshold
+    chown system system /dev/stune/top-app/schedtune.gb_imbalance_ratio
+    chown system system /dev/stune/top-app/schedtune.gb_duration
+    chown system system /dev/stune/top-app/schedtune.gb_balance_ratio
+    chown system system /dev/stune/foreground/schedtune.gb_interval_us
+    chown system system /dev/stune/foreground/schedtune.gb_window_ms
+    chown system system /dev/stune/foreground/schedtune.gb_threshold
+    chown system system /dev/stune/foreground/schedtune.gb_imbalance_ratio
+    chown system system /dev/stune/foreground/schedtune.gb_duration
+    chown system system /dev/stune/foreground/schedtune.gb_balance_ratio
+    chown system system /dev/stune/background/schedtune.gb_interval_us
+    chown system system /dev/stune/background/schedtune.gb_window_ms
+    chown system system /dev/stune/background/schedtune.gb_threshold
+    chown system system /dev/stune/background/schedtune.gb_imbalance_ratio
+    chown system system /dev/stune/background/schedtune.gb_duration
+    chown system system /dev/stune/background/schedtune.gb_balance_ratio
+    chmod 664 /dev/stune/top-app/schedtune.gb_interval_us
+    chmod 664 /dev/stune/top-app/schedtune.gb_window_ms
+    chmod 664 /dev/stune/top-app/schedtune.gb_threshold
+    chmod 664 /dev/stune/top-app/schedtune.gb_imbalance_ratio
+    chmod 664 /dev/stune/top-app/schedtune.gb_duration
+    chmod 664 /dev/stune/top-app/schedtune.gb_balance_ratio
+    chmod 664 /dev/stune/foreground/schedtune.gb_interval_us
+    chmod 664 /dev/stune/foreground/schedtune.gb_window_ms
+    chmod 664 /dev/stune/foreground/schedtune.gb_threshold
+    chmod 664 /dev/stune/foreground/schedtune.gb_imbalance_ratio
+    chmod 664 /dev/stune/foreground/schedtune.gb_duration
+    chmod 664 /dev/stune/foreground/schedtune.gb_balance_ratio
+    chmod 664 /dev/stune/background/schedtune.gb_interval_us
+    chmod 664 /dev/stune/background/schedtune.gb_window_ms
+    chmod 664 /dev/stune/background/schedtune.gb_threshold
+    chmod 664 /dev/stune/background/schedtune.gb_imbalance_ratio
+    chmod 664 /dev/stune/background/schedtune.gb_duration
+    chmod 664 /dev/stune/background/schedtune.gb_balance_ratio
+    write /dev/stune/top-app/schedtune.gb_interval_us 4000
+    write /dev/stune/top-app/schedtune.gb_window_ms 20
+    write /dev/stune/top-app/schedtune.gb_threshold 220
+    write /dev/stune/top-app/schedtune.gb_imbalance_ratio 75
+    write /dev/stune/top-app/schedtune.gb_duration 25
+    write /dev/stune/top-app/schedtune.gb_balance_ratio 55
+
 on post-fs
     # set RLIMIT_MEMLOCK to 64MB
     setrlimit 8 67108864 67108864
@@ -475,6 +519,20 @@ on boot
     chown system radio /sys/devices/system/sec_os_ctrl/migrate_os
     chmod 0664 sys/devices/system/sec_os_ctrl/migrate_os
 
+    # Permission for SCHEDTUNE
+    chown system system /dev/stune/top-app/schedtune.prefer_idle
+    chown system system /dev/stune/foreground/schedtune.prefer_idle
+    chown system system /dev/stune/background/schedtune.prefer_idle
+    chown system system /dev/stune/top-app/schedtune.prefer_perf
+    chown system system /dev/stune/foreground/schedtune.prefer_perf
+    chown system system /dev/stune/background/schedtune.prefer_perf
+    chmod 0664 /dev/stune/top-app/schedtune.prefer_idle
+    chmod 0664 /dev/stune/foreground/schedtune.prefer_idle
+    chmod 0664 /dev/stune/background/schedtune.prefer_idle
+    chmod 0664 /dev/stune/top-app/schedtune.prefer_perf
+    chmod 0664 /dev/stune/foreground/schedtune.prefer_perf
+    chmod 0664 /dev/stune/background/schedtune.prefer_perf
+
 # Permission and ownership for SEC PM
     # CPU dynamic hotplug
     chown system system /sys/power/cpuhotplug/enabled
@@ -684,6 +742,55 @@ on boot
     write /dev/cpuctl/bg_abnormal/cpu.rt_period_us 1000000
     write /dev/cpuctl/bg_abnormal/cpu.cfs_period_us 20000
     write /dev/cpuctl/bg_abnormal/cpu.cfs_quota_us 10000
+
+    mkdir /dev/cpuset/cached
+    write /dev/cpuset/cached/cpus 0-3
+    copy /dev/cpuset/mems /dev/cpuset/cached/mems
+    mkdir /dev/cpuset/abnormal
+    write /dev/cpuset/abnormal/cpus 0-3
+    copy /dev/cpuset/mems /dev/cpuset/abnormal/mems
+
+    # change permissions for BarTender's cpusets we'll touch at runtime
+    chown system system /dev/cpuset/cached
+    chown system system /dev/cpuset/abnormal
+    chown system system /dev/cpuset/cached/tasks
+    chown system system /dev/cpuset/abnormal/tasks
+    chown system system /dev/cpuset/cached/cpus
+    chown system system /dev/cpuset/abnormal/cpus
+    chmod 0664 /dev/cpuset/cached/tasks
+    chmod 0664 /dev/cpuset/abnormal/tasks
+    chmod 0664 /dev/cpuset/cached/cpus
+    chmod 0664 /dev/cpuset/abnormal/cpus
+
+    # For EAS scheduler
+    mkdir /dev/stune/bg_abnormal
+    chown system system /dev/stune/bg_abnormal
+    chown system system /dev/stune/bg_abnormal/tasks
+    chmod 0664 /dev/stune/bg_abnormal/tasks
+
+    mkdir /dev/stune/bg_cached
+    chown system system /dev/stune/bg_cached
+    chown system system /dev/stune/bg_cached/tasks
+    chmod 0664 /dev/stune/bg_cached/tasks
+
+# CPUSET(9810)
+    chown system system /dev/cpuset/top-app/cpus
+    chown system system /dev/cpuset/foreground/cpus
+    chown system system /dev/cpuset/background/cpus
+    chown system system /dev/cpuset/system-background/cpus
+    chown system system /dev/cpuset/restricted/cpus
+    chown system system /dev/cpuset/cpus
+    chmod 664 /dev/cpuset/top-app/cpus
+    chmod 664 /dev/cpuset/foreground/cpus
+    chmod 664 /dev/cpuset/background/cpus
+    chmod 664 /dev/cpuset/system-background/cpus
+    chmod 664 /dev/cpuset/restricted/cpus
+    chmod 664 /dev/cpuset/cpus
+    write /dev/cpuset/top-app/cpus 0-7
+    write /dev/cpuset/foreground/cpus 0-2,4-7
+    write /dev/cpuset/background/cpus 0-1
+    write /dev/cpuset/system-background/cpus 0-2
+    write /dev/cpuset/restricted/cpus 0-2
 
 # FactoryApp(SensorHub)
     # Ensure EFS layout exists and is labeled

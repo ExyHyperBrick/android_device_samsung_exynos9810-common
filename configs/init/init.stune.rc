@@ -41,12 +41,3 @@ on early-init
 
     chown system system /dev/stune/*/tasks
     chmod 0664          /dev/stune/*/tasks
-
-on boot
-    write /dev/stune/top-app/schedtune.boost 35
-    write /dev/stune/top-app/schedtune.prefer_idle 1
-    write /dev/stune/foreground/schedtune.boost 10
-    write /dev/stune/foreground/schedtune.prefer_idle 1
-    write /dev/stune/system-background/schedtune.boost 0
-    write /dev/stune/background/schedtune.boost 0
-    write /dev/stune/rt/schedtune.boost 50
