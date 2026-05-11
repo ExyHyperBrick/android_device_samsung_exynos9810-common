@@ -51,12 +51,6 @@ lib_fixups: lib_fixups_user_type = {
 
 blob_fixups: blob_fixups_user_type = {
     (
-        'vendor/lib64/libsec-ril.so',
-        'vendor/lib64/libsec-ril-dsds.so',
-    ): blob_fixup()
-	.sig_replace('60 0E 40 F9 82 0C 80 52 E1 03 15 AA E3 03 14 AA',
-            '60 0E 40 F9 82 0C 80 52 E1 03 15 AA 03 00 80 D2'),
-    (
         'vendor/lib/libsensorlistener.so',
         'vendor/lib64/libsensorlistener.so',
     ): blob_fixup()
