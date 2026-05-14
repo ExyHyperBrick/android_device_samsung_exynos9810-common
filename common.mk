@@ -371,6 +371,7 @@ PRODUCT_PROPERTY_OVERRIDES += \
 # without these, DataServiceManager and NetworkRegistrationManager fail
 # to bind their WLAN handlers, which can cascade to IMS setup failures.
 PRODUCT_PACKAGES += \
+    CarrierConfigResCommon \
     Iwlan \
     QualifiedNetworksService
 
