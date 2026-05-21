@@ -35,7 +35,7 @@ PRODUCT_PACKAGES += \
     libprocessgroup.vendor
 
 PRODUCT_PACKAGES += \
-    SamsungDAP
+    SamsungDAP9810
 
 PRODUCT_COPY_FILES += \
     frameworks/av/services/audiopolicy/config/bluetooth_audio_policy_configuration_7_0.xml:$(TARGET_COPY_OUT_VENDOR)/etc/bluetooth_audio_policy_configuration_7_0.xml \
@@ -119,6 +119,7 @@ PRODUCT_COPY_FILES += \
     $(COMMON_PATH)/configs/init/fstab.samsungexynos9810:$(TARGET_COPY_OUT_RAMDISK)/fstab.samsungexynos9810 \
     $(COMMON_PATH)/configs/init/fstab.samsungexynos9810:$(TARGET_COPY_OUT_VENDOR)/etc/fstab.samsungexynos9810 \
     $(COMMON_PATH)/configs/init/audio_postboot.rc:$(TARGET_COPY_OUT_VENDOR)/etc/init/audio_postboot.rc \
+    $(COMMON_PATH)/configs/init/dap_post_audio_restart.sh:$(TARGET_COPY_OUT_VENDOR)/etc/dap_post_audio_restart.sh \
     $(COMMON_PATH)/configs/init/mobicore.rc:$(TARGET_COPY_OUT_VENDOR)/etc/init/mobicore.rc \
     $(COMMON_PATH)/configs/init/init.baseband.rc:$(TARGET_COPY_OUT_VENDOR)/etc/init/init.baseband.rc \
     $(COMMON_PATH)/configs/init/init.greenfix.rc:$(TARGET_COPY_OUT_VENDOR)/etc/init/init.greenfix.rc \
