@@ -37,12 +37,45 @@ object DolbyCore {
     const val PROFILE_GAME_2 = 7
     const val PROFILE_SPACIAL_AUDIO = 8
 
-    private val audioEffect =
+    private var audioEffect: AudioEffect? = null
+
+    private fun createAudioEffect() =
         runCatching { AudioEffect(EFFECT_TYPE_DAP, AudioEffect.EFFECT_TYPE_NULL, 0, 0) }.getOrNull()
+
+    @Synchronized
+    fun recreate() {
+        runCatching { audioEffect?.release() }
+        audioEffect = createAudioEffect()
+    }
+
+    @Synchronized
+    private fun getAudioEffect(): AudioEffect? {
+        if (audioEffect == null) {
+            audioEffect = createAudioEffect()
+        }
+        return audioEffect
+    }
+
+    private fun <T> withAudioEffect(defaultValue: T, block: (AudioEffect) -> T): T {
+        val effect = getAudioEffect() ?: return defaultValue
+
+        return runCatching {
+            block(effect)
+        }.getOrElse {
+            recreate()
+
+            val newEffect = getAudioEffect() ?: return defaultValue
+            runCatching {
+                block(newEffect)
+            }.getOrDefault(defaultValue)
+        }
+    }
 
     fun getProfile(): Int {
         val out = intArrayOf(PROFILE_AUTO)
-        audioEffect?.getParameter(EFFECT_PARAM_PROFILE, out)
+        withAudioEffect(Unit) {
+            it.getParameter(EFFECT_PARAM_PROFILE, out)
+        }
         return out.first().coerceIn(PROFILE_AUTO, PROFILE_SPACIAL_AUDIO)
     }
 
@@ -56,13 +89,19 @@ object DolbyCore {
     }
 
     fun setProfile(profile: Int) {
-        audioEffect?.setParameter(EFFECT_PARAM_EFF_ENAB, 1)
-        audioEffect?.setParameter(EFFECT_PARAM_PROFILE, profile)
+        withAudioEffect(Unit) {
+            it.setParameter(EFFECT_PARAM_EFF_ENAB, 1)
+            it.setParameter(EFFECT_PARAM_PROFILE, profile)
+        }
     }
 
     fun setEnabled(enabled: Boolean) {
-        audioEffect?.enabled = enabled
+        withAudioEffect(Unit) {
+            it.enabled = enabled
+        }
     }
 
-    fun isEnabled() = audioEffect?.enabled ?: false
+    fun isEnabled() = withAudioEffect(false) {
+        it.enabled
+    }
 }
