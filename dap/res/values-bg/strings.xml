@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="dolby_enable_title">Включи Dolby Atmos</string>
+    <string name="dolby_top_intro_summary">възпроизвеждане</string>
+    <string name="dolby_profile_auto">Авт.</string>
+    <string name="dolby_profile_game">Игра</string>
+    <string name="dolby_profile_game_1">Игра 1</string>
+    <string name="dolby_profile_game_2">Игра 2</string>
+    <string name="dolby_profile_movie">Филм</string>
+    <string name="dolby_profile_music">Музика</string>
+    <string name="dolby_profile_off">Без профил</string>
+    <string name="dolby_profile_spacial_audio">Специално аудио</string>
+    <string name="dolby_profile_voice">Глас</string>
+</resources>
