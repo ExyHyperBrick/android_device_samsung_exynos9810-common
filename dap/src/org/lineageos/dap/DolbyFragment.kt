@@ -1,0 +1,77 @@
+/*
+ * Copyright (C) 2022-2025 The LineageOS Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package org.lineageos.dap
+
+import android.os.Bundle
+import androidx.preference.Preference
+import androidx.preference.PreferenceFragmentCompat
+import com.android.settingslib.widget.MainSwitchPreference
+import com.android.settingslib.widget.SelectorWithWidgetPreference
+
+class DolbyFragment : PreferenceFragmentCompat(), Preference.OnPreferenceChangeListener {
+
+    private lateinit var switchBar: MainSwitchPreference
+
+    override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
+        setPreferencesFromResource(R.xml.dolby_settings, rootKey)
+
+        switchBar = findPreference<MainSwitchPreference>(PREF_DOLBY_ENABLE)!!
+        switchBar.onPreferenceChangeListener = this
+        switchBar.isChecked = DolbyCore.isEnabled()
+
+        for ((key, value) in PREF_DOLBY_MODES) {
+            val preference = findPreference<SelectorWithWidgetPreference>(key)!!
+            preference.setOnPreferenceClickListener {
+                setProfile(value)
+                true
+            }
+        }
+    }
+
+    override fun onPreferenceChange(preference: Preference, newValue: Any?): Boolean {
+        if (preference == switchBar) {
+            DolbyCore.setEnabled(newValue as Boolean)
+        }
+        return true
+    }
+
+    private fun setProfile(profile: Int) {
+        DolbyCore.setProfile(profile)
+
+        for ((key, value) in PREF_DOLBY_MODES) {
+            val preference = findPreference<SelectorWithWidgetPreference>(key)!!
+            preference.isChecked = value == profile
+        }
+    }
+
+    companion object {
+        const val PREF_DOLBY_ENABLE = "dolby_enable"
+
+        val PREF_DOLBY_MODES =
+            mapOf(
+                "dolby_profile_auto" to DolbyCore.PROFILE_AUTO,
+                "dolby_profile_movie" to DolbyCore.PROFILE_MOVIE,
+                "dolby_profile_music" to DolbyCore.PROFILE_MUSIC,
+                "dolby_profile_voice" to DolbyCore.PROFILE_VOICE,
+                "dolby_profile_game" to DolbyCore.PROFILE_GAME,
+                "dolby_profile_off" to DolbyCore.PROFILE_OFF,
+                "dolby_profile_game_1" to DolbyCore.PROFILE_GAME_1,
+                "dolby_profile_game_2" to DolbyCore.PROFILE_GAME_2,
+                "dolby_profile_spacial_audio" to DolbyCore.PROFILE_SPACIAL_AUDIO,
+            )
+    }
+}

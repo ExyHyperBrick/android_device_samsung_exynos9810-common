@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="dolby_enable_title">Aktivera Dolby Atmos</string>
+    <string name="dolby_top_intro_summary">Upplev banbrytande ljud för mediauppspelning som flödar över och runt dig</string>
+    <string name="dolby_profile_auto">Auto</string>
+    <string name="dolby_profile_game">Spel</string>
+    <string name="dolby_profile_game_1">Spel 1</string>
+    <string name="dolby_profile_game_2">Spel 2</string>
+    <string name="dolby_profile_movie">Film</string>
+    <string name="dolby_profile_music">Musik</string>
+    <string name="dolby_profile_off">Ingen profil</string>
+    <string name="dolby_profile_spacial_audio">Rymligt ljud</string>
+    <string name="dolby_profile_voice">Röst</string>
+</resources>

@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="dolby_enable_title">Cumasaigh Dolby Atmos</string>
+    <string name="dolby_top_intro_summary">Taithí fuaime cinn le haghaidh athsheinm meáin a shreabhann thuas agus timpeall ort</string>
+    <string name="dolby_profile_auto">Uath</string>
+    <string name="dolby_profile_game">Cluiche</string>
+    <string name="dolby_profile_game_1">Cluiche 1</string>
+    <string name="dolby_profile_game_2">Cluiche 2</string>
+    <string name="dolby_profile_movie">Scannán</string>
+    <string name="dolby_profile_music">Ceol</string>
+    <string name="dolby_profile_off">Gan próifíl</string>
+    <string name="dolby_profile_spacial_audio">Fuaim spásúil</string>
+    <string name="dolby_profile_voice">Guth</string>
+</resources>

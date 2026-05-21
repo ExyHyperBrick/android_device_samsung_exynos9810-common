@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="dolby_enable_title">فعال کردن Dolby Atmos</string>
+    <string name="dolby_top_intro_summary">تجربه‌ی صدای پیشرفته برای پخش رسانه‌ای که بالای سر و اطرافتان جریان دارد.</string>
+    <string name="dolby_profile_auto">خودکار</string>
+    <string name="dolby_profile_game">بازی</string>
+    <string name="dolby_profile_game_1">بازی 1</string>
+    <string name="dolby_profile_game_2">بازی 2</string>
+    <string name="dolby_profile_movie">فیلم</string>
+    <string name="dolby_profile_music">موسیقی</string>
+    <string name="dolby_profile_off">بدون نمایه</string>
+    <string name="dolby_profile_spacial_audio">صدای فراگیر</string>
+    <string name="dolby_profile_voice">گفتار</string>
+</resources>
