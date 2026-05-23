@@ -4363,6 +4363,7 @@ static void set_microphone_info(struct audio_microphone_characteristic_t *microp
     uint32_t array_cnt = 0;
     float f_value[3];
     char *ptr = NULL;
+    char *saveptr = NULL;
 
     if (strcmp(attr[curIdx++], "device_id") == 0)
         strcpy(microphone->device_id, attr[curIdx++]);
@@ -4402,29 +4403,32 @@ static void set_microphone_info(struct audio_microphone_characteristic_t *microp
         microphone->num_frequency_responses = atoi(attr[curIdx++]);
         if (microphone->num_frequency_responses > 0) {
             if (strcmp(attr[curIdx++], "frequencies") == 0) {
-                ptr = strtok((char *)attr[curIdx++], " ");
+                saveptr = NULL;
+                ptr = strtok_r((char *)attr[curIdx++], " ", &saveptr);
                 while(ptr != NULL) {
                     microphone->frequency_responses[0][array_cnt++] = atof(ptr);
-                    ptr = strtok(NULL, " ");
+                    ptr = strtok_r(NULL, " ", &saveptr);
                 }
             }
             array_cnt = 0;
             if (strcmp(attr[curIdx++], "responses") == 0) {
-                ptr = strtok((char *)attr[curIdx++], " ");
+                saveptr = NULL;
+                ptr = strtok_r((char *)attr[curIdx++], " ", &saveptr);
                 while(ptr != NULL) {
                     microphone->frequency_responses[1][array_cnt++] = atof(ptr);
-                    ptr = strtok(NULL, " ");
+                    ptr = strtok_r(NULL, " ", &saveptr);
                 }
             }
         }
     }
 
     if (strcmp(attr[curIdx++], "geometric_location") == 0) {
-        ptr = strtok((char *)attr[curIdx++], " ");
+        saveptr = NULL;
+        ptr = strtok_r((char *)attr[curIdx++], " ", &saveptr);
         array_cnt = 0;
         while (ptr != NULL) {
             f_value[array_cnt++] = atof(ptr);
-            ptr = strtok(NULL, " ");
+            ptr = strtok_r(NULL, " ", &saveptr);
         }
         microphone->geometric_location.x = f_value[0];
         microphone->geometric_location.y = f_value[1];
@@ -4432,11 +4436,12 @@ static void set_microphone_info(struct audio_microphone_characteristic_t *microp
     }
 
     if (strcmp(attr[curIdx++], "orientation") == 0) {
-        ptr = strtok((char *)attr[curIdx++], " ");
+        saveptr = NULL;
+        ptr = strtok_r((char *)attr[curIdx++], " ", &saveptr);
         array_cnt = 0;
         while (ptr != NULL) {
             f_value[array_cnt++] = atof(ptr);
-            ptr = strtok(NULL, " ");
+            ptr = strtok_r(NULL, " ", &saveptr);
         }
         microphone->orientation.x = f_value[0];
         microphone->orientation.y = f_value[1];
