@@ -311,11 +311,9 @@ PRODUCT_PACKAGES += \
 
 # Sensors
 PRODUCT_PACKAGES += \
+    android.frameworks.schedulerservice@1.0 \
     android.hardware.sensors@1.0-impl.samsung:64 \
     android.hardware.sensors@1.0-service
-
-PRODUCT_COPY_FILES += \
-    $(COMMON_PATH)/vndk/android.frameworks.schedulerservice@1.0.so:$(TARGET_COPY_OUT_VENDOR)/lib64/android.frameworks.schedulerservice@1.0.so
 
 # Shims
 PRODUCT_PACKAGES += \
