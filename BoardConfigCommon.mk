@@ -10,7 +10,6 @@ TARGET_SPECIFIC_HEADER_PATH := $(COMMON_PATH)/include
 include vendor/samsung/exynos9810-common/BoardConfigVendor.mk
 
 # Audio
-$(call soong_config_set,exynos_audio,EXYNOS9810_CALLVOL_FIX,true)
 $(call soong_config_set,exynos_audio,PREDEFINED_LOW_CAPTURE_DURATION,20)
 $(call soong_config_set,exynos_audio,PROXY_LIBRARY,//device/samsung/exynos9810-common:libaudioproxy)
 $(call soong_config_set,exynos9810AudioVars,use_dual_speaker,true)
