@@ -25,6 +25,23 @@
                     <profile name="" format="AUDIO_FORMAT_PCM_16_BIT"
                              samplingRates="48000" channelMasks="AUDIO_CHANNEL_OUT_STEREO"/>
                 </mixPort>
+                <!-- EXYNOS9810_HDMI_AUDIO_DIRECT:
+                     HDMI/DP audio must open the HAL AUX_DIGITAL stream, not
+                     reroute primary-out/fast.  No flags are intentional:
+                     audio_hw.c maps flags == NONE + AUDIO_DEVICE_OUT_AUX_DIGITAL
+                     to ASTREAM_PLAYBACK_AUX_DIGITAL / DP Audio PCM. -->
+                <mixPort name="aux-digital-output" role="source">
+                    <!-- EXYNOS9810_HDMI_AUDIO_STEREO_48K:
+                         Keep the DP/HDMI direct output conservative.  The
+                         Samsung DP DMA/HAL path opens pcmC0D15p directly and
+                         some sinks/HAL paths behave badly when AudioPolicy
+                         picks 192 kHz / multichannel from the broad static
+                         profile.  Start with stable 48 kHz stereo; widen only
+                         after the hotplug path is stable. -->
+                    <profile name="" format="AUDIO_FORMAT_PCM_16_BIT"
+                             samplingRates="48000"
+                             channelMasks="AUDIO_CHANNEL_OUT_STEREO"/>
+                </mixPort>
                 <mixPort name="primary-in" role="sink">
                     <profile name="" format="AUDIO_FORMAT_PCM_16_BIT"
                              samplingRates="8000 11025 12000 16000 22050 24000 32000 44100 48000"
@@ -119,6 +136,8 @@
                        sources="primary-out,fast"/>
                 <route type="mix" sink="Bt Sco Car Kit"
                        sources="primary-out,fast"/>
+                <route type="mix" sink="Aux Device Out"
+                       sources="aux-digital-output"/>
                 <route type="mix" sink="primary-in"
                        sources="Built-In Mic,Wired Headset Mic,Bt Sco Headset Mic,Aux Device In,Voice Call Mic,FM Mic"/>
             </routes>
