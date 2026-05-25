@@ -1,0 +1,10 @@
+cc_prebuilt_library_shared {
+    name: "android.frameworks.schedulerservice@1.0",
+    vendor: true,
+    compile_multilib: "both",
+    srcs: ["android.frameworks.schedulerservice@1.0.so"],
+    check_elf_files: false,
+    strip: {
+        none: true,
+    },
+}

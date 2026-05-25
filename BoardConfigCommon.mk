@@ -3,8 +3,6 @@
 
 COMMON_PATH := device/samsung/exynos9810-common
 
-BUILD_BROKEN_ELF_PREBUILT_PRODUCT_COPY_FILES := true
-
 # Include path
 TARGET_SPECIFIC_HEADER_PATH := $(COMMON_PATH)/include
 
