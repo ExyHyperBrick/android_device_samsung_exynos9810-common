@@ -313,6 +313,8 @@ PRODUCT_PACKAGES += \
 
 # Shims
 PRODUCT_PACKAGES += \
+    libsec-ril \
+    libsec-ril-dsds \
     libshim_audioparams \
     libshim_sensorndkbridge
 
