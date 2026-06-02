@@ -30,6 +30,16 @@
                 "100"
             ],
             "HoldFd": true
+        },
+        {
+            "Name": "CPULittleClusterMinFreq",
+            "Path": "/sys/devices/system/cpu/cpu0/cpufreq/scaling_min_freq",
+            "Values": [
+                "0",
+                "1456000"
+            ],
+            "DefaultIndex": 0,
+            "ResetOnInit": true
         }
     ],
     "Actions": [
@@ -74,6 +84,12 @@
             "Node": "GPUMaxFreq",
             "Duration": 0,
             "Value": "572000"
+        },
+        {
+            "PowerHint": "INTERACTION",
+            "Node": "CPULittleClusterMinFreq",
+            "Duration": 100,
+            "Value": "1456000"
         }
     ]
 }
