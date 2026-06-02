@@ -243,6 +243,7 @@ on post-fs-data
     mkdir /efs/nfc 0700 nfc nfc
 
     # NFC KEY
+    mkdir /data/nfc 0770 nfc nfc
     mkdir /data/vendor/nfc 0770 nfc nfc
 
     # Create all remaining /data root dirs so that they are made through init
