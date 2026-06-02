@@ -1,7 +1,6 @@
 ### Data
 /data/log(/.*)? u:object_r:log_data_file:s0
 /data/vendor/mediadrm(/.*)? u:object_r:mediadrm_vendor_data_file:s0
-/data/vendor/nfc(/.*)? u:object_r:nfc_vendor_data_file:s0
 
 ### DEV
 # Extcon
@@ -14,6 +13,9 @@
 # Graphics
 /dev/g2d u:object_r:graphics_device:s0
 /dev/mali[0-9] u:object_r:gpu_device:s0
+# NFC
+/data/nfc(/.*)? u:object_r:nfc_data_file:s0
+/data/vendor/nfc(/.*)? u:object_r:nfc_vendor_data_file:s0
 # Secmem
 /dev/s5p-smem u:object_r:secmem_device:s0
 # ZRAM
