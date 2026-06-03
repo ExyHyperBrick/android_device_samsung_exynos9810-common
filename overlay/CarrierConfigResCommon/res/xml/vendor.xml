@@ -16,13 +16,17 @@
             <item value="14" />
         </int-array>
 
-        <!-- Allow IMS handover between LTE/NR and IWLAN for VoLTE <-> VoWiFi
-             transitions. Keep GERAN/UTRAN <-> IWLAN disabled because older
-             Samsung DATA HALs do not handle those handovers safely. -->
-        <string-array name="iwlan_handover_policy_string_array" num="3">
+        <!-- Samsung legacy DATA HAL cannot perform/cancel framework IMS
+             EUTRAN <-> IWLAN handover cleanly. Make IMS transport changes
+             break-before-make instead of attempting seamless handover. -->
+        <boolean name="delay_ims_tear_down_until_call_end_bool" value="true" />
+
+        <string-array name="iwlan_handover_policy_string_array" num="5">
+            <item value="source=EUTRAN|NGRAN, target=IWLAN, type=disallowed, capabilities=IMS|EIMS" />
+            <item value="source=IWLAN, target=EUTRAN|NGRAN, type=disallowed, capabilities=IMS|EIMS" />
             <item value="source=IWLAN, target=GERAN|UTRAN, type=disallowed" />
             <item value="source=GERAN|UTRAN, target=IWLAN, type=disallowed" />
-            <item value="source=EUTRAN|NGRAN|IWLAN, target=EUTRAN|NGRAN|IWLAN, type=allowed" />
+            <item value="source=GERAN|UTRAN|EUTRAN|NGRAN|IWLAN|UNKNOWN, target=GERAN|UTRAN|EUTRAN|NGRAN|IWLAN, type=allowed" />
         </string-array>
     </carrier_config>
 
