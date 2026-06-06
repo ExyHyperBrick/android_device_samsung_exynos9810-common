@@ -562,6 +562,9 @@ on boot
     chmod 0664 /sys/power/cpuhotplug/governor/ldsum_enabled
     chmod 0664 /sys/power/cpuhotplug/governor/skip_lit_enabled
 
+    # Reduce userspace freezer wait during suspend.
+    write /sys/power/pm_freeze_timeout 1000
+
     # DEV Freq
     chown radio system /sys/class/devfreq/17000010.devfreq_mif/scaling_devfreq_min
     chmod 0664 /sys/class/devfreq/17000010.devfreq_mif/scaling_devfreq_min
