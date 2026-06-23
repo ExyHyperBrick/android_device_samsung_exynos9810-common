@@ -12,7 +12,9 @@ $(call inherit-product, hardware/samsung_slsi-linaro/config/config.mk)
 PRODUCT_SOONG_NAMESPACES += \
     $(COMMON_PATH) \
     hardware/google/interfaces \
-    hardware/google/pixel \
+    hardware/google/pixel/pixelstats \
+    hardware/google/pixel/power-libperfmgr \
+    hardware/google/pixel/thermal \
     hardware/samsung \
     hardware/samsung/aidl/power-libperfmgr \
     hardware/samsung_slsi-linaro/exynos/gralloc/gralloc3 \
