@@ -68,10 +68,6 @@ PRODUCT_PACKAGES += \
 PRODUCT_PACKAGES += \
     charger_res_images_vendor
 
-# ConfigStore
-PRODUCT_PACKAGES += \
-    disable_configstore
-
 # Display
 PRODUCT_PACKAGES += \
     android.hardware.graphics.allocator@2.0-impl:64 \
