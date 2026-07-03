@@ -82,6 +82,8 @@ PRODUCT_PACKAGES += \
     android.hardware.composer.hwc3-service.slsi \
     gralloc.universal9810
 
+$(call soong_config_set_bool,libui,legacy_gralloc,true)
+
 # DRM
 PRODUCT_PACKAGES += \
     android.hardware.drm@1.4.vendor:32 \
