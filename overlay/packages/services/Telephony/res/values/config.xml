@@ -24,4 +24,7 @@
          are routed through the android.media.AudioManager class (true) or through
          the com.android.internal.telephony.Phone interface (false). -->
     <bool name="send_mic_mute_to_AudioManager">true</bool>
+
+<!-- Register me.phh.ims as the IMS MmTel provider -->
+<string name="config_ims_mmtel_package" translatable="false">me.phh.ims</string>
 </resources>
