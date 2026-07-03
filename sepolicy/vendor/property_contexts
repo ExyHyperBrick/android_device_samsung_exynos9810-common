@@ -11,6 +11,9 @@ ro.fastbootd.available         u:object_r:exported_default_prop:s0
 ro.vendor.winupdate            u:object_r:vendor_hwc_prop:s0
 vendor.hwc.display.            u:object_r:vendor_hwc_prop:s0
 
+# IMS
+vendor.ril.ims.                u:object_r:vendor_ims_prop:s0
+
 # TEE
 sys.mobicoredaemon.enable u:object_r:tee_prop:s0
 

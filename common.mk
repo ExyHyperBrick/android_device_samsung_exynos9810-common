@@ -358,3 +358,18 @@ PRODUCT_COPY_FILES += \
 
 PRODUCT_VENDOR_PROPERTIES += \
     ro.vendor.init_dev_config.path=/vendor/bin/init_dev_config
+
+# IMS over Wi-Fi data service and network qualification service.
+# Required by the telephony framework even for VoLTE-only (no VoWiFi):
+# without these, DataServiceManager and NetworkRegistrationManager fail
+# to bind their WLAN handlers, which can cascade to IMS setup failures.
+PRODUCT_PACKAGES += \
+    CarrierConfigResCommon \
+    Iwlan \
+    QualifiedNetworksService
+
+PRODUCT_PACKAGES += \
+    PhhIms
+
+PRODUCT_COPY_FILES += \
+    $(COMMON_PATH)/configs/permissions/privapp-permissions-me.phh.ims.xml:$(TARGET_COPY_OUT_SYSTEM)/etc/permissions/privapp-permissions-me.phh.ims.xml
