@@ -1359,6 +1359,183 @@ static void do_operations_by_playback_route_reset(struct audio_proxy *aproxy __u
 }
 
 
+static void clear_active_playback_route(struct audio_proxy *aproxy,
+                                        const char *reason)
+{
+    if (aproxy->active_playback_ausage == AUSAGE_NONE ||
+        aproxy->active_playback_device == DEVICE_NONE)
+        return;
+
+    ALOGI("proxy-%s: clear active playback route for %s: usage(%d) device(%d)",
+          __func__, reason, aproxy->active_playback_ausage,
+          aproxy->active_playback_device);
+
+    disable_internal_path(aproxy, aproxy->active_playback_device);
+
+    if (aproxy->active_playback_modifier != MODIFIER_NONE) {
+        reset_modifier(aproxy, aproxy->active_playback_modifier);
+        aproxy->active_playback_modifier = MODIFIER_NONE;
+    }
+
+    reset_route(aproxy, aproxy->active_playback_ausage,
+                aproxy->active_playback_device);
+
+    aproxy->active_playback_ausage = AUSAGE_NONE;
+    aproxy->active_playback_device = DEVICE_NONE;
+}
+
+static void clear_active_capture_route(struct audio_proxy *aproxy,
+                                       const char *reason)
+{
+    if (aproxy->active_capture_ausage == AUSAGE_NONE ||
+        aproxy->active_capture_device == DEVICE_NONE)
+        return;
+
+    ALOGI("proxy-%s: clear active capture route for %s: usage(%d) device(%d)",
+          __func__, reason, aproxy->active_capture_ausage,
+          aproxy->active_capture_device);
+
+    disable_internal_path(aproxy, aproxy->active_capture_device);
+
+    if (aproxy->active_capture_modifier != MODIFIER_NONE) {
+        reset_modifier(aproxy, aproxy->active_capture_modifier);
+        aproxy->active_capture_modifier = MODIFIER_NONE;
+    }
+
+    reset_route(aproxy, aproxy->active_capture_ausage,
+                aproxy->active_capture_device);
+
+    aproxy->active_capture_ausage = AUSAGE_NONE;
+    aproxy->active_capture_device = DEVICE_NONE;
+}
+
+static void prepare_ap_call_transition(struct audio_proxy *aproxy,
+                                       audio_usage routed_ausage)
+{
+    if (!is_usage_APCall(routed_ausage))
+        return;
+
+    if (is_usage_CPCall(aproxy->active_capture_ausage))
+        clear_active_capture_route(aproxy, "CP to AP call transition");
+
+    if (is_usage_CPCall(aproxy->active_playback_ausage))
+        clear_active_playback_route(aproxy, "CP to AP call transition");
+}
+
+static void prepare_fresh_cp_playback_route(struct audio_proxy *aproxy,
+                                            audio_usage routed_ausage,
+                                            device_type routed_device)
+{
+    if (!is_usage_CPCall(routed_ausage))
+        return;
+
+    if (aproxy->active_playback_ausage != AUSAGE_NONE ||
+        aproxy->active_playback_device != DEVICE_NONE)
+        return;
+
+    if (aproxy->active_playback_modifier != MODIFIER_NONE) {
+        ALOGI("proxy-%s: clear stale playback modifier for fresh CP call",
+              __func__);
+        reset_modifier(aproxy, aproxy->active_playback_modifier);
+        aproxy->active_playback_modifier = MODIFIER_NONE;
+    }
+
+    ALOGI("proxy-%s: reset requested CP playback route before fresh start: "
+          "usage(%d) device(%d)", __func__, routed_ausage, routed_device);
+    reset_route(aproxy, routed_ausage, routed_device);
+}
+
+static void prepare_fresh_cp_capture_route(struct audio_proxy *aproxy,
+                                           audio_usage routed_ausage,
+                                           device_type routed_device)
+{
+    if (!is_usage_CPCall(routed_ausage))
+        return;
+
+    if (aproxy->active_capture_ausage != AUSAGE_NONE ||
+        aproxy->active_capture_device != DEVICE_NONE)
+        return;
+
+    if (aproxy->active_capture_modifier != MODIFIER_NONE) {
+        ALOGI("proxy-%s: clear stale capture modifier for fresh CP call",
+              __func__);
+        reset_modifier(aproxy, aproxy->active_capture_modifier);
+        aproxy->active_capture_modifier = MODIFIER_NONE;
+    }
+
+    ALOGI("proxy-%s: reset requested CP capture route before fresh start: "
+          "usage(%d) device(%d)", __func__, routed_ausage, routed_device);
+    reset_route(aproxy, routed_ausage, routed_device);
+}
+
+static void prepare_fresh_ap_playback_route(struct audio_proxy *aproxy,
+                                            audio_usage routed_ausage,
+                                            device_type routed_device)
+{
+    if (!is_usage_APCall(routed_ausage))
+        return;
+
+    if (aproxy->active_playback_ausage != AUSAGE_NONE ||
+        aproxy->active_playback_device != DEVICE_NONE)
+        return;
+
+    if (aproxy->active_playback_modifier != MODIFIER_NONE) {
+        ALOGI("proxy-%s: clear stale playback modifier for fresh AP call",
+              __func__);
+        reset_modifier(aproxy, aproxy->active_playback_modifier);
+        aproxy->active_playback_modifier = MODIFIER_NONE;
+    }
+
+    /*
+     * A fresh AP/VoIP call can still inherit stale mixer or internal PCM
+     * state even when the proxy state says no playback route is active.
+     * A later speaker toggle naturally closes these internal paths and
+     * re-applies the communication route, which is why it recovers the
+     * distorted/chipmunk state. Do the same cleanup before the first AP
+     * call route is applied, without changing the user-visible route.
+     */
+    ALOGI("proxy-%s: reset requested AP playback route before fresh start: "
+          "usage(%d) device(%d)", __func__, routed_ausage, routed_device);
+    disable_internal_path(aproxy, routed_device);
+    reset_route(aproxy, routed_ausage, routed_device);
+}
+
+static void prepare_fresh_ap_capture_route(struct audio_proxy *aproxy,
+                                           audio_usage routed_ausage,
+                                           device_type routed_device)
+{
+    if (!is_usage_APCall(routed_ausage))
+        return;
+
+    if (aproxy->active_capture_ausage != AUSAGE_NONE ||
+        aproxy->active_capture_device != DEVICE_NONE)
+        return;
+
+    if (aproxy->active_capture_modifier != MODIFIER_NONE) {
+        ALOGI("proxy-%s: clear stale capture modifier for fresh AP call",
+              __func__);
+        reset_modifier(aproxy, aproxy->active_capture_modifier);
+        aproxy->active_capture_modifier = MODIFIER_NONE;
+    }
+
+    ALOGI("proxy-%s: reset requested AP capture route before fresh start: "
+          "usage(%d) device(%d)", __func__, routed_ausage, routed_device);
+    reset_route(aproxy, routed_ausage, routed_device);
+}
+
+static bool is_any_active_usage_ap_call(struct audio_proxy *aproxy)
+{
+    return is_usage_APCall(aproxy->active_playback_ausage) ||
+           is_usage_APCall(aproxy->active_capture_ausage);
+}
+
+static bool should_ignore_cp_call_setup(struct audio_proxy *aproxy,
+                                        audio_usage routed_ausage)
+{
+    return is_usage_CPCall(routed_ausage) &&
+           is_any_active_usage_ap_call(aproxy);
+}
+
 /*
  * Dump functions
  */
@@ -3568,9 +3745,21 @@ bool proxy_set_route(void *proxy, int ausage, int device, int modifier, bool set
     modifier_type routed_modifier = (modifier_type)modifier;
 
     if (set) {
+        if (should_ignore_cp_call_setup(aproxy, routed_ausage)) {
+            ALOGW("proxy-%s: ignore transient CP call route while AP call "
+                  "is active: usage(%d) device(%d)", __func__,
+                  routed_ausage, routed_device);
+            return true;
+        }
+
         if (routed_device < DEVICE_MAIN_MIC) {
             /* Do Specific Operation based on Audio Path */
             do_operations_by_playback_route_set(aproxy, routed_ausage, routed_device);
+            prepare_ap_call_transition(aproxy, routed_ausage);
+            prepare_fresh_cp_playback_route(aproxy, routed_ausage,
+                                            routed_device);
+            prepare_fresh_ap_playback_route(aproxy, routed_ausage,
+                                            routed_device);
 
             if (aproxy->active_playback_ausage != AUSAGE_NONE &&
                 aproxy->active_playback_device != DEVICE_NONE) {
@@ -3603,6 +3792,11 @@ bool proxy_set_route(void *proxy, int ausage, int device, int modifier, bool set
             }
         } else {
             // Audio Path Routing for Capture Path
+            prepare_fresh_cp_capture_route(aproxy, routed_ausage,
+                                           routed_device);
+            prepare_fresh_ap_capture_route(aproxy, routed_ausage,
+                                           routed_device);
+
             if (aproxy->active_capture_ausage != AUSAGE_NONE &&
                 aproxy->active_capture_device != DEVICE_NONE) {
                 disable_internal_path(aproxy, aproxy->active_capture_device);
@@ -3684,6 +3878,12 @@ void  proxy_stop_voice_call(void *proxy)
 void proxy_start_voice_call(void *proxy)
 {
     struct audio_proxy *aproxy = (struct audio_proxy *)proxy;
+
+    if (is_any_active_usage_ap_call(aproxy)) {
+        ALOGW("proxy-%s: ignore CP voice start while AP call is active",
+              __func__);
+        return;
+    }
 
     voice_rx_start(aproxy);
 
@@ -3853,6 +4053,12 @@ void proxy_set_audiomode(void *proxy, int audiomode)
     struct audio_proxy *aproxy = proxy;
     struct mixer_ctl *ctrl = NULL;
     int ret = 0, val = audiomode;
+
+    if (val == AUDIO_MODE_IN_CALL && is_any_active_usage_ap_call(aproxy)) {
+        ALOGW("proxy-%s: ignore transient IN_CALL while AP call is active",
+              __func__);
+        return;
+    }
 
     aproxy->audio_mode = val; // set audio mode
 
