@@ -1524,6 +1524,18 @@ static void prepare_fresh_ap_capture_route(struct audio_proxy *aproxy,
     reset_route(aproxy, routed_ausage, routed_device);
 }
 
+static bool is_any_active_usage_ap_call(struct audio_proxy *aproxy)
+{
+    return is_usage_APCall(aproxy->active_playback_ausage) ||
+           is_usage_APCall(aproxy->active_capture_ausage);
+}
+
+static bool should_ignore_cp_call_setup(struct audio_proxy *aproxy,
+                                        audio_usage routed_ausage)
+{
+    return is_usage_CPCall(routed_ausage) &&
+           is_any_active_usage_ap_call(aproxy);
+}
 
 /*
  * Dump functions
@@ -3734,6 +3746,13 @@ bool proxy_set_route(void *proxy, int ausage, int device, int modifier, bool set
     modifier_type routed_modifier = (modifier_type)modifier;
 
     if (set) {
+        if (should_ignore_cp_call_setup(aproxy, routed_ausage)) {
+            ALOGW("proxy-%s: ignore transient CP call route while AP call "
+                  "is active: usage(%d) device(%d)", __func__,
+                  routed_ausage, routed_device);
+            return true;
+        }
+
         if (routed_device < DEVICE_MAIN_MIC) {
             /* Do Specific Operation based on Audio Path */
             do_operations_by_playback_route_set(aproxy, routed_ausage, routed_device);
@@ -3860,6 +3879,12 @@ void  proxy_stop_voice_call(void *proxy)
 void proxy_start_voice_call(void *proxy)
 {
     struct audio_proxy *aproxy = (struct audio_proxy *)proxy;
+
+    if (is_any_active_usage_ap_call(aproxy)) {
+        ALOGW("proxy-%s: ignore CP voice start while AP call is active",
+              __func__);
+        return;
+    }
 
     voice_rx_start(aproxy);
 
@@ -4029,6 +4054,12 @@ void proxy_set_audiomode(void *proxy, int audiomode)
     struct audio_proxy *aproxy = proxy;
     struct mixer_ctl *ctrl = NULL;
     int ret = 0, val = audiomode;
+
+    if (val == AUDIO_MODE_IN_CALL && is_any_active_usage_ap_call(aproxy)) {
+        ALOGW("proxy-%s: ignore transient IN_CALL while AP call is active",
+              __func__);
+        return;
+    }
 
     aproxy->audio_mode = val; // set audio mode
 
