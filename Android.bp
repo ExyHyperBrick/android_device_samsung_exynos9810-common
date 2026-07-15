@@ -34,6 +34,7 @@ prebuilt_etc {
     filename_from_src: true,
     sub_dir: "init",
     vendor: true,
+    overrides: ["filterPowerSupplyEvents.o"],
 }
 
 prebuilt_etc {
