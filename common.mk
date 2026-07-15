@@ -115,21 +115,23 @@ PRODUCT_PACKAGES += \
     libhwbinder.vendor
 
 # init
+PRODUCT_PACKAGES += \
+    exynos9810_audio_postboot_rc \
+    exynos9810_baseband_rc \
+    exynos9810_greenfix_rc \
+    exynos9810_init_rc \
+    exynos9810_mobicore_rc \
+    exynos9810_samsung_rc \
+    exynos9810_swap_rc \
+    exynos9810_ueventd_rc \
+    exynos9810_usb_rc \
+    exynos9810_wifi_rc
+
 PRODUCT_COPY_FILES += \
     $(COMMON_PATH)/configs/init/fstab.samsungexynos9810:$(TARGET_COPY_OUT_RAMDISK)/fstab.samsungexynos9810 \
     $(COMMON_PATH)/configs/init/fstab.samsungexynos9810:$(TARGET_COPY_OUT_VENDOR)/etc/fstab.samsungexynos9810 \
-    $(COMMON_PATH)/configs/init/audio_postboot.rc:$(TARGET_COPY_OUT_VENDOR)/etc/init/audio_postboot.rc \
     $(COMMON_PATH)/configs/init/dap_post_audio_restart.sh:$(TARGET_COPY_OUT_VENDOR)/etc/dap_post_audio_restart.sh \
-    $(COMMON_PATH)/configs/init/mobicore.rc:$(TARGET_COPY_OUT_VENDOR)/etc/init/mobicore.rc \
-    $(COMMON_PATH)/configs/init/init.baseband.rc:$(TARGET_COPY_OUT_VENDOR)/etc/init/init.baseband.rc \
-    $(COMMON_PATH)/configs/init/init.greenfix.rc:$(TARGET_COPY_OUT_VENDOR)/etc/init/init.greenfix.rc \
-    $(COMMON_PATH)/configs/init/init.recovery.samsungexynos9810.rc:$(TARGET_COPY_OUT_RECOVERY)/root/init.recovery.samsungexynos9810.rc \
-    $(COMMON_PATH)/configs/init/init.samsungexynos9810.rc:$(TARGET_COPY_OUT_VENDOR)/etc/init/init.samsungexynos9810.rc \
-    $(COMMON_PATH)/configs/init/init.samsungexynos9810.usb.rc:$(TARGET_COPY_OUT_VENDOR)/etc/init/init.samsungexynos9810.usb.rc \
-    $(COMMON_PATH)/configs/init/init.samsung.rc:$(TARGET_COPY_OUT_VENDOR)/etc/init/hw/init.samsung.rc \
-    $(COMMON_PATH)/configs/init/init.swap.rc:$(TARGET_COPY_OUT_VENDOR)/etc/init/init.swap.rc \
-    $(COMMON_PATH)/configs/init/ueventd.rc:$(TARGET_COPY_OUT_VENDOR)/etc/ueventd.rc \
-    $(COMMON_PATH)/configs/init/wifi.rc:$(TARGET_COPY_OUT_VENDOR)/etc/init/wifi.rc
+    $(COMMON_PATH)/configs/init/init.recovery.samsungexynos9810.rc:$(TARGET_COPY_OUT_RECOVERY)/root/init.recovery.samsungexynos9810.rc
 
 # Kernel
 PRODUCT_OTA_ENFORCE_VINTF_KERNEL_REQUIREMENTS := false
@@ -145,10 +147,8 @@ PRODUCT_COPY_FILES += \
 # Keymaster
 PRODUCT_PACKAGES += \
     android.hardware.keymaster@3.0-service \
-    android.hardware.keymaster@3.0-impl
-
-PRODUCT_COPY_FILES += \
-    $(LOCAL_PATH)/configs/init/keymaster@3.0-override.rc:$(TARGET_COPY_OUT_VENDOR)/etc/init/keymaster@3.0-override.rc
+    android.hardware.keymaster@3.0-impl \
+    exynos9810_keymaster_rc
 
 # Lights
 PRODUCT_PACKAGES += \
