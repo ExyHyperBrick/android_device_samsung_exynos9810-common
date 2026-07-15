@@ -3,3 +3,82 @@ soong_namespace {
         "vendor/samsung/exynos9810-common",
     ],
 }
+
+prebuilt_etc {
+    name: "exynos9810_mobicore_rc",
+    src: "configs/init/mobicore.rc",
+    filename_from_src: true,
+    sub_dir: "init",
+    vendor: true,
+}
+
+prebuilt_etc {
+    name: "exynos9810_baseband_rc",
+    src: "configs/init/init.baseband.rc",
+    filename_from_src: true,
+    sub_dir: "init",
+    vendor: true,
+}
+
+prebuilt_etc {
+    name: "exynos9810_greenfix_rc",
+    src: "configs/init/init.greenfix.rc",
+    filename_from_src: true,
+    sub_dir: "init",
+    vendor: true,
+}
+
+prebuilt_etc {
+    name: "exynos9810_init_rc",
+    src: "configs/init/init.samsungexynos9810.rc",
+    filename_from_src: true,
+    sub_dir: "init",
+    vendor: true,
+}
+
+prebuilt_etc {
+    name: "exynos9810_usb_rc",
+    src: "configs/init/init.samsungexynos9810.usb.rc",
+    filename_from_src: true,
+    sub_dir: "init",
+    vendor: true,
+}
+
+prebuilt_etc {
+    name: "exynos9810_samsung_rc",
+    src: "configs/init/init.samsung.rc",
+    filename_from_src: true,
+    sub_dir: "init/hw",
+    vendor: true,
+}
+
+prebuilt_etc {
+    name: "exynos9810_swap_rc",
+    src: "configs/init/init.swap.rc",
+    filename_from_src: true,
+    sub_dir: "init",
+    vendor: true,
+}
+
+prebuilt_etc {
+    name: "exynos9810_ueventd_rc",
+    src: "configs/init/ueventd.rc",
+    filename_from_src: true,
+    vendor: true,
+}
+
+prebuilt_etc {
+    name: "exynos9810_wifi_rc",
+    src: "configs/init/wifi.rc",
+    filename_from_src: true,
+    sub_dir: "init",
+    vendor: true,
+}
+
+prebuilt_etc {
+    name: "exynos9810_keymaster_rc",
+    src: "configs/init/keymaster@3.0-override.rc",
+    filename_from_src: true,
+    sub_dir: "init",
+    vendor: true,
+}
