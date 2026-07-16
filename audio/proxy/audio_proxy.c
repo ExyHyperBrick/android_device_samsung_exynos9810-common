@@ -3673,6 +3673,7 @@ bool proxy_init_route(void *proxy, char *path)
                 aproxy->active_playback_ausage   = AUSAGE_NONE;
                 aproxy->active_playback_device   = DEVICE_NONE;
                 aproxy->active_playback_modifier = MODIFIER_NONE;
+                aproxy->playback_route_refreshed = false;
 
                 aproxy->active_capture_ausage   = AUSAGE_NONE;
                 aproxy->active_capture_device   = DEVICE_NONE;
@@ -3696,6 +3697,29 @@ bool proxy_init_route(void *proxy, char *path)
     }
 
     return ret;
+}
+
+static bool refresh_playback_route_after_tickle(struct audio_proxy *aproxy)
+{
+    struct audio_route *ar;
+
+    /* Replay mixer defaults while Calliope is awake. */
+    proxy_set_mixercontrol(aproxy, TICKLE_CONTROL, ABOX_TICKLE_ON);
+
+    pthread_rwlock_wrlock(&aproxy->mixer_update_lock);
+    ar = audio_route_init(MIXER_CARD0, aproxy->xml_path);
+    if (!ar) {
+        ALOGE("proxy-%s: failed to refresh audio route", __func__);
+       pthread_rwlock_unlock(&aproxy->mixer_update_lock);
+        return false;
+    }
+
+    audio_route_free(aproxy->aroute);
+    aproxy->aroute = ar;
+    pthread_rwlock_unlock(&aproxy->mixer_update_lock);
+
+    ALOGI("proxy-%s: refreshed audio route after ABOX tickle", __func__);
+    return true;
 }
 
 void proxy_deinit_route(void *proxy)
@@ -3756,6 +3780,13 @@ bool proxy_set_route(void *proxy, int ausage, int device, int modifier, bool set
         }
 
         if (routed_device < DEVICE_MAIN_MIC) {
+            if (!aproxy->playback_route_refreshed &&
+                aproxy->active_playback_ausage == AUSAGE_NONE &&
+                aproxy->active_playback_device == DEVICE_NONE) {
+                aproxy->playback_route_refreshed =
+                        refresh_playback_route_after_tickle(aproxy);
+            }
+
             /* Do Specific Operation based on Audio Path */
             do_operations_by_playback_route_set(aproxy, routed_ausage, routed_device);
             prepare_ap_call_transition(aproxy, routed_ausage);
