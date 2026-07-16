@@ -2,12 +2,3 @@
 on property:sys.boot_completed=1
     wait /dev/snd/controlC0 10
     restart audioserver
-    start dap_post_audio_restart
-
-service dap_post_audio_restart /system/bin/sh /vendor/etc/dap_post_audio_restart.sh
-    class late_start
-    user system
-    group system shell
-    seclabel u:r:shell:s0
-    disabled
-    oneshot

@@ -35,7 +35,7 @@ PRODUCT_PACKAGES += \
     libprocessgroup.vendor
 
 PRODUCT_PACKAGES += \
-    SamsungDAP9810
+    SamsungDAP
 
 PRODUCT_COPY_FILES += \
     frameworks/av/services/audiopolicy/config/bluetooth_audio_policy_configuration_7_0.xml:$(TARGET_COPY_OUT_VENDOR)/etc/bluetooth_audio_policy_configuration_7_0.xml \
@@ -130,7 +130,6 @@ PRODUCT_PACKAGES += \
 PRODUCT_COPY_FILES += \
     $(COMMON_PATH)/configs/init/fstab.samsungexynos9810:$(TARGET_COPY_OUT_RAMDISK)/fstab.samsungexynos9810 \
     $(COMMON_PATH)/configs/init/fstab.samsungexynos9810:$(TARGET_COPY_OUT_VENDOR)/etc/fstab.samsungexynos9810 \
-    $(COMMON_PATH)/configs/init/dap_post_audio_restart.sh:$(TARGET_COPY_OUT_VENDOR)/etc/dap_post_audio_restart.sh \
     $(COMMON_PATH)/configs/init/init.recovery.samsungexynos9810.rc:$(TARGET_COPY_OUT_RECOVERY)/root/init.recovery.samsungexynos9810.rc
 
 # Kernel
