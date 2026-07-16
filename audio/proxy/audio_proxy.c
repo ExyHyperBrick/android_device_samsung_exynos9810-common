@@ -3643,11 +3643,20 @@ bool proxy_init_route(void *proxy, char *path)
     struct audio_proxy *aproxy = proxy;
     struct audio_route *ar = NULL;
     bool ret = false;
+    int lock_ret;
 
     if (aproxy) {
+        lock_ret = pthread_rwlock_init(&aproxy->mixer_update_lock, NULL);
+        if (lock_ret != 0) {
+            ALOGE("proxy-%s: failed to initialize mixer lock (%d)",
+                  __func__, lock_ret);
+            return false;
+        }
+
         aproxy->mixer = mixer_open(MIXER_CARD0);
-        proxy_set_mixercontrol(aproxy, TICKLE_CONTROL, ABOX_TICKLE_ON);
         if (aproxy->mixer) {
+            proxy_set_mixercontrol(aproxy, TICKLE_CONTROL, ABOX_TICKLE_ON);
+
             // In order to get add event, subscription has to be here!
             mixer_subscribe_events(aproxy->mixer, 1);
 
@@ -3673,8 +3682,6 @@ bool proxy_init_route(void *proxy, char *path)
                 ret = true;
 
                 /* Create Mixer Control Update Thread */
-                pthread_rwlock_init(&aproxy->mixer_update_lock, NULL);
-
                 if (audio_route_missing_ctl(ar)) {
                     pthread_create(&aproxy->mixer_update_thread, NULL, mixer_update_loop, aproxy);
                     ALOGI("proxy-%s: missing control found, update thread is created", __func__);
@@ -3683,6 +3690,9 @@ bool proxy_init_route(void *proxy, char *path)
             }
         } else
             ALOGE("proxy-%s: failed to open Mixer", __func__);
+
+        if (!ret)
+            pthread_rwlock_destroy(&aproxy->mixer_update_lock);
     }
 
     return ret;
