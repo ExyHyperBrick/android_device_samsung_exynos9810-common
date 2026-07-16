@@ -2492,13 +2492,6 @@ int proxy_open_playback_stream(void *proxy_stream, int32_t min_size_frames, void
             ALOGW("%s-%s: PCM Device is already opened!", stream_table[apstream->stream_type], __func__);
     }
 
-    if(aproxy->support_dualspk) {
-        if (aproxy->active_playback_device == DEVICE_EARPIECE)
-            proxy_set_mixer_value_int(aproxy, SPK_AMPL_POWER_NAME, true);
-        else
-            proxy_set_mixer_value_int(aproxy, SPK_AMPL_POWER_NAME, aproxy->spk_ampL_powerOn);
-    }
-
     apstream->need_update_pcm_config = false;
 
     return ret;
