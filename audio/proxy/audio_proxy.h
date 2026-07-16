@@ -113,6 +113,7 @@ struct audio_proxy
     audio_usage   active_playback_ausage;
     device_type   active_playback_device;
     modifier_type active_playback_modifier;
+    bool          playback_route_refreshed;
 
     audio_usage   active_capture_ausage;
     device_type   active_capture_device;
