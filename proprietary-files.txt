@@ -156,6 +156,10 @@ vendor/lib64/libMcClient.so
 vendor/lib/hw/power.exynos9810.so
 vendor/lib64/hw/power.exynos9810.so
 
+# RIL configuration - N770FXXU8HVK5 (T)
+vendor/etc/mtu-conf.xml|544025ac200b4e1bb51135bbf971a48e3c5ecb89
+vendor/etc/pdpcnt-conf.xml|914a3ec45c2f82cca4355b4736e617e1ee644fbe
+
 # RIL - N770FXXU8FVB4 (S)
 vendor/etc/init/init.vendor.rilchip.rc|0f5f13a11c084db5dc0eb47bb693235a2273f91e
 vendor/etc/init/init.vendor.rilcommon.rc|eb3115e335457fdc95c854190ee6804e165718f2
