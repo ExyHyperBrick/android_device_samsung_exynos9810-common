@@ -2492,13 +2492,6 @@ int proxy_open_playback_stream(void *proxy_stream, int32_t min_size_frames, void
             ALOGW("%s-%s: PCM Device is already opened!", stream_table[apstream->stream_type], __func__);
     }
 
-    if(aproxy->support_dualspk) {
-        if (aproxy->active_playback_device == DEVICE_EARPIECE)
-            proxy_set_mixer_value_int(aproxy, SPK_AMPL_POWER_NAME, true);
-        else
-            proxy_set_mixer_value_int(aproxy, SPK_AMPL_POWER_NAME, aproxy->spk_ampL_powerOn);
-    }
-
     apstream->need_update_pcm_config = false;
 
     return ret;
@@ -4429,21 +4422,6 @@ void proxy_set_stream_channel(void *proxy_stream, int new_channel, bool skip)
     apstream->need_monoconversion = !skip;
 }
 
-void proxy_set_spk_ampL_power(void* proxy, bool state)
-{
-    struct audio_proxy *aproxy = proxy;
-    aproxy->spk_ampL_powerOn = state;
-
-    if(aproxy->support_dualspk)
-        proxy_set_mixer_value_int(aproxy, SPK_AMPL_POWER_NAME, aproxy->spk_ampL_powerOn);
-}
-
-bool proxy_get_spk_ampL_power(void* proxy)
-{
-    struct audio_proxy *aproxy = proxy;
-    return aproxy->spk_ampL_powerOn;
-}
-
 /*
  *  Proxy Dump
  */
@@ -4839,8 +4817,6 @@ void * proxy_init(void)
     /* offload effect */
     aproxy->offload_effect_lib = NULL;
     aproxy->offload_effect_lib_update = NULL;
-    aproxy->spk_ampL_powerOn = false;
-
     // Force dual speaker
     aproxy->support_dualspk = true;
 

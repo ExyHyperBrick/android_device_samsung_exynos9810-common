@@ -54,8 +54,6 @@ typedef enum {
 // Compress Offload Upscaling
 #define OFFLOAD_UPSCALE_CONTROL_NAME "ComprTx0 Format"
 
-#define SPK_AMPL_POWER_NAME "Spk AmpL Power"
-
 typedef enum {
     UPSCALE_NONE        = 0,
     UPSCALE_48K_16B,
