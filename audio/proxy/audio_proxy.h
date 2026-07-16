@@ -189,7 +189,6 @@ struct audio_proxy
     void (*offload_effect_lib_update)(struct mixer *, int);
 
     bool support_dualspk;  //Dual Speaker
-    bool spk_ampL_powerOn; //Dual Speaker
 };
 
 
