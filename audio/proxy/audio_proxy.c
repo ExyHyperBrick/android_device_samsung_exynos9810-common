@@ -3756,6 +3756,9 @@ bool proxy_set_route(void *proxy, int ausage, int device, int modifier, bool set
         }
 
         if (routed_device < DEVICE_MAIN_MIC) {
+            // Playback routing also needs ABOX to be awake before mixer writes.
+            proxy_set_mixercontrol(aproxy, TICKLE_CONTROL, ABOX_TICKLE_ON);
+
             /* Do Specific Operation based on Audio Path */
             do_operations_by_playback_route_set(aproxy, routed_ausage, routed_device);
             prepare_ap_call_transition(aproxy, routed_ausage);
