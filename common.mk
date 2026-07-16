@@ -129,6 +129,7 @@ PRODUCT_PACKAGES += \
 PRODUCT_COPY_FILES += \
     $(COMMON_PATH)/configs/init/fstab.samsungexynos9810:$(TARGET_COPY_OUT_RAMDISK)/fstab.samsungexynos9810 \
     $(COMMON_PATH)/configs/init/fstab.samsungexynos9810:$(TARGET_COPY_OUT_VENDOR)/etc/fstab.samsungexynos9810 \
+    $(COMMON_PATH)/configs/init/init.recovery.samsungexynos9810.rc:$(TARGET_COPY_OUT_RECOVERY)/root/init.recovery.samsungexynos9810.rc
 
 # Kernel
 PRODUCT_OTA_ENFORCE_VINTF_KERNEL_REQUIREMENTS := false
