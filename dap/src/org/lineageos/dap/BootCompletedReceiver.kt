@@ -27,9 +27,6 @@ class BootCompletedReceiver : BroadcastReceiver() {
 
     override fun onReceive(context: Context, intent: Intent) {
         val sharedPrefs = PreferenceManager.getDefaultSharedPreferences(context)
-
-        DolbyCore.recreate()
-
         for ((key, value) in PREF_DOLBY_MODES) {
             if (sharedPrefs.getBoolean(key, false)) {
                 DolbyCore.setProfile(value)
