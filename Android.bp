@@ -5,14 +5,6 @@ soong_namespace {
 }
 
 prebuilt_etc {
-    name: "exynos9810_audio_postboot_rc",
-    src: "configs/init/audio_postboot.rc",
-    filename_from_src: true,
-    sub_dir: "init",
-    vendor: true,
-}
-
-prebuilt_etc {
     name: "exynos9810_mobicore_rc",
     src: "configs/init/mobicore.rc",
     filename_from_src: true,
