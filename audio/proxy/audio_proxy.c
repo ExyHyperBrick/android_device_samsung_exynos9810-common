@@ -1233,11 +1233,14 @@ static void set_reroute(void *proxy, audio_usage old_ausage, device_type old_dev
     // 1. Unset Active Route
     make_path(old_ausage, old_device, path_name);
     add_dual_path(aproxy, path_name);
-    audio_route_reset_path(aproxy->aroute, path_name);
+    /* Updated to reset_and_update to match Q audio-route changes
+     * otherwise noise issue happened in alarm/ringtone scenarios
+     */
+    audio_route_reset_and_update_path(aproxy->aroute, path_name);
     ALOGI("proxy-%s: unrouted %s", __func__, path_name);
 
     make_gain(path_name, gain_name);
-    audio_route_reset_path(aproxy->aroute, gain_name);
+    audio_route_reset_and_update_path(aproxy->aroute, gain_name);
     ALOGI("proxy-%s: reset gain %s", __func__, gain_name);
 
     // 2. Set New Route
