@@ -20,6 +20,9 @@
 <!-- Phone app resources that may need to be customized
      for different hardware or product builds. -->
 <resources>
+    <!-- Use the AOSP userspace IMS service for MMTEL features. -->
+    <string name="config_ims_mmtel_package" translatable="false">com.android.imsstack</string>
+
     <!-- Determine whether calls to mute the microphone in PhoneUtils
          are routed through the android.media.AudioManager class (true) or through
          the com.android.internal.telephony.Phone interface (false). -->
