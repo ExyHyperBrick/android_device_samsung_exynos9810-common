@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Enable only the paths covered by the first device test branch. -->
+    <bool name="config_imsstack_emergency_mmtel_feature">false</bool>
+    <bool name="config_imsstack_rcs_feature">false</bool>
+    <bool name="config_imsstack_dedicated_bearer_qos_supported">false</bool>
+</resources>
