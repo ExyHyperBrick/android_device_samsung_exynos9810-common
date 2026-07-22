@@ -362,4 +362,21 @@
          tts, etc. dialogs. -->
     <string name="config_appsNotReportingCrashes">com.google.android.tts</string>
 
+    <!-- IMS framework integration. -->
+    <bool name="config_carrier_volte_available">true</bool>
+    <bool name="config_device_volte_available">true</bool>
+    <bool name="config_device_vt_available">false</bool>
+
+    <!-- Keep serving-cell identity available to the system IMS stack. -->
+    <string-array name="config_serviceStateLocationAllowedPackages">
+        <item>com.android.phone</item>
+        <item>com.android.imsstack</item>
+    </string-array>
+
+    <string name="config_wlan_data_service_package">com.google.android.iwlan</string>
+    <string name="config_wlan_network_service_package">com.google.android.iwlan</string>
+    <string name="config_qualified_networks_service_package">com.android.telephony.qns</string>
+
+    <bool name="config_use_voip_mode_for_ims">true</bool>
+
 </resources>
