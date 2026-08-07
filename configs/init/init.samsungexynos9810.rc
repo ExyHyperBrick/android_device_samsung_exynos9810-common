@@ -813,8 +813,6 @@ on fs
 
     chown radio system /mnt/vendor/efs
     chmod 0771 /mnt/vendor/efs
-    chown radio system /mnt/vendor/cpefs
-    chmod 0771 /mnt/vendor/cpefs
     chown system system /mnt/vendor/persist
 
 # Permissions for ION
