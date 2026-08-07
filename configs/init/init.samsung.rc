@@ -124,7 +124,6 @@ on post-fs-data
     chmod 0664 /sys/class/input_booster/touchkey/freq
     chmod 0664 /sys/class/input_booster/touchkey/time
 
-    mkdir /data/log 0775 system log
     mkdir /data/log/bt 0770 bluetooth bluetooth
 
     #MCPS
@@ -174,12 +173,8 @@ on post-fs-data
     mkdir /data/vendor/wifi/hostapd 0770 system wifi
 
     # give system access to wpa_supplicant.conf for backup and restore
-    mkdir /data/misc/wifi 0770 wifi system
-    mkdir /data/misc/wifi_share_profile 0771 wifi system
-    mkdir /data/misc/wifi_hostapd 0771 wifi system    
 
     mkdir /data/log/wifi/ 0775 system root
-    mkdir /data/misc/reboot 0700 system system
     chown system system /sys/kernel/ipv4/tcp_delack_seg
 
     # for WIFI MAC address
@@ -232,12 +227,10 @@ on post-fs-data
     mkdir /efs/nfc 0700 nfc nfc
 
     # NFC KEY
-    mkdir /data/nfc 0770 nfc nfc
     mkdir /data/vendor/nfc 0770 nfc nfc
 
     # Create all remaining /data root dirs so that they are made through init
     # and get proper encryption policy installed
-    mkdir /data/backup 0700 system system
 
     # FINGERPRINT
     mkdir /data/vendor/biometrics 0770 system system
@@ -477,9 +470,6 @@ on boot
     mkdir /efs/Battery 0775 radio system
     chown radio system /efs/Battery
     chmod 0775 /efs/Battery
-    copy /system/vendor/firmware/battery_data.dat /efs/Battery/battery_data.dat
-    chmod 0400 /efs/Battery/battery_data.dat
-    write /sys/class/power_supply/battery/batt_update_data "/efs/Battery/battery_data.dat"
     chown system radio /sys/class/power_supply/battery/batt_ext_dev_chg
     chown system radio /efs/Battery/fg_full_voltage
     chown system radio /sys/class/power_supply/battery/fg_full_voltage
@@ -1130,7 +1120,6 @@ on boot
 
 # BATTERY
 on property:sys.boot_completed=1
-    write /sys/class/power_supply/battery/boot_completed "1"
 
     # GPU DVFS
     chown system system /sys/kernel/gpu/gpu_freq_table
