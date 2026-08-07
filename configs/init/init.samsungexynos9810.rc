@@ -1,23 +1,6 @@
 import /vendor/etc/init/hw/init.samsung.rc
 
-on early-init
-    mkdir /mnt/vendor/efs 0771 radio system
-    mkdir /mnt/vendor/cpefs 0771 radio system
-    mkdir /mnt/vendor/persist 0771 system system
-
 on init
-    start watchdogd
-
-    # See storage config details at http://source.android.com/tech/storage/
-    mkdir /mnt/shell/emulated 0700 shell shell
-    mkdir /storage/emulated 0555 root root
-
-    # Support legacy paths
-    symlink /sdcard /mnt/sdcard
-
-    export EXTERNAL_STORAGE /sdcard
-
-    symlink /data/app /factory
     #Reactivation Lock
     symlink /dev/block/platform/11120000.ufs/by-name/STEADY /dev/block/steady
 
@@ -247,50 +230,6 @@ on init
     chmod 0664 /sys/kernel/ert/switch_fair_load_ratio
     chmod 0664 /sys/kernel/ert/switch_rt_load_ratio
     write /sys/kernel/ert/rt_ratio_for_freq 0
-
-    # Group Balancer
-    chown system system /dev/stune/top-app/schedtune.gb_interval_us
-    chown system system /dev/stune/top-app/schedtune.gb_window_ms
-    chown system system /dev/stune/top-app/schedtune.gb_threshold
-    chown system system /dev/stune/top-app/schedtune.gb_imbalance_ratio
-    chown system system /dev/stune/top-app/schedtune.gb_duration
-    chown system system /dev/stune/top-app/schedtune.gb_balance_ratio
-    chown system system /dev/stune/foreground/schedtune.gb_interval_us
-    chown system system /dev/stune/foreground/schedtune.gb_window_ms
-    chown system system /dev/stune/foreground/schedtune.gb_threshold
-    chown system system /dev/stune/foreground/schedtune.gb_imbalance_ratio
-    chown system system /dev/stune/foreground/schedtune.gb_duration
-    chown system system /dev/stune/foreground/schedtune.gb_balance_ratio
-    chown system system /dev/stune/background/schedtune.gb_interval_us
-    chown system system /dev/stune/background/schedtune.gb_window_ms
-    chown system system /dev/stune/background/schedtune.gb_threshold
-    chown system system /dev/stune/background/schedtune.gb_imbalance_ratio
-    chown system system /dev/stune/background/schedtune.gb_duration
-    chown system system /dev/stune/background/schedtune.gb_balance_ratio
-    chmod 664 /dev/stune/top-app/schedtune.gb_interval_us
-    chmod 664 /dev/stune/top-app/schedtune.gb_window_ms
-    chmod 664 /dev/stune/top-app/schedtune.gb_threshold
-    chmod 664 /dev/stune/top-app/schedtune.gb_imbalance_ratio
-    chmod 664 /dev/stune/top-app/schedtune.gb_duration
-    chmod 664 /dev/stune/top-app/schedtune.gb_balance_ratio
-    chmod 664 /dev/stune/foreground/schedtune.gb_interval_us
-    chmod 664 /dev/stune/foreground/schedtune.gb_window_ms
-    chmod 664 /dev/stune/foreground/schedtune.gb_threshold
-    chmod 664 /dev/stune/foreground/schedtune.gb_imbalance_ratio
-    chmod 664 /dev/stune/foreground/schedtune.gb_duration
-    chmod 664 /dev/stune/foreground/schedtune.gb_balance_ratio
-    chmod 664 /dev/stune/background/schedtune.gb_interval_us
-    chmod 664 /dev/stune/background/schedtune.gb_window_ms
-    chmod 664 /dev/stune/background/schedtune.gb_threshold
-    chmod 664 /dev/stune/background/schedtune.gb_imbalance_ratio
-    chmod 664 /dev/stune/background/schedtune.gb_duration
-    chmod 664 /dev/stune/background/schedtune.gb_balance_ratio
-    write /dev/stune/top-app/schedtune.gb_interval_us 4000
-    write /dev/stune/top-app/schedtune.gb_window_ms 20
-    write /dev/stune/top-app/schedtune.gb_threshold 220
-    write /dev/stune/top-app/schedtune.gb_imbalance_ratio 75
-    write /dev/stune/top-app/schedtune.gb_duration 25
-    write /dev/stune/top-app/schedtune.gb_balance_ratio 55
 
 on post-fs
     # set RLIMIT_MEMLOCK to 64MB
