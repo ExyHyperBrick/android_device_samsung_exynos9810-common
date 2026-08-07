@@ -17,13 +17,6 @@ on init
     chown system system /sys/module/sec_debug/parameters/reboot_multicmd
     chmod 0400 /sys/module/sec_debug/parameters/reboot_multicmd
 
-    # VOLD FOR ASEC++
-    # Directory-target for the ASEC images will be bind-mounted.
-    mkdir /mnt/secure/asec 0700 root root
-    mount tmpfs tmpfs /mnt/secure/asec mode=0700,uid=0,gid=0
-    restorecon_recursive /mnt/secure/asec
-    # VOLD FOR ASEC--
-
     # reset_reason
     chown system system /proc/reset_reason
     chmod 0440 /proc/reset_reason
@@ -81,10 +74,6 @@ on early-fs
     chmod 0660 /dev/tzic
 
 on post-fs
-    # VOLD FOR ASEC++
-    mount tmpfs tmpfs /mnt/secure/asec shared rec
-    # VOLD FOR ASEC--
-
     chown system log /proc/sec_log
 
     # make fsdbg on /dev for filesystem debug info.
