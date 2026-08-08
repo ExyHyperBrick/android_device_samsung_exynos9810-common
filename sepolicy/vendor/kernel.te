@@ -8,3 +8,7 @@ r_dir_file(kernel, sysfs_sec_key);
 
 allow kernel efs_file:dir search;
 allow kernel efs_file:file rw_file_perms;
+
+r_dir_file(kernel, app_efs_file);
+
+allow kernel app_efs_file:file rw_file_perms;
