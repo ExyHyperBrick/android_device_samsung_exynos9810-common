@@ -3,3 +3,6 @@ allow lhd hal_system_suspend_service:service_manager find;
 allow lhd netd:unix_stream_socket connectto;
 
 binder_call(lhd, servicemanager)
+
+# /sys/bbd/lk_enable and /sys/bbd/lk_timeout
+allow lhd sysfs_bbd_writable:file rw_file_perms;
