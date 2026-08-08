@@ -238,6 +238,9 @@ on post-fs-data
     mkdir /data/vendor/fpSnrTest 0770 system system
 
 on boot
+    # Broadcom LHD killer controls
+    chown root system /sys/bbd/lk_enable
+    chown root system /sys/bbd/lk_timeout
     # MSP: FactoryApp directory generation
     mkdir /efs/FactoryApp 0775 system system
 

@@ -1,6 +1,10 @@
 # Proc
 genfscon proc /sys/vm/swappiness u:object_r:proc_swappiness:s0
 
+# BBD
+genfscon sysfs /bbd/lk_enable u:object_r:sysfs_bbd_writable:s0
+genfscon sysfs /bbd/lk_timeout u:object_r:sysfs_bbd_writable:s0
+
 # Devices
 genfscon sysfs /devices/platform/10000.mif_pdata/sim/ds_detect u:object_r:sysfs_sim_writable:s0
 genfscon sysfs /devices/platform/10430000.pinctrl/gpiochip39/gpio/gpio141/value u:object_r:sysfs_gps_writable:s0
