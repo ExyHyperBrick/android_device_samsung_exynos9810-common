@@ -1,1 +1,5 @@
 allow hal_power_default sysfs_gpu_writable:file rw_file_perms;
+
+allow hal_power_default fwk_stats_service:service_manager find;
+
+hal_client_domain(hal_power_default, hal_thermal);
