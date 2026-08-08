@@ -6,6 +6,7 @@ genfscon sysfs /bbd/lk_enable u:object_r:sysfs_bbd_writable:s0
 genfscon sysfs /bbd/lk_timeout u:object_r:sysfs_bbd_writable:s0
 
 # Devices
+genfscon sysfs /devices/platform/11120000.ufs/host0/target0:0:0/0:0:0:0/block/sda u:object_r:sysfs_devices_block:s0
 genfscon sysfs /devices/platform/10000.mif_pdata/sim/ds_detect u:object_r:sysfs_sim_writable:s0
 genfscon sysfs /devices/platform/10430000.pinctrl/gpiochip39/gpio/gpio141/value u:object_r:sysfs_gps_writable:s0
 genfscon sysfs /devices/platform/141c0000.speedy/i2c-15/15-0000/s2mps18-rtc/rtc/rtc0/hctosys u:object_r:sysfs_rtc:s0
