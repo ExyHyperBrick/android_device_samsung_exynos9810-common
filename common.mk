@@ -21,7 +21,8 @@ PRODUCT_SOONG_NAMESPACES += \
     hardware/samsung \
     hardware/samsung/aidl/power-libperfmgr \
     hardware/samsung_slsi-linaro/exynos/gralloc/gralloc3 \
-    hardware/samsung_slsi-linaro/exynos/libaudio/audiohal
+    hardware/samsung_slsi-linaro/exynos/libaudio/audiohal \
+    vendor/lineage/imsstack-carrier-config-ext
 
 # Audio
 PRODUCT_PACKAGES += \
@@ -362,3 +363,15 @@ PRODUCT_COPY_FILES += \
 
 PRODUCT_VENDOR_PROPERTIES += \
     ro.vendor.init_dev_config.path=/vendor/bin/init_dev_config
+
+# Userspace IMS and its framework bearer services
+$(call inherit-product, packages/modules/ImsMedia/imsmedia.mk)
+$(call soong_config_set,imsstack_namespace,use_carrier_config_ext,true)
+#$(call soong_config_set_bool,imsstack_namespace,use_android16_telephony_compat,true)
+
+PRODUCT_PACKAGES += \
+    CarrierConfigResCommon \
+    ImsStack \
+    ImsStackOverlay \
+    Iwlan \
+    QualifiedNetworksService

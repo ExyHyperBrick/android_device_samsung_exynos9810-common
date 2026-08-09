@@ -1,0 +1,1 @@
+allow sehradiomanager vendor_ims_prop:property_service set;
