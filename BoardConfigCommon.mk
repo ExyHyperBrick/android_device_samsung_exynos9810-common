@@ -118,6 +118,7 @@ include device/lineage/sepolicy/exynos/sepolicy.mk
 include device/lineage/sepolicy/libion/sepolicy.mk
 include device/samsung_slsi/sepolicy/sepolicy.mk
 BOARD_VENDOR_SEPOLICY_DIRS += $(COMMON_PATH)/sepolicy/vendor
+SYSTEM_EXT_PRIVATE_SEPOLICY_DIRS += packages/modules/ImsMedia/sepolicy/system_ext/private
 
 # Dolby
 BOARD_VENDOR_SEPOLICY_DIRS += $(COMMON_PATH)/audio/dolby/sepolicy
