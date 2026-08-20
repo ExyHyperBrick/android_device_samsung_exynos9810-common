@@ -58,6 +58,10 @@ $(call soong_config_set_bool,samsungCameraVars,needs_sec_reserved_field,true)
 # Display
 BOARD_MINIMUM_DISPLAY_BRIGHTNESS := 1
 
+ifeq ($(EXYNOS9810_USES_MAINLINE_KERNEL),true)
+$(call soong_config_set_bool,exynos_hwc,ENABLE_SINGLE_DPP,true)
+endif
+
 # Filesystem
 BOARD_CACHEIMAGE_FILE_SYSTEM_TYPE := ext4
 BOARD_ODMIMAGE_FILE_SYSTEM_TYPE := ext4
@@ -79,11 +83,6 @@ BOARD_KERNEL_IMAGE_NAME := Image
 BOARD_KERNEL_SEPARATED_DT := true
 TARGET_CUSTOM_DTBTOOL := dtbhtoolExynos
 TARGET_KERNEL_SOURCE := $(EXYNOS9810_KERNEL_SOURCE)
-
-# Keep composition on the single DPP plane exposed by mainline.
-ifeq ($(EXYNOS9810_USES_MAINLINE_KERNEL),true)
-BOARD_USES_HWC_FORCE_GPU := true
-endif
 
 # Manifest
 # HIDL
