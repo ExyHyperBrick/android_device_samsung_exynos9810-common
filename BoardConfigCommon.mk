@@ -3,6 +3,8 @@
 
 COMMON_PATH := device/samsung/exynos9810-common
 
+include $(COMMON_PATH)/mainline.mk
+
 # Include path
 TARGET_SPECIFIC_HEADER_PATH := $(COMMON_PATH)/include
 
@@ -76,7 +78,12 @@ HWUI_COMPILE_FOR_PERF := true
 BOARD_KERNEL_IMAGE_NAME := Image
 BOARD_KERNEL_SEPARATED_DT := true
 TARGET_CUSTOM_DTBTOOL := dtbhtoolExynos
-TARGET_KERNEL_SOURCE := kernel/samsung/exynos9810
+TARGET_KERNEL_SOURCE := $(EXYNOS9810_KERNEL_SOURCE)
+
+# Keep composition on the single DPP plane exposed by mainline.
+ifeq ($(EXYNOS9810_USES_MAINLINE_KERNEL),true)
+BOARD_USES_HWC_FORCE_GPU := true
+endif
 
 # Manifest
 # HIDL

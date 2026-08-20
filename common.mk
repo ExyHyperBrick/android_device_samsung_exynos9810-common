@@ -3,6 +3,8 @@
 
 COMMON_PATH := device/samsung/exynos9810-common
 
+include $(COMMON_PATH)/mainline.mk
+
 # Get non-open-source specific aspects
 $(call inherit-product, vendor/samsung/exynos9810-common/exynos9810-common-vendor.mk)
 
