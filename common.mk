@@ -337,8 +337,14 @@ PRODUCT_PACKAGES += \
     android.hardware.thermal-service.pixel \
     thermal_symlinks
 
+EXYNOS9810_THERMAL_CONFIG := thermal_info_config.json
+ifeq ($(EXYNOS9810_USES_MAINLINE_KERNEL),true)
+EXYNOS9810_THERMAL_CONFIG := thermal_info_config_mainline.json
+PRODUCT_VENDOR_PROPERTIES += vendor.disable.thermalhal.control=true
+endif
+
 PRODUCT_COPY_FILES += \
-    $(COMMON_PATH)/configs/thermal/thermal_info_config.json:$(TARGET_COPY_OUT_VENDOR)/etc/thermal_info_config.json
+    $(COMMON_PATH)/configs/thermal/$(EXYNOS9810_THERMAL_CONFIG):$(TARGET_COPY_OUT_VENDOR)/etc/thermal_info_config.json
 
 # Touch
 ifneq ($(EXYNOS9810_USES_MAINLINE_KERNEL),true)
