@@ -83,6 +83,12 @@ PRODUCT_PACKAGES += \
     android.hardware.composer.hwc3-service.slsi \
     gralloc.universal9810
 
+ifeq ($(EXYNOS9810_USES_MAINLINE_KERNEL),true)
+PRODUCT_VENDOR_PROPERTIES += ro.vendor.ddk.set.afbc=0
+else
+PRODUCT_VENDOR_PROPERTIES += ro.vendor.ddk.set.afbc=1
+endif
+
 # DRM
 PRODUCT_PACKAGES += \
     android.hardware.drm@1.4.vendor:32 \
