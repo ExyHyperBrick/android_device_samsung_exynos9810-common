@@ -114,6 +114,10 @@ TARGET_SOC := exynos9810
 TARGET_BOOTLOADER_BOARD_NAME := exynos9810
 include hardware/samsung_slsi-linaro/config/BoardConfig9810.mk
 
+ifeq ($(EXYNOS9810_USES_MAINLINE_KERNEL),true)
+$(call soong_config_set_bool,openmax,MAINLINE_FEATURE_IN_SINCE_4_19,true)
+endif
+
 # Properties
 TARGET_SYSTEM_PROP += $(COMMON_PATH)/system.prop
 TARGET_PRODUCT_PROP += $(COMMON_PATH)/product.prop
