@@ -1,0 +1,8 @@
+<manifest version="2.0" type="device">
+    <hal format="aidl" override="true">
+        <name>vendor.lineage.livedisplay</name>
+    </hal>
+    <hal format="aidl" override="true">
+        <name>vendor.lineage.touch</name>
+    </hal>
+</manifest>

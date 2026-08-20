@@ -174,8 +174,10 @@ $(call soong_config_set,lineage_health,fast_charge_value_none,1)
 $(call soong_config_set,lineage_health,fast_charge_value_fast_charge,0)
 
 # Livedisplay
+ifneq ($(EXYNOS9810_USES_MAINLINE_KERNEL),true)
 PRODUCT_PACKAGES += \
     vendor.lineage.livedisplay-service.samsung-exynos
+endif
 
 # Media
 PRODUCT_COPY_FILES += \
@@ -339,8 +341,10 @@ PRODUCT_COPY_FILES += \
     $(COMMON_PATH)/configs/thermal/thermal_info_config.json:$(TARGET_COPY_OUT_VENDOR)/etc/thermal_info_config.json
 
 # Touch
+ifneq ($(EXYNOS9810_USES_MAINLINE_KERNEL),true)
 PRODUCT_PACKAGES += \
     vendor.lineage.touch-service.samsung
+endif
 
 # Update
 AB_OTA_UPDATER := false
