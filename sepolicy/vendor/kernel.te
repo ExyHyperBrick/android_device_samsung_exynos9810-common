@@ -4,6 +4,8 @@ allow kernel device:dir { add_name write remove_name rmdir };
 
 allow kernel self:capability mknod;
 
+allow kernel vendor_firmware_file:system firmware_load;
+
 r_dir_file(kernel, sysfs_sec_key);
 
 allow kernel efs_file:dir search;
