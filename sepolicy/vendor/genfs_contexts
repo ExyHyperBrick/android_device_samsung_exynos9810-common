@@ -10,6 +10,8 @@ genfscon sysfs /devices/platform/11120000.ufs/host0/target0:0:0/0:0:0:0/block/sd
 genfscon sysfs /devices/platform/10000.mif_pdata/sim/ds_detect u:object_r:sysfs_sim_writable:s0
 genfscon sysfs /devices/platform/10430000.pinctrl/gpiochip39/gpio/gpio141/value u:object_r:sysfs_gps_writable:s0
 genfscon sysfs /devices/platform/141c0000.speedy/i2c-15/15-0000/s2mps18-rtc/rtc/rtc0/hctosys u:object_r:sysfs_rtc:s0
+genfscon sysfs /devices/platform/soc@0/143600c0.usi/14360000.i2c/i2c-1/1-0036/max77705-battery.0.auto/power_supply u:object_r:sysfs_battery:s0
+genfscon sysfs /devices/platform/soc@0/143600c0.usi/14360000.i2c/i2c-1/1-0069/power_supply/max77705-charger u:object_r:sysfs_battery:s0
 genfscon sysfs /devices/platform/14360000.hsi2c/i2c-13/13-0066/max77705-charger/power_supply/max77705-charger/type u:object_r:sysfs_battery:s0
 genfscon sysfs /devices/platform/14360000.hsi2c/i2c-13/13-0066/max77705-fuelgauge/power_supply/max77705-fuelgauge/type u:object_r:sysfs_battery:s0
 genfscon sysfs /devices/platform/14360000.hsi2c/i2c-13/13-0066/max77705-charger/power_supply/otg/type u:object_r:sysfs_battery:s0
