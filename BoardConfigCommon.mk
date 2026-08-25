@@ -135,6 +135,9 @@ TARGET_RECOVERY_FSTAB := $(COMMON_PATH)/configs/init/fstab.samsungexynos9810
 # RIL
 ENABLE_VENDOR_RIL_SERVICE := true
 
+# USB
+$(call soong_config_set,samsungUsbGadgetVars,gadget_name,10c00000.dwc3)
+
 # Sepolicy
 BOARD_SEPOLICY_TEE_FLAVOR := mobicore
 include device/lineage/sepolicy/exynos/sepolicy.mk
