@@ -33,6 +33,8 @@ genfscon sysfs /devices/platform/178d0000.mfc0/video4linux/video8/name u:object_
 genfscon sysfs /devices/platform/bluetooth/rfkill/rfkill0/state u:object_r:sysfs_rfkill_writable:s0
 genfscon sysfs /devices/platform/panel_drv@001/backlight/panel/brightness u:object_r:sysfs_backlight_writable:s0
 genfscon sysfs /devices/platform/panel_drv@001/backlight/panel/max_brightness u:object_r:sysfs_backlight_writable:s0
+genfscon sysfs /devices/platform/16030000.decon_f/backlight/panel/brightness u:object_r:sysfs_backlight_writable:s0
+genfscon sysfs /devices/platform/16030000.decon_f/backlight/panel/max_brightness u:object_r:sysfs_backlight_writable:s0
 genfscon sysfs /devices/platform/panel_drv@001/lcd/panel/window_type u:object_r:sysfs_lcd:s0
 genfscon sysfs /devices/platform/panel_drv@001/lcd/panel/mdnie/accessibility u:object_r:sysfs_lcd_writable:s0
 genfscon sysfs /devices/platform/panel_drv@001/lcd/panel/mdnie/lux u:object_r:sysfs_lcd_writable:s0
