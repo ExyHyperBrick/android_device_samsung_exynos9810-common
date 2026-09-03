@@ -23,5 +23,6 @@ type sysfs_gpu_writable, sysfs_type, rw_fs_type, fs_type;
 type sysfs_lcd, sysfs_type, r_fs_type, fs_type;
 type sysfs_led_writable, sysfs_type, rw_fs_type, fs_type;
 type sysfs_modelinfo, sysfs_type, r_fs_type, fs_type;
+type sysfs_panel_writable, sysfs_type, rw_fs_type, fs_type;
 type sysfs_rfkill_writable, sysfs_type, rw_fs_type, fs_type;
 type sysfs_v4l, sysfs_type, r_fs_type, fs_type;
