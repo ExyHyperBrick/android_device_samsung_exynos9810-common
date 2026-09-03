@@ -6,3 +6,4 @@ allow init mnt_vendor_file:dir mounton;
 allow init kernel:system module_request;
 
 allow init sysfs_block_writable:file rw_file_perms;
+allow init sysfs_panel_writable:file rw_file_perms;
