@@ -1,10 +1,12 @@
 # Green Screen Workaround
-on init
-    chown system system /sys/devices/platform/panel_drv@001/backlight/panel/device/lcd/panel/fix_green_screen
-    write /sys/devices/platform/panel_drv@001/backlight/panel/device/lcd/panel/fix_green_screen 0
+on boot && property:persist.vendor.panel.greenfix=1
+    write /sys/devices/platform/panel_drv@001/lcd/panel/fix_green_screen 1
+
+on boot && property:persist.vendor.panel.greenfix=0
+    write /sys/devices/platform/panel_drv@001/lcd/panel/fix_green_screen 0
 
 on property:persist.vendor.panel.greenfix=1
-    write /sys/devices/platform/panel_drv@001/backlight/panel/device/lcd/panel/fix_green_screen 1
+    write /sys/devices/platform/panel_drv@001/lcd/panel/fix_green_screen 1
 
 on property:persist.vendor.panel.greenfix=0
-    write /sys/devices/platform/panel_drv@001/backlight/panel/device/lcd/panel/fix_green_screen 0
+    write /sys/devices/platform/panel_drv@001/lcd/panel/fix_green_screen 0
