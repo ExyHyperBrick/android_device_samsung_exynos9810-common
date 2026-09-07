@@ -1,6 +1,3 @@
-# Adoptable Storage
-ro.crypto.volume.options=aes-256-xts
-
 # Audio
 audio.offload.min.duration.secs=30
 aaudio.mmap_policy=2
@@ -27,6 +24,11 @@ bluetooth.profile.sap.server.enabled=true
 
 # Dalvik
 dalvik.vm.lockprof.threshold=500
+
+# Encryption
+ro.crypto.dm_default_key.options_format.version=2
+ro.crypto.volume.metadata.method=dm-default-key
+ro.crypto.volume.options=aes-256-xts:aes-256-cts:v2
 
 # Fastbootd
 ro.fastbootd.available=true
