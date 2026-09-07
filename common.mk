@@ -6,6 +6,9 @@ COMMON_PATH := device/samsung/exynos9810-common
 # Get non-open-source specific aspects
 $(call inherit-product, vendor/samsung/exynos9810-common/exynos9810-common-vendor.mk)
 
+# Enable project quotas and casefolding for emulated storage without sdcardfs
+$(call inherit-product, $(SRC_TARGET_DIR)/product/emulated_storage.mk)
+
 # Soong namespaces
 $(call inherit-product, hardware/samsung_slsi-linaro/config/config.mk)
 
