@@ -3,9 +3,6 @@
 
 COMMON_PATH := device/samsung/exynos9810-common
 
-# Include path
-TARGET_SPECIFIC_HEADER_PATH := $(COMMON_PATH)/include
-
 # Inherit proprietary vendor configuration
 include vendor/samsung/exynos9810-common/BoardConfigVendor.mk
 
@@ -38,16 +35,15 @@ TARGET_SCREEN_HEIGHT := 2960
 TARGET_SCREEN_WIDTH := 1440
 
 # Boot Image
-BOARD_CUSTOM_BOOTIMG := true
-BOARD_CUSTOM_BOOTIMG_MK := $(COMMON_PATH)/mkbootimg.mk
 BOARD_KERNEL_BASE := 0x10000000
 BOARD_KERNEL_OFFSET := 0x00008000
 BOARD_KERNEL_PAGESIZE := 2048
 BOARD_KERNEL_RAMDISK_OFFSET := 0x01000000
 BOARD_KERNEL_TAGS_OFFSET     := 0x00000100
-BOARD_MKBOOTIMG_ARGS += --ramdisk_offset $(BOARD_KERNEL_RAMDISK_OFFSET)
-BOARD_MKBOOTIMG_ARGS += --tags_offset $(BOARD_KERNEL_TAGS_OFFSET)
-BOARD_MKBOOTIMG_ARGS := --kernel_offset $(BOARD_KERNEL_OFFSET)
+BOARD_MKBOOTIMG_ARGS := --header_version 0 \
+    --kernel_offset $(BOARD_KERNEL_OFFSET) \
+    --ramdisk_offset $(BOARD_KERNEL_RAMDISK_OFFSET) \
+    --tags_offset $(BOARD_KERNEL_TAGS_OFFSET)
 
 # Camera
 $(call soong_config_set_bool,samsungCameraVars,usage_64bit,true)
@@ -73,10 +69,10 @@ USE_OPENGL_RENDERER := true
 HWUI_COMPILE_FOR_PERF := true
 
 # Kernel
-BOARD_KERNEL_IMAGE_NAME := Image
-BOARD_KERNEL_SEPARATED_DT := true
-TARGET_CUSTOM_DTBTOOL := dtbhtoolExynos
+BOARD_KERNEL_IMAGE_NAME := Image.samsung
 TARGET_KERNEL_SOURCE := kernel/samsung/exynos9810
+BOARD_CUSTOM_MKBOOTIMG := $(TARGET_KERNEL_SOURCE)/scripts/samsung_bootimg.py
+TARGET_KERNEL_ADDITIONAL_FLAGS += SAMSUNG_BOOT_PAGESIZE=$(BOARD_KERNEL_PAGESIZE)
 
 # Manifest
 # HIDL
