@@ -76,6 +76,9 @@ on early-fs
 on post-fs
     chown system log /proc/sec_log
 
+    # Restore attestation key labels before early HALs access EFS.
+    restorecon_recursive /mnt/vendor/efs/DAK
+
     # make fsdbg on /dev for filesystem debug info.
     mkdir /dev/fsdbg 0775 root system
 
