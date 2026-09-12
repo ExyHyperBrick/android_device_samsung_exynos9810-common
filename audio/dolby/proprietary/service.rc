@@ -1,0 +1,10 @@
+# SPDX-License-Identifier: Apache-2.0
+service vendor.moto-dms /vendor/bin/hw/vendor.motod.hardware.dms@2.0-service
+    class hal
+    user media
+    group audio
+    interface vendor.dolby.hardware.dms@2.0::IDms default
+
+on post-fs-data
+    mkdir /data/vendor/motod 0770 media audio
+    restorecon_recursive /data/vendor/motod

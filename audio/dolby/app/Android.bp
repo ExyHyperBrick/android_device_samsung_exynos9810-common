@@ -1,0 +1,21 @@
+// SPDX-License-Identifier: Apache-2.0
+android_app {
+    name: "Exynos9810Dolby",
+    defaults: ["SettingsLibDefaults"],
+    srcs: ["src/**/*.java"],
+    platform_apis: true,
+    static_libs: ["androidx.preference_preference"],
+    certificate: "platform",
+    privileged: true,
+    system_ext_specific: true,
+    min_sdk_version: "current",
+    required: ["exynos9810_dolby_permissions"],
+}
+
+prebuilt_etc {
+    name: "exynos9810_dolby_permissions",
+    src: "privapp-permissions-org.lineageos.audio.dolby.xml",
+    filename_from_src: true,
+    sub_dir: "permissions",
+    system_ext_specific: true,
+}

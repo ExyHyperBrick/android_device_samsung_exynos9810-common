@@ -39,8 +39,7 @@ PRODUCT_PACKAGES += \
     audio.usb.default \
     libprocessgroup.vendor
 
-PRODUCT_PACKAGES += \
-    SamsungDAP
+$(call inherit-product, $(COMMON_PATH)/audio/dolby/dolby.mk)
 
 PRODUCT_COPY_FILES += \
     frameworks/av/services/audiopolicy/config/bluetooth_audio_policy_configuration_7_0.xml:$(TARGET_COPY_OUT_VENDOR)/etc/bluetooth_audio_policy_configuration_7_0.xml \
