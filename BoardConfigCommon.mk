@@ -120,6 +120,10 @@ include device/lineage/sepolicy/libion/sepolicy.mk
 include device/samsung_slsi/sepolicy/sepolicy.mk
 BOARD_VENDOR_SEPOLICY_DIRS += $(COMMON_PATH)/sepolicy/vendor
 
+# Dolby
+BOARD_VENDOR_SEPOLICY_DIRS += $(COMMON_PATH)/audio/dolby/sepolicy
+DEVICE_FRAMEWORK_COMPATIBILITY_MATRIX_FILE += $(COMMON_PATH)/audio/dolby/framework-matrix.xml
+
 # Vendor Security Patch
 VENDOR_SECURITY_PATCH := 2023-02-01
 

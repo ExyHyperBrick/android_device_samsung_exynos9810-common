@@ -1,0 +1,3 @@
+/vendor/bin/hw/vendor\.motod\.hardware\.dms@2\.0-service  u:object_r:hal_moto_dms_default_exec:s0
+/vendor/etc/motod(/.*)?                                  u:object_r:vendor_configs_file:s0
+/data/vendor/motod(/.*)?                                 u:object_r:vendor_moto_dms_data_file:s0
