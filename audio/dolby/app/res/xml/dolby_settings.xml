@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+    android:key="dolby_settings"
+    android:title="@string/dolby_title">
+
+    <com.android.settingslib.widget.TopIntroPreference
+        android:key="dolby_intro"
+        android:title="@string/dolby_intro" />
+
+    <com.android.settingslib.widget.MainSwitchPreference
+        android:key="dolby_enable"
+        android:persistent="false"
+        android:title="@string/dolby_enabled" />
+
+    <PreferenceCategory
+        android:key="dolby_profiles"
+        android:title="@string/dolby_profile">
+        <com.android.settingslib.widget.SelectorWithWidgetPreference
+            android:key="dolby_profile_music"
+            android:persistent="false"
+            android:title="@string/dolby_music" />
+        <com.android.settingslib.widget.SelectorWithWidgetPreference
+            android:key="dolby_profile_dynamic"
+            android:persistent="false"
+            android:title="@string/dolby_dynamic" />
+    </PreferenceCategory>
+
+    <Preference
+        android:key="dolby_status"
+        android:selectable="false"
+        android:title="@string/dolby_status" />
+    <Preference
+        android:key="dolby_retry"
+        android:title="@string/dolby_retry" />
+</PreferenceScreen>
