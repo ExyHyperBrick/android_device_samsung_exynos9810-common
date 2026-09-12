@@ -1,0 +1,2 @@
+vendor.dolby.dap.param.tee    u:object_r:vendor_moto_dms_debug_prop:s0 exact bool
+vendor.dolby.mi.metadata.log  u:object_r:vendor_moto_dms_debug_prop:s0 exact bool

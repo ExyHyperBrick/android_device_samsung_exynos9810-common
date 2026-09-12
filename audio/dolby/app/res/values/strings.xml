@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="dolby_title">Dolby Atmos</string>
+    <string name="dolby_enabled">Use Dolby Atmos</string>
+    <string name="dolby_profile">Sound profile</string>
+    <string name="dolby_music">Music</string>
+    <string name="dolby_dynamic">Dynamic</string>
+    <string name="dolby_retry">Retry</string>
+    <string name="dolby_starting">Starting audio processing…</string>
+    <string name="dolby_off">Off</string>
+    <string name="dolby_active">On</string>
+    <string name="dolby_paused">Paused during calls</string>
+    <string name="dolby_unavailable">Audio processing is unavailable. Tap Retry to try again.</string>
+    <string name="dolby_owner_only">These device-wide settings are available in the owner user.</string>
+    <string name="dolby_intro">Adjust Dolby Atmos processing for media playback.</string>
+    <string name="dolby_status">Processing state</string>
+    <string name="dolby_tile_unavailable">Unavailable</string>
+</resources>

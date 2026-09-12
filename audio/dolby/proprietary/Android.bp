@@ -1,0 +1,223 @@
+// Motorola Edge 30 Ultra Dolby payload from DolbyAtmosSpatialSound v4.2.
+package {
+    default_applicable_licenses: ["exynos9810_moto_dolby_blob_license"],
+}
+license {
+    name: "exynos9810_moto_dolby_blob_license",
+    visibility: [":__subpackages__"],
+    license_kinds: ["legacy_proprietary"],
+}
+cc_defaults {
+    name: "exynos9810_moto_dolby_blob_defaults",
+    vendor: true,
+    check_elf_files: true,
+    stl: "none",
+    strip: { none: true },
+}
+
+cc_prebuilt_library_shared {
+    name: "exynos9810_moto_dap",
+    defaults: ["exynos9810_moto_dolby_blob_defaults"],
+    stem: "libmtdap",
+    compile_multilib: "both",
+    shared_libs: [
+        "liblog",
+        "libutils",
+        "libcutils",
+        "libaudioutils",
+        "exynos9810_moto_dap_params",
+        "libhidlbase",
+        "exynos9810_moto_stagefright_compat",
+        "exynos9810_moto_dap_preg",
+        "exynos9810_moto_dms_interface",
+        "libc++",
+    ],
+    arch: {
+        arm: {
+            srcs: ["vendor/lib/soundfx/libmtdap.so"],
+        },
+        arm64: {
+            srcs: ["vendor/lib64/soundfx/libmtdap.so"],
+        },
+    },
+    relative_install_path: "soundfx",
+}
+
+cc_prebuilt_library_shared {
+    name: "exynos9810_moto_dap_params",
+    defaults: ["exynos9810_moto_dolby_blob_defaults"],
+    stem: "libmtpparamstorage",
+    compile_multilib: "both",
+    shared_libs: [
+        "libcutils",
+        "libutils",
+        "liblog",
+        "libc++",
+    ],
+    arch: {
+        arm: {
+            srcs: ["vendor/lib/libmtpparamstorage.so"],
+        },
+        arm64: {
+            srcs: ["vendor/lib64/libmtpparamstorage.so"],
+        },
+    },
+}
+
+cc_prebuilt_library_shared {
+    name: "exynos9810_moto_dap_preg",
+    defaults: ["exynos9810_moto_dolby_blob_defaults"],
+    stem: "libmtbpreg",
+    compile_multilib: "both",
+    shared_libs: [
+        "liblog",
+        "libutils",
+        "libcutils",
+        "libaudioutils",
+        "exynos9810_moto_stagefright_compat",
+        "libc++",
+    ],
+    arch: {
+        arm: {
+            srcs: ["vendor/lib/libmtbpreg.so"],
+        },
+        arm64: {
+            srcs: ["vendor/lib64/libmtbpreg.so"],
+        },
+    },
+}
+
+cc_prebuilt_library_shared {
+    name: "exynos9810_moto_stagefright_compat",
+    defaults: ["exynos9810_moto_dolby_blob_defaults"],
+    stem: "libmtagefright_foundation",
+    compile_multilib: "both",
+    shared_libs: [
+        "libbinder",
+        "libutils",
+        "libcutils",
+        "liblog",
+        "libc++",
+    ],
+    arch: {
+        arm: {
+            srcs: ["vendor/lib/libmtagefright_foundation.so"],
+        },
+        arm64: {
+            srcs: ["vendor/lib64/libmtagefright_foundation.so"],
+        },
+    },
+}
+
+cc_prebuilt_library_shared {
+    name: "exynos9810_moto_dms_interface",
+    defaults: ["exynos9810_moto_dolby_blob_defaults"],
+    stem: "vendor.motod.hardware.dms@2.0",
+    compile_multilib: "both",
+    shared_libs: [
+        "libhidlbase",
+        "liblog",
+        "libutils",
+        "libcutils",
+        "libc++",
+    ],
+    arch: {
+        arm: {
+            srcs: ["vendor/lib/vendor.motod.hardware.dms@2.0.so"],
+        },
+        arm64: {
+            srcs: ["vendor/lib64/vendor.motod.hardware.dms@2.0.so"],
+        },
+    },
+}
+
+cc_prebuilt_library_shared {
+    name: "exynos9810_moto_dms_engine",
+    defaults: ["exynos9810_moto_dolby_blob_defaults"],
+    stem: "libmtbdsservice",
+    compile_multilib: "64",
+    shared_libs: [
+        "libutils",
+        "exynos9810_moto_stagefright_compat",
+        "liblog",
+        "libxml2",
+        "libcrypto",
+        "exynos9810_moto_dap_params",
+        "exynos9810_moto_sqlite_compat",
+        "libhidlbase",
+        "exynos9810_moto_dms_interface",
+        "libc++",
+    ],
+    arch: {
+        arm64: {
+            srcs: ["vendor/lib64/libmtbdsservice.so"],
+        },
+    },
+}
+
+cc_prebuilt_library_shared {
+    name: "exynos9810_moto_sqlite_compat",
+    defaults: ["exynos9810_moto_dolby_blob_defaults"],
+    stem: "libmtlite",
+    compile_multilib: "64",
+    shared_libs: [
+        "liblog",
+        "libc++",
+    ],
+    arch: {
+        arm64: {
+            srcs: ["vendor/lib64/libmtlite.so"],
+        },
+    },
+}
+
+cc_prebuilt_library_shared {
+    name: "exynos9810_moto_dms_impl",
+    defaults: ["exynos9810_moto_dolby_blob_defaults"],
+    stem: "vendor.motod.hardware.dms@2.0-impl",
+    compile_multilib: "64",
+    shared_libs: [
+        "libhidlbase",
+        "libutils",
+        "liblog",
+        "exynos9810_moto_dap_params",
+        "exynos9810_moto_dms_engine",
+        "exynos9810_moto_dms_interface",
+        "libc++",
+    ],
+    arch: {
+        arm64: {
+            srcs: ["vendor/lib64/vendor.motod.hardware.dms@2.0-impl.so"],
+        },
+    },
+}
+
+cc_prebuilt_binary {
+    name: "exynos9810_moto_dms_service",
+    defaults: ["exynos9810_moto_dolby_blob_defaults"],
+    stem: "vendor.motod.hardware.dms@2.0-service",
+    compile_multilib: "64",
+    shared_libs: [
+        "liblog",
+        "libutils",
+        "libhidlbase",
+        "exynos9810_moto_dap_params",
+        "exynos9810_moto_dms_engine",
+        "exynos9810_moto_dms_interface",
+        "exynos9810_moto_dms_impl",
+        "libc++",
+    ],
+    srcs: ["vendor/bin/hw/vendor.motod.hardware.dms@2.0-service"],
+    relative_install_path: "hw",
+    init_rc: ["service.rc"],
+    vintf_fragments: ["service.xml"],
+    required: ["exynos9810_moto_dax_config"],
+}
+
+prebuilt_etc {
+    name: "exynos9810_moto_dax_config",
+    vendor: true,
+    src: "vendor/etc/motod/dax-default.xml",
+    filename: "dax-default.xml",
+    sub_dir: "motod",
+}

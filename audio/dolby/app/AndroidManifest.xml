@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="org.lineageos.audio.dolby"
+    android:versionCode="2"
+    android:versionName="1.1">
+    <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS" />
+    <uses-permission android:name="android.permission.MODIFY_AUDIO_ROUTING" />
+    <application
+        android:name=".DolbyApplication"
+        android:allowBackup="false"
+        android:defaultToDeviceProtectedStorage="true"
+        android:directBootAware="true"
+        android:label="@string/dolby_title"
+        android:persistent="true"
+        android:supportsRtl="true"
+        android:theme="@style/DolbyTheme">
+        <activity
+            android:name=".DolbyActivity"
+            android:exported="true"
+            android:label="@string/dolby_title">
+            <intent-filter>
+                <action android:name="com.android.settings.action.IA_SETTINGS" />
+                <action android:name="com.android.settings.action.EXTRA_SETTINGS" />
+                <action android:name="android.service.quicksettings.action.QS_TILE_PREFERENCES" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+            <meta-data android:name="com.android.settings.category"
+                android:value="com.android.settings.category.ia.sound" />
+            <meta-data android:name="com.android.settings.group_key"
+                android:value="system_sounds_and_vibrations_category" />
+        </activity>
+        <provider
+            android:name=".DolbySearchIndexablesProvider"
+            android:authorities="org.lineageos.audio.dolby"
+            android:exported="true"
+            android:grantUriPermissions="true"
+            android:multiprocess="false"
+            android:permission="android.permission.READ_SEARCH_INDEXABLES">
+            <intent-filter>
+                <action android:name="android.content.action.SEARCH_INDEXABLES_PROVIDER" />
+            </intent-filter>
+        </provider>
+        <service
+            android:name=".DolbyTile"
+            android:exported="true"
+            android:icon="@drawable/ic_dolby"
+            android:label="@string/dolby_title"
+            android:permission="android.permission.BIND_QUICK_SETTINGS_TILE">
+            <intent-filter>
+                <action android:name="android.service.quicksettings.action.QS_TILE" />
+            </intent-filter>
+        </service>
+    </application>
+</manifest>
