@@ -5,6 +5,9 @@
     <string name="dolby_profile">Sound profile</string>
     <string name="dolby_music">Music</string>
     <string name="dolby_dynamic">Dynamic</string>
+    <string name="dolby_movie">Movie</string>
+    <string name="dolby_voice">Voice</string>
+    <string name="dolby_game">Game</string>
     <string name="dolby_retry">Retry</string>
     <string name="dolby_starting">Starting audio processing…</string>
     <string name="dolby_off">Off</string>
