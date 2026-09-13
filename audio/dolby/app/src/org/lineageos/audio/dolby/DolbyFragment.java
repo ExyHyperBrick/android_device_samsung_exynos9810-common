@@ -12,11 +12,13 @@ import com.android.settingslib.widget.MainSwitchPreference;
 import com.android.settingslib.widget.SelectorWithWidgetPreference;
 import com.android.settingslib.widget.SettingsBasePreferenceFragment;
 
+import java.util.EnumMap;
+
 public final class DolbyFragment extends SettingsBasePreferenceFragment {
     private DolbyApplication mDolby;
     private MainSwitchPreference mEnabled;
-    private SelectorWithWidgetPreference mMusic;
-    private SelectorWithWidgetPreference mDynamic;
+    private final EnumMap<DolbyProfile, SelectorWithWidgetPreference> mProfiles =
+            new EnumMap<>(DolbyProfile.class);
     private Preference mStatus;
     private Preference mRetry;
     private final Runnable mListener = this::refresh;
@@ -26,8 +28,12 @@ public final class DolbyFragment extends SettingsBasePreferenceFragment {
         setPreferencesFromResource(R.xml.dolby_settings, rootKey);
         mDolby = (DolbyApplication) requireActivity().getApplication();
         mEnabled = findPreference("dolby_enable");
-        mMusic = findPreference("dolby_profile_music");
-        mDynamic = findPreference("dolby_profile_dynamic");
+        mProfiles.clear();
+        for (DolbyProfile profile : DolbyProfile.values()) {
+            SelectorWithWidgetPreference preference = findPreference(profile.preferenceKey);
+            preference.setOnPreferenceClickListener(unused -> setProfile(profile));
+            mProfiles.put(profile, preference);
+        }
         mStatus = findPreference("dolby_status");
         mRetry = findPreference("dolby_retry");
 
@@ -37,8 +43,6 @@ public final class DolbyFragment extends SettingsBasePreferenceFragment {
             mDolby.setEnabled((Boolean) value);
             return true;
         });
-        mMusic.setOnPreferenceClickListener(preference -> setProfile(MotorolaDolby.MUSIC));
-        mDynamic.setOnPreferenceClickListener(preference -> setProfile(MotorolaDolby.DYNAMIC));
         mRetry.setOnPreferenceClickListener(preference -> {
             mDolby.retry();
             return true;
@@ -59,7 +63,7 @@ public final class DolbyFragment extends SettingsBasePreferenceFragment {
         super.onStop();
     }
 
-    private boolean setProfile(int profile) {
+    private boolean setProfile(DolbyProfile profile) {
         if (!mDolby.isReady() || !mDolby.isEnabled()) return false;
         mDolby.setProfile(profile);
         refresh();
@@ -71,10 +75,11 @@ public final class DolbyFragment extends SettingsBasePreferenceFragment {
         boolean enabled = mDolby.isEnabled();
         mEnabled.setEnabled(ready);
         mEnabled.setChecked(enabled);
-        mMusic.setEnabled(ready && enabled);
-        mDynamic.setEnabled(ready && enabled);
-        mMusic.setChecked(mDolby.getProfile() == MotorolaDolby.MUSIC);
-        mDynamic.setChecked(mDolby.getProfile() == MotorolaDolby.DYNAMIC);
+        for (DolbyProfile profile : DolbyProfile.values()) {
+            SelectorWithWidgetPreference preference = mProfiles.get(profile);
+            preference.setEnabled(ready && enabled);
+            preference.setChecked(mDolby.getProfile() == profile);
+        }
         mStatus.setSummary(mDolby.getStatus());
         mRetry.setVisible(ready && enabled && mDolby.getStatus() == R.string.dolby_unavailable);
     }

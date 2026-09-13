@@ -12,8 +12,6 @@ import java.util.UUID;
 /** Narrow protocol adapter for the pinned v4.2 Motorola payload, not Samsung DAP. */
 final class MotorolaDolby {
     static final UUID UUID_DAP = UUID.fromString("9d4921da-8225-4f29-aefa-39537a04bcaa");
-    static final int DYNAMIC = 0;
-    static final int MUSIC = 2;
     private static final int PARAM_DAP = 5;
     private static final int KEY_ON = 0;
     private static final int KEY_PROFILE_COUNT = 0x03000000;
@@ -54,24 +52,22 @@ final class MotorolaDolby {
         return ByteBuffer.wrap(value).order(ByteOrder.LITTLE_ENDIAN).getInt();
     }
 
-    static void prepare(AudioEffect effect, int profile, Runnable current) {
-        if (profile != MUSIC && profile != DYNAMIC) {
-            throw new IllegalArgumentException("Unsupported Dolby profile " + profile);
-        }
+    static void prepare(AudioEffect effect, DolbyProfile profile, Runnable current) {
+        if (profile == null) throw new IllegalArgumentException("Missing Dolby profile");
         int count = read(effect, KEY_PROFILE_COUNT, current);
-        if (count <= profile || count > 64) {
+        if (count <= profile.id || count > 64) {
             throw new IllegalStateException("DMS reported an invalid profile count: " + count);
         }
         // The stock Motorola wrapper sends these 12-byte commands under parameter 5.
         // Neither Samsung's profile=0 nor its enable=19 protocol applies here.
         set(effect, ints(KEY_ON, 1, 0), current);
         awaitOff(effect, current);
-        set(effect, ints(KEY_PROFILE, 1, profile), current);
+        set(effect, ints(KEY_PROFILE, 1, profile.id), current);
         // Profile-scoped leveler off, matching the module's default installer policy.
         // Layout: kind, value-count+1, profile, parameter ID, value.
-        set(effect, ints(PROFILE_PARAMETER, 2, profile, VOLUME_LEVELER, 0), current);
+        set(effect, ints(PROFILE_PARAMETER, 2, profile.id, VOLUME_LEVELER, 0), current);
         // Confirm configuration while internally bypassed, before requesting internal on.
-        awaitState(effect, profile, 0, current);
+        awaitState(effect, profile.id, 0, current);
         set(effect, ints(KEY_ON, 1, 1), current);
     }
 
@@ -126,10 +122,10 @@ final class MotorolaDolby {
         }
     }
 
-    static String verify(AudioEffect effect, int profile, Runnable current) {
-        awaitState(effect, profile, 1, current);
-        return "Last verified Motorola state: profile=" + profile
-                + (profile == MUSIC ? " (Music)" : " (Dynamic)")
+    static String verify(AudioEffect effect, DolbyProfile profile, Runnable current) {
+        awaitState(effect, profile.id, 1, current);
+        return "Last verified Motorola state: profile=" + profile.id
+                + " (" + profile.name() + ")"
                 + ", dsOn=1, volumeLeveler=0\nSpeaker tuning: " + speakerTuning(effect, current);
     }
 
