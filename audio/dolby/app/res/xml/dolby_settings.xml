@@ -23,6 +23,18 @@
             android:key="dolby_profile_dynamic"
             android:persistent="false"
             android:title="@string/dolby_dynamic" />
+        <com.android.settingslib.widget.SelectorWithWidgetPreference
+            android:key="dolby_profile_movie"
+            android:persistent="false"
+            android:title="@string/dolby_movie" />
+        <com.android.settingslib.widget.SelectorWithWidgetPreference
+            android:key="dolby_profile_voice"
+            android:persistent="false"
+            android:title="@string/dolby_voice" />
+        <com.android.settingslib.widget.SelectorWithWidgetPreference
+            android:key="dolby_profile_game"
+            android:persistent="false"
+            android:title="@string/dolby_game" />
     </PreferenceCategory>
 
     <Preference

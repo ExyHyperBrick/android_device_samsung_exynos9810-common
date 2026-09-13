@@ -39,7 +39,7 @@ public final class DolbyApplication extends Application {
     private volatile boolean mServerAlive = true;
     private boolean mReady;
     private boolean mEnabled;
-    private int mProfile = MotorolaDolby.MUSIC;
+    private DolbyProfile mProfile = DolbyProfile.MUSIC;
     private int mMode = AudioManager.MODE_NORMAL;
     private int mStatus = R.string.dolby_starting;
     private String mDetails = "No completed setup";
@@ -57,10 +57,8 @@ public final class DolbyApplication extends Application {
         try {
             mPreferences = getSharedPreferences("dolby", MODE_PRIVATE);
             mEnabled = mPreferences.getBoolean("enabled", true);
-            mProfile = mPreferences.getInt("profile", MotorolaDolby.MUSIC);
-            if (mProfile != MotorolaDolby.MUSIC && mProfile != MotorolaDolby.DYNAMIC) {
-                mProfile = MotorolaDolby.MUSIC;
-            }
+            mProfile = DolbyProfile.fromId(mPreferences.getInt("profile", DolbyProfile.MUSIC.id));
+            if (mProfile == null) mProfile = DolbyProfile.MUSIC;
             mAudioManager = getSystemService(AudioManager.class);
             if (mAudioManager == null) throw new IllegalStateException("AudioManager unavailable");
             mMode = mAudioManager.getMode();
@@ -100,7 +98,7 @@ public final class DolbyApplication extends Application {
 
     public boolean isEnabled() { return mEnabled; }
     public boolean isReady() { return mReady; }
-    public int getProfile() { return mProfile; }
+    public DolbyProfile getProfile() { return mProfile; }
     public int getStatus() { return mStatus; }
 
     public void setEnabled(boolean enabled) {
@@ -110,13 +108,11 @@ public final class DolbyApplication extends Application {
         retry();
     }
 
-    public void setProfile(int profile) {
-        if (profile != MotorolaDolby.MUSIC && profile != MotorolaDolby.DYNAMIC) {
-            throw new IllegalArgumentException("Unsupported Dolby profile " + profile);
-        }
+    public void setProfile(DolbyProfile profile) {
+        if (profile == null) throw new IllegalArgumentException("Missing Dolby profile");
         if (!mReady || profile == mProfile) return;
         mProfile = profile;
-        mPreferences.edit().putInt("profile", profile).apply();
+        mPreferences.edit().putInt("profile", profile.id).apply();
         retry();
     }
 
@@ -138,7 +134,7 @@ public final class DolbyApplication extends Application {
         }
         final boolean canApply = available;
         final boolean enabled = mEnabled;
-        final int profile = mProfile;
+        final DolbyProfile profile = mProfile;
         final int mode = mMode;
         mStatus = R.string.dolby_starting;
         mDetails = "Pending: previous handle cleanup not yet confirmed";
@@ -154,7 +150,7 @@ public final class DolbyApplication extends Application {
         if (generation != mGeneration) throw new Superseded();
     }
 
-    private void applyOnWorker(long generation, boolean enabled, int profile, int mode,
+    private void applyOnWorker(long generation, boolean enabled, DolbyProfile profile, int mode,
             boolean available, int attempt) {
         if (generation != mGeneration) return;
         AudioEffect candidate = null;
@@ -262,7 +258,7 @@ public final class DolbyApplication extends Application {
     }
 
     public String describeState() {
-        return "Requested enabled=" + mEnabled + ", profile=" + mProfile + ", audio mode=" + mMode
+        return "Requested enabled=" + mEnabled + ", profile=" + mProfile.id + ", audio mode=" + mMode
                 + "\n" + getString(mStatus) + "\nLast setup: " + mDetails;
     }
 

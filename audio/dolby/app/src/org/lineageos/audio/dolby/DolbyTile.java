@@ -54,8 +54,7 @@ public final class DolbyTile extends TileService {
                 : active ? Tile.STATE_ACTIVE : Tile.STATE_INACTIVE);
         tile.setLabel(getString(R.string.dolby_title));
         if (active) {
-            tile.setSubtitle(getString(dolby.getProfile() == MotorolaDolby.MUSIC
-                    ? R.string.dolby_music : R.string.dolby_dynamic));
+            tile.setSubtitle(getString(dolby.getProfile().titleRes));
         } else {
             tile.setSubtitle(getString(!dolby.isReady()
                     || dolby.getStatus() == R.string.dolby_unavailable
