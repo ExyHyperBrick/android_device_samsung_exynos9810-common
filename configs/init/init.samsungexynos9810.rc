@@ -458,19 +458,6 @@ on boot
     chown system radio /sys/devices/system/sec_os_ctrl/migrate_os
     chmod 0664 sys/devices/system/sec_os_ctrl/migrate_os
 
-    # Permission for SCHEDTUNE
-    chown system system /dev/stune/top-app/schedtune.prefer_idle
-    chown system system /dev/stune/foreground/schedtune.prefer_idle
-    chown system system /dev/stune/background/schedtune.prefer_idle
-    chown system system /dev/stune/top-app/schedtune.prefer_perf
-    chown system system /dev/stune/foreground/schedtune.prefer_perf
-    chown system system /dev/stune/background/schedtune.prefer_perf
-    chmod 0664 /dev/stune/top-app/schedtune.prefer_idle
-    chmod 0664 /dev/stune/foreground/schedtune.prefer_idle
-    chmod 0664 /dev/stune/background/schedtune.prefer_idle
-    chmod 0664 /dev/stune/top-app/schedtune.prefer_perf
-    chmod 0664 /dev/stune/foreground/schedtune.prefer_perf
-    chmod 0664 /dev/stune/background/schedtune.prefer_perf
 
 # Permission and ownership for SEC PM
     # CPU dynamic hotplug
@@ -662,6 +649,7 @@ on boot
 
 # BarTender
     mkdir /dev/cpuctl/bg_cached
+    write /dev/cpuctl/bg_cached/cpu.ems.boost_group 2
     chown system system /dev/cpuctl/bg_cached/tasks
     chown system system /dev/cpuctl/bg_cached/cpu.cfs_period_us
     chown system system /dev/cpuctl/bg_cached/cpu.cfs_quota_us
@@ -672,6 +660,7 @@ on boot
     write /dev/cpuctl/bg_cached/cpu.cfs_quota_us 10000
 
     mkdir /dev/cpuctl/bg_abnormal
+    write /dev/cpuctl/bg_abnormal/cpu.ems.boost_group 2
     chown system system /dev/cpuctl/bg_abnormal/tasks
     chown system system /dev/cpuctl/bg_abnormal/cpu.cfs_period_us
     chown system system /dev/cpuctl/bg_abnormal/cpu.cfs_quota_us
@@ -700,16 +689,6 @@ on boot
     chmod 0664 /dev/cpuset/cached/cpus
     chmod 0664 /dev/cpuset/abnormal/cpus
 
-    # For EAS scheduler
-    mkdir /dev/stune/bg_abnormal
-    chown system system /dev/stune/bg_abnormal
-    chown system system /dev/stune/bg_abnormal/tasks
-    chmod 0664 /dev/stune/bg_abnormal/tasks
-
-    mkdir /dev/stune/bg_cached
-    chown system system /dev/stune/bg_cached
-    chown system system /dev/stune/bg_cached/tasks
-    chmod 0664 /dev/stune/bg_cached/tasks
 
 # CPUSET(9810)
     chown system system /dev/cpuset/top-app/cpus
@@ -959,3 +938,84 @@ on fs
 
 # ARGOSD network_throughput
     chown system system /dev/network_throughput
+
+# CPU groups are created by the platform init rules.
+on init
+    # Keep Samsung input boosting attached to the matching CPU groups.
+    write /dev/cpuctl/foreground/cpu.ems.boost_group 1
+    write /dev/cpuctl/foreground_window/cpu.ems.boost_group 1
+    write /dev/cpuctl/background/cpu.ems.boost_group 2
+    write /dev/cpuctl/top-app/cpu.ems.boost_group 3
+    write /dev/cpuctl/rt/cpu.ems.boost_group 4
+    write /dev/cpuctl/system/cpu.ems.boost_group 0
+    write /dev/cpuctl/system-background/cpu.ems.boost_group 2
+    write /dev/cpuctl/dex2oat/cpu.ems.boost_group 2
+    write /dev/cpuctl/camera-daemon/cpu.ems.boost_group 0
+    write /dev/cpuctl/nnapi-hal/cpu.ems.boost_group 0
+
+    # Expose the standard CPU controls to Android and the power HAL.
+    chown system system /dev/cpuctl/foreground/cpu.uclamp.min
+    chmod 0664 /dev/cpuctl/foreground/cpu.uclamp.min
+    chown system system /dev/cpuctl/foreground/cpu.uclamp.max
+    chmod 0664 /dev/cpuctl/foreground/cpu.uclamp.max
+    chown system system /dev/cpuctl/foreground/cpu.uclamp.latency_sensitive
+    chmod 0664 /dev/cpuctl/foreground/cpu.uclamp.latency_sensitive
+    chown system system /dev/cpuctl/foreground_window/cpu.uclamp.min
+    chmod 0664 /dev/cpuctl/foreground_window/cpu.uclamp.min
+    chown system system /dev/cpuctl/foreground_window/cpu.uclamp.max
+    chmod 0664 /dev/cpuctl/foreground_window/cpu.uclamp.max
+    chown system system /dev/cpuctl/foreground_window/cpu.uclamp.latency_sensitive
+    chmod 0664 /dev/cpuctl/foreground_window/cpu.uclamp.latency_sensitive
+    chown system system /dev/cpuctl/background/cpu.uclamp.min
+    chmod 0664 /dev/cpuctl/background/cpu.uclamp.min
+    chown system system /dev/cpuctl/background/cpu.uclamp.max
+    chmod 0664 /dev/cpuctl/background/cpu.uclamp.max
+    chown system system /dev/cpuctl/background/cpu.uclamp.latency_sensitive
+    chmod 0664 /dev/cpuctl/background/cpu.uclamp.latency_sensitive
+    chown system system /dev/cpuctl/top-app/cpu.uclamp.min
+    chmod 0664 /dev/cpuctl/top-app/cpu.uclamp.min
+    chown system system /dev/cpuctl/top-app/cpu.uclamp.max
+    chmod 0664 /dev/cpuctl/top-app/cpu.uclamp.max
+    chown system system /dev/cpuctl/top-app/cpu.uclamp.latency_sensitive
+    chmod 0664 /dev/cpuctl/top-app/cpu.uclamp.latency_sensitive
+    chown system system /dev/cpuctl/rt/cpu.uclamp.min
+    chmod 0664 /dev/cpuctl/rt/cpu.uclamp.min
+    chown system system /dev/cpuctl/rt/cpu.uclamp.max
+    chmod 0664 /dev/cpuctl/rt/cpu.uclamp.max
+    chown system system /dev/cpuctl/rt/cpu.uclamp.latency_sensitive
+    chmod 0664 /dev/cpuctl/rt/cpu.uclamp.latency_sensitive
+    chown system system /dev/cpuctl/system/cpu.uclamp.min
+    chmod 0664 /dev/cpuctl/system/cpu.uclamp.min
+    chown system system /dev/cpuctl/system/cpu.uclamp.max
+    chmod 0664 /dev/cpuctl/system/cpu.uclamp.max
+    chown system system /dev/cpuctl/system/cpu.uclamp.latency_sensitive
+    chmod 0664 /dev/cpuctl/system/cpu.uclamp.latency_sensitive
+    chown system system /dev/cpuctl/system-background/cpu.uclamp.min
+    chmod 0664 /dev/cpuctl/system-background/cpu.uclamp.min
+    chown system system /dev/cpuctl/system-background/cpu.uclamp.max
+    chmod 0664 /dev/cpuctl/system-background/cpu.uclamp.max
+    chown system system /dev/cpuctl/system-background/cpu.uclamp.latency_sensitive
+    chmod 0664 /dev/cpuctl/system-background/cpu.uclamp.latency_sensitive
+    chown system system /dev/cpuctl/dex2oat/cpu.uclamp.min
+    chmod 0664 /dev/cpuctl/dex2oat/cpu.uclamp.min
+    chown system system /dev/cpuctl/dex2oat/cpu.uclamp.max
+    chmod 0664 /dev/cpuctl/dex2oat/cpu.uclamp.max
+    chown system system /dev/cpuctl/dex2oat/cpu.uclamp.latency_sensitive
+    chmod 0664 /dev/cpuctl/dex2oat/cpu.uclamp.latency_sensitive
+    chown system system /dev/cpuctl/camera-daemon/cpu.uclamp.min
+    chmod 0664 /dev/cpuctl/camera-daemon/cpu.uclamp.min
+    chown system system /dev/cpuctl/camera-daemon/cpu.uclamp.max
+    chmod 0664 /dev/cpuctl/camera-daemon/cpu.uclamp.max
+    chown system system /dev/cpuctl/camera-daemon/cpu.uclamp.latency_sensitive
+    chmod 0664 /dev/cpuctl/camera-daemon/cpu.uclamp.latency_sensitive
+    chown system system /dev/cpuctl/nnapi-hal/cpu.uclamp.min
+    chmod 0664 /dev/cpuctl/nnapi-hal/cpu.uclamp.min
+    chown system system /dev/cpuctl/nnapi-hal/cpu.uclamp.max
+    chmod 0664 /dev/cpuctl/nnapi-hal/cpu.uclamp.max
+    chown system system /dev/cpuctl/nnapi-hal/cpu.uclamp.latency_sensitive
+    chmod 0664 /dev/cpuctl/nnapi-hal/cpu.uclamp.latency_sensitive
+
+    # Keep neutral limits and prefer idle CPUs for top-app work.
+    write /dev/cpuctl/top-app/cpu.uclamp.min 0
+    write /dev/cpuctl/top-app/cpu.uclamp.max max
+    write /dev/cpuctl/top-app/cpu.uclamp.latency_sensitive 1
