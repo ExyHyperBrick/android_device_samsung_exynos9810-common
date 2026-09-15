@@ -122,6 +122,9 @@ PRODUCT_PACKAGES += \
     libhwbinder \
     libhwbinder.vendor
 
+# IMS
+$(call inherit-product, hardware/lineage/generic-ims/ims.mk)
+
 # init
 PRODUCT_PACKAGES += \
     exynos9810_baseband_rc \
