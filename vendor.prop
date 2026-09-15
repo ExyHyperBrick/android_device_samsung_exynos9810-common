@@ -61,6 +61,7 @@ ro.hardware.keystore=mdfpp
 # LMK
 ro.lmk.use_psi=true
 ro.lmk.kill_heaviest_task=true
+ro.lmk.swap_compression_ratio=2
 ro.lmk.swap_free_low_percentage=10
 ro.lmk.lowmem_min_oom_score=1001
 ro.lmk.thrashing_limit=30
