@@ -4,6 +4,9 @@ ro.vendor.cscsupported=1
 ro.cmc.device_type=pd
 ro.cmc.version=2.0
 
+# Display
+sys.brightness.disable_gamma_conversion=true
+
 # Charger
 ro.charger.enable_suspend=true
 
