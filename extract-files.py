@@ -51,7 +51,14 @@ lib_fixups: lib_fixups_user_type = {
 
 blob_fixups: blob_fixups_user_type = {
     'vendor/etc/media_profiles_V1_0.xml': blob_fixup()
-        .regex_replace('cameraId="2"', 'cameraId="50"'),
+        .regex_replace(
+            r'(?s)(<CamcorderProfiles cameraId="2">)(.*?)(</CamcorderProfiles>)',
+            r'\1\2\3\n\n'
+            r'    <!-- Auxiliary Camera (enumeration index) -->\n'
+            r'    <CamcorderProfiles cameraId="3">\2</CamcorderProfiles>\n\n'
+            r'    <!-- Auxiliary Camera (public ID) -->\n'
+            r'    <CamcorderProfiles cameraId="50">\2</CamcorderProfiles>',
+        ),
     (
         'vendor/lib/libsensorlistener.so',
         'vendor/lib64/libsensorlistener.so',
