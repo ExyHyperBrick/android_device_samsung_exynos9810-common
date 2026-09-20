@@ -1,3 +1,6 @@
+# Copyright (C) 2022-2026 The LineageOS Project
+# SPDX-License-Identifier: Apache-2.0
+
 allow lhd hal_system_suspend_service:service_manager find;
 
 allow lhd netd:unix_stream_socket connectto;

@@ -1,3 +1,5 @@
+# Copyright (C) 2022 The LineageOS Project
+
 # Bluetooth
 vendor.bluetooth_fw_ver u:object_r:wifi_log_prop:s0
 

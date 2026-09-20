@@ -1,3 +1,5 @@
+# Copyright (C) 2022-2026 The LineageOS Project
+
 ### Data
 /data/log(/.*)? u:object_r:log_data_file:s0
 /data/vendor/mediadrm(/.*)? u:object_r:mediadrm_vendor_data_file:s0

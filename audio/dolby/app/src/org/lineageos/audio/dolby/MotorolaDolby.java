@@ -1,4 +1,8 @@
-/* SPDX-License-Identifier: Apache-2.0 */
+/*
+ * Copyright (C) 2026 The LineageOS Project
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 package org.lineageos.audio.dolby;
 
 import android.media.audiofx.AudioEffect;

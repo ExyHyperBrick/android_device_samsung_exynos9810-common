@@ -1,3 +1,5 @@
+# Copyright (C) 2025 The LineageOS Project
+
 allow tee efs_file:dir r_dir_perms;
 allow tee efs_file:file r_file_perms;
 allow tee unlabeled:dir search;
