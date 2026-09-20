@@ -1,2 +1,5 @@
+# Copyright (C) 2022 The LineageOS Project
+# SPDX-License-Identifier: Apache-2.0
+
 allow netd lhd:fd use;
 allow netd lhd:tcp_socket { read write getopt setopt };

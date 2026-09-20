@@ -1,3 +1,6 @@
+# Copyright (C) 2025-2026 The LineageOS Project
+# SPDX-License-Identifier: Apache-2.0
+
 on late-init
     write /proc/sys/vm/min_free_kbytes 32768
     write /proc/sys/vm/page-cluster 0

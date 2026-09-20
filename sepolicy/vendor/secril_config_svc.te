@@ -1,3 +1,5 @@
+# Copyright (C) 2022 The LineageOS Project
+
 r_dir_file(secril_config_svc, imei_efs_file);
 
 dontaudit secril_config_svc default_prop:property_service set;

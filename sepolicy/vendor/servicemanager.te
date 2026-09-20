@@ -1,2 +1,5 @@
+# Copyright (C) 2026 The LineageOS Project
+# SPDX-License-Identifier: Apache-2.0
+
 # Power HAL service-registration callback
 allow servicemanager hal_power_default:binder call;

@@ -1,3 +1,5 @@
+# Copyright (C) 2025-2026 The LineageOS Project
+
 # Samsung specific
 ro.product_ship=true
 ro.vendor.cscsupported=1

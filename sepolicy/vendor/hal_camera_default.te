@@ -1,3 +1,5 @@
+# Copyright (C) 2025 The LineageOS Project
+
 r_dir_file(hal_camera_default, sysfs_battery);
 r_dir_file(hal_camera_default, sysfs_camera);
 
