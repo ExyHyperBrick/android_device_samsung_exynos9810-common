@@ -1,4 +1,6 @@
+# Copyright (C) 2026 The LineageOS Project
 # SPDX-License-Identifier: Apache-2.0
+
 # Only the vendor effect HAL talks to DMS; the settings APK uses AudioEffect, not HwBinder.
 hal_attribute(moto_dms)
 

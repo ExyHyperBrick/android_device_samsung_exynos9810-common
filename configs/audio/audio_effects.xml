@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<!-- Copyright (C) 2026 The LineageOS Project -->
 <audio_effects_conf version="2.0" xmlns="http://schemas.android.com/audio/audio_effects_conf/v2_0">
     <!-- List of effect libraries to load.
          Each library element must contain a "name" attribute and a "path" attribute giving the

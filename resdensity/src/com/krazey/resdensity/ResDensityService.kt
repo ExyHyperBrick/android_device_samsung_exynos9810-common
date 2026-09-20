@@ -1,3 +1,8 @@
+/*
+ * Copyright (C) 2025 The LineageOS Project
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 package com.krazey.resdensity
 
 import android.app.Service

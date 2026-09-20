@@ -1,3 +1,5 @@
+# Copyright (C) 2025 The LineageOS Project
+
 on post-fs
 	setprop vendor.sys.mobicoredaemon.enable stopped
 

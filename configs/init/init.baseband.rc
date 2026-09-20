@@ -1,3 +1,5 @@
+# Copyright (C) 2026 The LineageOS Project
+
 on init
     symlink /dev/block/platform/11120000.ufs/by-name/RADIO /dev/mbin0
     restorecon /dev/mbin0
