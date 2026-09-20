@@ -1,6 +1,7 @@
 #!/usr/bin/env -S PYTHONPATH=../../../tools/extract-utils python3
 #
 # SPDX-FileCopyrightText: 2024 The LineageOS Project
+# SPDX-FileCopyrightText: 2026 The LineageOS Project
 # SPDX-License-Identifier: Apache-2.0
 #
 
@@ -52,7 +53,8 @@ lib_fixups: lib_fixups_user_type = {
 blob_fixups: blob_fixups_user_type = {
     'vendor/etc/media_profiles_V1_0.xml': blob_fixup()
         .regex_replace(
-            r'(?s)(<CamcorderProfiles cameraId="2">)(.*?)(</CamcorderProfiles>)',
+            r'(?s)(?!.*<CamcorderProfiles cameraId="(?:3|50)">)'
+            r'(<CamcorderProfiles cameraId="2">)(.*?)(</CamcorderProfiles>)',
             r'\1\2\3\n\n'
             r'    <!-- Auxiliary Camera (enumeration index) -->\n'
             r'    <CamcorderProfiles cameraId="3">\2</CamcorderProfiles>\n\n'
