@@ -1,0 +1,18 @@
+// Copyright (C) 2026 The LineageOS Project
+// SPDX-License-Identifier: Apache-2.0
+
+prebuilt_etc {
+    name: "exynos9810_moto_dms_init",
+    src: "configs/service.rc",
+    filename_from_src: true,
+    sub_dir: "init",
+    vendor: true,
+}
+
+prebuilt_etc_xml {
+    name: "exynos9810_moto_dms_manifest",
+    src: "configs/service.xml",
+    filename_from_src: true,
+    sub_dir: "vintf/manifest",
+    vendor: true,
+}

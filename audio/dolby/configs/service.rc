@@ -1,4 +1,6 @@
+# Copyright (C) 2026 The LineageOS Project
 # SPDX-License-Identifier: Apache-2.0
+
 service vendor.moto-dms /vendor/bin/hw/vendor.motod.hardware.dms@2.0-service
     class hal
     user media
