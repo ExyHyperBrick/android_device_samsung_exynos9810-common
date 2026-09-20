@@ -253,8 +253,10 @@ vendor/firmware/nvram.txt_murata_r041_b2|2adda0674d47181251b256cf13c5a717282d58d
 vendor/firmware/nvram.txt_r02a_b2|20bb9e2d91aa736ba016283e9f198730d0a5b4dd
 vendor/firmware/nvram.txt_r02b_b2|02bf8a48b74edb8c81ed580ff6dca1f9c40089b6
 
-# Sensors - scheduler service from AOSP VNDK v30 (arm64)
+# Scheduler service - AOSP VNDK v30 (arm, arm64)
 # platform/prebuilts/vndk/v30 @ 5f9884aa352825291757dfd6694b874ad8c1805e
+# arm64/arch-arm-armv8-a/shared/vndk-core/android.frameworks.schedulerservice@1.0.so
 # arm64/arch-arm64-armv8-a/shared/vndk-core/android.frameworks.schedulerservice@1.0.so
 # https://android.googlesource.com/platform/prebuilts/vndk/v30/+/5f9884aa352825291757dfd6694b874ad8c1805e/
+vendor/lib/android.frameworks.schedulerservice@1.0.so|88dc4dfd03bc4ebbd9d30f9238a321c5670396c3
 vendor/lib64/android.frameworks.schedulerservice@1.0.so|d20b02d9f2b775f1033ac95885d4fe385a74a407
