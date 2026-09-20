@@ -1,3 +1,5 @@
+# Copyright (C) 2025-2026 The LineageOS Project
+
 allow init socket_device:sock_file create_file_perms;
 
 allow init efs_file:dir mounton;

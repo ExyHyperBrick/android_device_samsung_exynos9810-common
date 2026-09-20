@@ -1,3 +1,6 @@
+# Copyright (C) 2025-2026 The LineageOS Project
+# SPDX-License-Identifier: Apache-2.0
+
 # Green Screen Workaround
 on boot && property:persist.vendor.panel.greenfix=1
     write /sys/devices/platform/panel_drv@001/lcd/panel/fix_green_screen 1

@@ -1,3 +1,5 @@
+# Copyright (C) 2025 The LineageOS Project
+
 allow vold efs_file:dir r_file_perms;
 allow vold mnt_vendor_file:dir r_file_perms;
 

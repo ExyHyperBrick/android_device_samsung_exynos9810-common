@@ -1,3 +1,5 @@
+# Copyright (C) 2022-2026 The LineageOS Project
+
 # Proc
 genfscon proc /sys/vm/swappiness u:object_r:proc_swappiness:s0
 

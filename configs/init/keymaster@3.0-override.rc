@@ -1,3 +1,6 @@
+# Copyright (C) 2025 The LineageOS Project
+# SPDX-License-Identifier: Apache-2.0
+
 service vendor.keymaster-3-0 /vendor/bin/hw/android.hardware.keymaster@3.0-service
     override
     interface android.hardware.keymaster@3.0::IKeymasterDevice default
