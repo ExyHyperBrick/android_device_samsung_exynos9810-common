@@ -232,6 +232,9 @@
     <string-array translatable="false" name="config_defaultPinnerServiceFiles">
     </string-array>
 
+    <!-- Keep launcher APKs and ART files reclaimable. -->
+    <integer name="config_pinnerHomePinBytes">0</integer>
+
     <!-- Power Management: Specifies whether to decouple the auto-suspend state of the
          device from the display on/off state.
 
