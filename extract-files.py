@@ -43,7 +43,24 @@ libs_remove = (
     'sound_trigger.primary.exynos9810',
 )
 
+dolby_libs = {
+    'libmtdap': 'exynos9810_moto_dap',
+    'libmtpparamstorage': 'exynos9810_moto_dap_params',
+    'libmtbpreg': 'exynos9810_moto_dap_preg',
+    'libmtagefright_foundation': 'exynos9810_moto_stagefright_compat',
+    'vendor.motod.hardware.dms@2.0': 'exynos9810_moto_dms_interface',
+    'libmtbdsservice': 'exynos9810_moto_dms_engine',
+    'libmtlite': 'exynos9810_moto_sqlite_compat',
+    'vendor.motod.hardware.dms@2.0-impl': 'exynos9810_moto_dms_impl',
+}
+
+
+def lib_fixup_dolby(lib: str, partition: str):
+    return dolby_libs[lib] if partition == 'vendor' else lib
+
+
 lib_fixups: lib_fixups_user_type = {
+    tuple(dolby_libs): lib_fixup_dolby,
     libs_clang_rt_ubsan: lib_fixup_remove_arch_suffix,
     libs_proto_3_9_1: lib_fixup_vendorcompat,
     libs_proto_unversioned: lib_fixup_vendorcompat,
@@ -51,6 +68,46 @@ lib_fixups: lib_fixups_user_type = {
 }
 
 blob_fixups: blob_fixups_user_type = {
+    # Keep the private library names and data paths used by the existing port.
+    # Same-length replacements preserve the layout of the pinned firmware ELFs.
+    (
+        'vendor/bin/hw/vendor.motod.hardware.dms@2.0-service',
+        'vendor/lib/libmtagefright_foundation.so',
+        'vendor/lib/libmtbpreg.so',
+        'vendor/lib/libmtpparamstorage.so',
+        'vendor/lib/soundfx/libmtdap.so',
+        'vendor/lib/vendor.motod.hardware.dms@2.0.so',
+        'vendor/lib64/libmtagefright_foundation.so',
+        'vendor/lib64/libmtbdsservice.so',
+        'vendor/lib64/libmtbpreg.so',
+        'vendor/lib64/libmtlite.so',
+        'vendor/lib64/libmtpparamstorage.so',
+        'vendor/lib64/soundfx/libmtdap.so',
+        'vendor/lib64/vendor.motod.hardware.dms@2.0-impl.so',
+        'vendor/lib64/vendor.motod.hardware.dms@2.0.so',
+    ): blob_fixup()
+        .binary_regex_replace(b'libswdap\\.so', b'libmtdap.so')
+        .binary_regex_replace(b'libdapparamstorage\\.so', b'libmtpparamstorage.so')
+        .binary_regex_replace(b'libdlbpreg\\.so', b'libmtbpreg.so')
+        .binary_regex_replace(b'libstagefright_foundation\\.so', b'libmtagefright_foundation.so')
+        .binary_regex_replace(
+            b'vendor\\.dolby\\.hardware\\.dms@2\\.0\\.so',
+            b'vendor.motod.hardware.dms@2.0.so',
+        )
+        .binary_regex_replace(b'libdlbdsservice\\.so', b'libmtbdsservice.so')
+        .binary_regex_replace(b'libsqlite\\.so', b'libmtlite.so')
+        .binary_regex_replace(
+            b'vendor\\.dolby\\.hardware\\.dms@2\\.0\\-impl\\.so',
+            b'vendor.motod.hardware.dms@2.0-impl.so',
+        )
+        .binary_regex_replace(b'/data/vendor/dolby', b'/data/vendor/motod')
+        .binary_regex_replace(b'/vendor/etc/dolby', b'/vendor/etc/motod'),
+    'vendor/etc/motod/dax-default.xml': blob_fixup()
+        .regex_replace(
+            '<volume-leveler-enable value="true"/>',
+            '<volume-leveler-enable value="false"/>',
+        )
+        .patch_file('audio/dolby/dax-default'),
     'vendor/etc/media_profiles_V1_0.xml': blob_fixup()
         .regex_replace(
             r'(?s)(?!.*<CamcorderProfiles cameraId="(?:3|50)">)'

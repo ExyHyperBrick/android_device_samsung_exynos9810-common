@@ -18,6 +18,29 @@ vendor/lib/libdatamod.so
 vendor/lib/libprofileparamstorage.so
 vendor/lib/libsecaudiocoreutils.so
 
+# Audio - Motorola Dolby (Motorola Edge 30 Ultra, T1SQ33.15-11-137-10)
+# Public firmware dump: https://dumps.tadiphone.dev/dumps/motorola/eqs/-/tree/b57f578404ab23fe583bd52f6cb89d16274dda12
+# Original and fixed-up SHA-1 pins; see audio/dolby/README.md.
+vendor/bin/hw/vendor.dolby.hardware.dms@2.0-service:vendor/bin/hw/vendor.motod.hardware.dms@2.0-service;MODULE=exynos9810_moto_dms_service;REQUIRED=exynos9810_moto_dms_init,exynos9810_moto_dms_manifest|2d85baa325ca2cc4cd5518ee7513879a3ae786f1|806f63d14e2b0ae9bd9a92e15d4369a7ff2d4116
+vendor/etc/dolby/dax-default.xml:vendor/etc/motod/dax-default.xml|bf2c0308101eb7dd66caf3b7571d47dabef08789|9a24b8bc1b1b1fc48e129430a6a188aae234ed07
+system/lib/libstagefright_foundation.so:vendor/lib/libmtagefright_foundation.so;MODULE=exynos9810_moto_stagefright_compat|abc7daebe6a76767fc82f3a99cf679a9624efebf|73562377814affe9d6b1e115b437242adf5314a1
+vendor/lib/libdlbpreg.so:vendor/lib/libmtbpreg.so;MODULE=exynos9810_moto_dap_preg|d6fd2e957bad75e1237a22e4e3ada8976e8f03db|d1ba88a7fa4d443f4a6c3477fe3032b75d5df3d5
+vendor/lib/libdapparamstorage.so:vendor/lib/libmtpparamstorage.so;MODULE=exynos9810_moto_dap_params|8f746d056e23ea0b2c6e56bd3c6fef6ddd9cade6|638d94707719eb7491d3c7bce2fbc563d9977094
+vendor/lib/soundfx/libswdap.so:vendor/lib/soundfx/libmtdap.so;MODULE=exynos9810_moto_dap|c0f98168f8f2830621c7512e0778b24182035bbc|9681a1e6f19a63b4157fe3b3af7e2cbe0e814ef8
+vendor/lib/vendor.dolby.hardware.dms@2.0.so:vendor/lib/vendor.motod.hardware.dms@2.0.so;MODULE=exynos9810_moto_dms_interface|0bf3de489463ebdcfbd62fc7bcdc03e31f616f76|0d10efd7c93c0711aece5442a6ac05d245cbf595
+system/lib64/libstagefright_foundation.so:vendor/lib64/libmtagefright_foundation.so;MODULE=exynos9810_moto_stagefright_compat|b275d7e97190dbcae0a2bd827695e33b64da9b7a|c4975db59c10135f8d5f00a0741c49da70a18a59
+vendor/lib64/libdlbdsservice.so:vendor/lib64/libmtbdsservice.so;MODULE=exynos9810_moto_dms_engine|6a548281dfeb3b22a69ebd09c614d719e730a4e2|af94c5f42e12633a57fb2b8ea75adc4182254b23
+vendor/lib64/libdlbpreg.so:vendor/lib64/libmtbpreg.so;MODULE=exynos9810_moto_dap_preg|09c4850cd5204ce18479b7404582c579dee1544f|b399c5671f8e883c420514d9a9f1578f268b7865
+vendor/lib64/libdapparamstorage.so:vendor/lib64/libmtpparamstorage.so;MODULE=exynos9810_moto_dap_params|7ea739916ff2c6be6ce279f8fe030d47b32bc43c|989210c054e8936c28e651ed00cc8084e851d679
+vendor/lib64/soundfx/libswdap.so:vendor/lib64/soundfx/libmtdap.so;MODULE=exynos9810_moto_dap|2e6cd2488ab8a5ce9e9a3bf3e354db65cb72fd8d|b6e926b9df8c776ac1eeb719d33949f932719e45
+vendor/lib64/vendor.dolby.hardware.dms@2.0-impl.so:vendor/lib64/vendor.motod.hardware.dms@2.0-impl.so;MODULE=exynos9810_moto_dms_impl|e26f36da96f770dee83fbfca7639517bc55a065c|5deae142332020785af1226673becfa25da237e0
+vendor/lib64/vendor.dolby.hardware.dms@2.0.so:vendor/lib64/vendor.motod.hardware.dms@2.0.so;MODULE=exynos9810_moto_dms_interface|6250ffb321328246e80778af65d8a7c16540752f|7cb559dd07dce8f08dea83c725f6cbb0f0d42c97
+
+# Audio - Motorola Dolby SQLite dependency (ZTE P855A01, RKQ1.201221.002/20211215.223102)
+# Public firmware dump: https://dumps.tadiphone.dev/dumps/zte/p855a01/-/tree/9c88f819e4d9ecd6430fd95cbfffde450728e296
+# The library is extracted from the firmware VNDK APEX.
+system/apex/com.android.vndk.current/lib64/libsqlite.so:vendor/lib64/libmtlite.so;MODULE=exynos9810_moto_sqlite_compat|67cb61ec41610299bbbcc91583ce877669e33704|ff8a791681d689ff0adafd1418d8d40417ef3bf7
+
 # Audio Firmware
 vendor/firmware/HFD.cfg.bin
 vendor/firmware/HFD.model.new
@@ -229,3 +252,9 @@ vendor/firmware/bcmdhd_sta.bin_b2|4571624f0e2b024e402e7e57d4c8eb04b17f3c67
 vendor/firmware/nvram.txt_murata_r041_b2|2adda0674d47181251b256cf13c5a717282d58dc
 vendor/firmware/nvram.txt_r02a_b2|20bb9e2d91aa736ba016283e9f198730d0a5b4dd
 vendor/firmware/nvram.txt_r02b_b2|02bf8a48b74edb8c81ed580ff6dca1f9c40089b6
+
+# Sensors - scheduler service from AOSP VNDK v30 (arm64)
+# platform/prebuilts/vndk/v30 @ 5f9884aa352825291757dfd6694b874ad8c1805e
+# arm64/arch-arm64-armv8-a/shared/vndk-core/android.frameworks.schedulerservice@1.0.so
+# https://android.googlesource.com/platform/prebuilts/vndk/v30/+/5f9884aa352825291757dfd6694b874ad8c1805e/
+vendor/lib64/android.frameworks.schedulerservice@1.0.so|d20b02d9f2b775f1033ac95885d4fe385a74a407

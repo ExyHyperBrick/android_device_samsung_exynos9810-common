@@ -1,0 +1,27 @@
+From: Rei Ryuki
+Subject: Add empty graphic equalizer presets
+
+Adapted from DolbyAtmosSpatialSound v4.2, revision
+6b3e7b3af0f4fd2ddad1368cec8a079da5dbe408.
+Copyright (c) 2023 Rei Ryuki
+SPDX-License-Identifier: MIT
+
+--- a/dax-default.xml
++++ b/dax-default.xml
+@@ -2091,4 +2091,16 @@
+     <global_setting virtual_bass_process="1"/>
+     <global_setting atmos_game_system_gain="0"/>
+   </authorized_technologies>
++  <graphic-equalizer>
++    <geq-preset name="brilliant treble" id="0" max_edit_gain="192" min_edit_gain="-192">
++    </geq-preset>
++    <geq-preset name="bass boost" id="1" max_edit_gain="192" min_edit_gain="-192">
++    </geq-preset>
++    <geq-preset name="vocal boost" id="2" max_edit_gain="192" min_edit_gain="-192">
++    </geq-preset>
++    <geq-preset name="manual" id="3" max_edit_gain="192" min_edit_gain="-192">
++    </geq-preset>
++    <geq-preset name="flat" id="4" max_edit_gain="192" min_edit_gain="-192">
++    </geq-preset>
++  </graphic-equalizer>
+ </device_data>
