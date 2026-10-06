@@ -39,8 +39,10 @@ PRODUCT_PACKAGES += \
     audio.usb.default \
     libprocessgroup.vendor
 
+# Samsung DAP followed by the stock speaker SoundBooster stage.
 PRODUCT_PACKAGES += \
-    SamsungDAP
+    SamsungDAP \
+    exynos9810_soundbooster_effect
 
 PRODUCT_COPY_FILES += \
     frameworks/av/services/audiopolicy/config/bluetooth_audio_policy_configuration_7_0.xml:$(TARGET_COPY_OUT_VENDOR)/etc/bluetooth_audio_policy_configuration_7_0.xml \
