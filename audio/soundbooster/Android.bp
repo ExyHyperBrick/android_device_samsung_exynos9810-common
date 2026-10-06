@@ -1,0 +1,16 @@
+// SPDX-FileCopyrightText: The LineageOS Project
+// SPDX-License-Identifier: Apache-2.0
+cc_library_shared {
+    name: "exynos9810_soundbooster_effect",
+    stem: "libexynos9810_soundbooster",
+    vendor: true,
+    relative_install_path: "soundfx",
+    compile_multilib: "32",
+    srcs: ["SoundBoosterEffect.cpp"],
+    shared_libs: [
+        "liblog",
+        "libdl",
+    ],
+    header_libs: ["libhardware_headers", "libaudio_system_headers"],
+    cflags: ["-Wall", "-Wextra", "-Werror"],
+}
