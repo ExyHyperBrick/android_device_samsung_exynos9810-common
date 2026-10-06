@@ -42,6 +42,7 @@ PRODUCT_PACKAGES += \
 # Samsung DAP followed by the stock speaker SoundBooster stage.
 PRODUCT_PACKAGES += \
     SamsungDAP \
+    Exynos9810SoundBooster \
     exynos9810_soundbooster_effect
 
 PRODUCT_COPY_FILES += \

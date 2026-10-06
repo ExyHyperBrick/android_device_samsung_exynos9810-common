@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Copyright (C) 2026 The LineageOS Project; SPDX-License-Identifier: Apache-2.0 -->
+<resources>
+    <string name="soundbooster_title">Samsung speaker tuning</string>
+    <string name="soundbooster_enabled">Use Samsung speaker tuning</string>
+    <string name="soundbooster_intro">Apply Samsung tuning to the phone speakers. This setting works independently of Dolby Atmos.</string>
+    <string name="soundbooster_status">Processing state</string>
+    <string name="soundbooster_retry">Retry</string>
+    <string name="soundbooster_copy_status">Copy processing status</string>
+    <string name="soundbooster_starting">Starting speaker tuning…</string>
+    <string name="soundbooster_off">Off</string>
+    <string name="soundbooster_active">On</string>
+    <string name="soundbooster_paused">Paused during calls or while using another audio output</string>
+    <string name="soundbooster_unavailable">Speaker tuning is unavailable. Tap Retry to try again.</string>
+</resources>

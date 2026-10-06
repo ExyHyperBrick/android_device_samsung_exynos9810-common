@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Copyright (C) 2026 The LineageOS Project; SPDX-License-Identifier: Apache-2.0 -->
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+    android:title="@string/soundbooster_title">
+    <com.android.settingslib.widget.TopIntroPreference android:key="soundbooster_intro"
+        android:title="@string/soundbooster_intro" />
+    <com.android.settingslib.widget.MainSwitchPreference android:key="soundbooster_enable"
+        android:persistent="false" android:title="@string/soundbooster_enabled" />
+    <Preference android:key="soundbooster_status" android:selectable="false"
+        android:title="@string/soundbooster_status" />
+    <Preference android:key="soundbooster_retry" android:title="@string/soundbooster_retry" />
+    <Preference android:key="soundbooster_copy_status" android:title="@string/soundbooster_copy_status" />
+</PreferenceScreen>
