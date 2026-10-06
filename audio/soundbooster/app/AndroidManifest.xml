@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Copyright (C) 2026 The LineageOS Project; SPDX-License-Identifier: Apache-2.0 -->
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="org.lineageos.audio.soundbooster" android:versionCode="1" android:versionName="1.0">
+    <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS" />
+    <uses-permission android:name="android.permission.MODIFY_AUDIO_ROUTING" />
+    <application android:name=".SoundBoosterApplication" android:allowBackup="false"
+        android:defaultToDeviceProtectedStorage="true" android:directBootAware="true"
+        android:persistent="true" android:supportsRtl="true"
+        android:label="@string/soundbooster_title" android:theme="@style/SoundBoosterTheme">
+        <activity android:name=".SoundBoosterActivity" android:exported="true"
+            android:label="@string/soundbooster_title">
+            <intent-filter>
+                <action android:name="com.android.settings.action.IA_SETTINGS" />
+                <action android:name="com.android.settings.action.EXTRA_SETTINGS" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+            <meta-data android:name="com.android.settings.category"
+                android:value="com.android.settings.category.ia.sound" />
+            <meta-data android:name="com.android.settings.group_key"
+                android:value="system_sounds_and_vibrations_category" />
+        </activity>
+    </application>
+</manifest>
