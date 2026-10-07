@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Copyright (C) 2026 The LineageOS Project
+    SPDX-License-Identifier: Apache-2.0
+-->
+<displayConfiguration>
+    <densityMapping>
+        <density>
+            <width>1080</width>
+            <height>2220</height>
+            <density>420</density>
+        </density>
+        <density>
+            <width>1440</width>
+            <height>2960</height>
+            <density>560</density>
+        </density>
+    </densityMapping>
+</displayConfiguration>
