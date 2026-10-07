@@ -185,6 +185,17 @@ final class SoundBooster {
         return true;
     }
 
+    private static boolean reportedSpeakerOnly(List<AudioDeviceInfo> devices) {
+        if (devices == null || devices.isEmpty()) return false;
+        for (AudioDeviceInfo device : devices) {
+            if (device == null || !device.isSink()) return false;
+            int type = device.getType();
+            if (type != AudioDeviceInfo.TYPE_BUILTIN_SPEAKER
+                    && type != AudioDeviceInfo.TYPE_BUILTIN_SPEAKER_SAFE) return false;
+        }
+        return true;
+    }
+
     private static String policyDevices(List<AudioDeviceAttributes> devices) {
         if (devices == null) return "not queried";
         StringBuilder result = new StringBuilder("[");
@@ -197,7 +208,8 @@ final class SoundBooster {
         return result.append("]").toString();
     }
 
-    private static String playerDetails(AudioPlaybackConfiguration configuration) {
+    private static String playerDetails(AudioPlaybackConfiguration configuration,
+            List<AudioDeviceInfo> devices, String deviceError) {
         AudioAttributes attributes = configuration.getAudioAttributes();
         StringBuilder result = new StringBuilder()
                 .append("uid=").append(configuration.getClientUid())
@@ -206,20 +218,20 @@ final class SoundBooster {
                 .append(", usage=").append(attributes.getUsage())
                 .append(", content=").append(attributes.getContentType())
                 .append(", flags=0x").append(Integer.toHexString(attributes.getAllFlags()));
-        // Report actual player device IDs when the platform supplies them.
-        // Missing diagnostic data must not change the selected-route decision.
-        try {
-            result.append(", reportedDevices=[");
-            List<AudioDeviceInfo> devices = configuration.getAudioDeviceInfos();
+        result.append(", reportedDevices=");
+        if (devices == null) {
+            result.append("unavailable: ").append(deviceError);
+        } else {
+            result.append("[");
             for (int i = 0; i < devices.size(); ++i) {
                 if (i != 0) result.append(", ");
                 AudioDeviceInfo device = devices.get(i);
-                result.append("id=").append(device.getId())
-                        .append("/type=").append(device.getType());
+                if (device == null) result.append("null");
+                else result.append("id=").append(device.getId())
+                        .append("/type=").append(device.getType())
+                        .append("/sink=").append(device.isSink());
             }
             result.append("]");
-        } catch (RuntimeException e) {
-            result.append("unavailable: ").append(e.getClass().getSimpleName());
         }
         return result.toString();
     }
@@ -249,8 +261,8 @@ final class SoundBooster {
                         : "speaker-only playback";
                 StringBuilder decision = new StringBuilder("mode=").append(mode)
                         .append(", MEDIA policyDevices=").append(policyDevices(mediaDevices));
-                // Connected hardware is not a route. Check selected policy routes, including
-                // active streams that may use a different output from media.
+                // Connected hardware is not a route. Prefer actual player outputs;
+                // attributes describe a predicted route when output IDs are unavailable.
                 for (AudioPlaybackConfiguration configuration :
                         mAudioManager.getActivePlaybackConfigurations()) {
                     if (!configuration.isActive()) continue;
@@ -258,13 +270,27 @@ final class SoundBooster {
                     int usage = attributes.getUsage();
                     boolean voice = usage == AudioAttributes.USAGE_VOICE_COMMUNICATION
                             || usage == AudioAttributes.USAGE_VOICE_COMMUNICATION_SIGNALLING;
-                    List<AudioDeviceAttributes> devices = voice ? null
+                    List<AudioDeviceInfo> reportedDevices = null;
+                    String deviceError = "null device list";
+                    try {
+                        reportedDevices = configuration.getAudioDeviceInfos();
+                    } catch (RuntimeException e) {
+                        deviceError = e.getClass().getSimpleName();
+                    }
+                    boolean reportedRoute = reportedDevices != null && !reportedDevices.isEmpty();
+                    List<AudioDeviceAttributes> devices = voice || reportedRoute ? null
                             : mAudioManager.getDevicesForAttributes(attributes);
-                    decision.append("; active ").append(playerDetails(configuration))
+                    boolean playerSpeaker = reportedRoute
+                            ? reportedSpeakerOnly(reportedDevices) : speakerOnly(devices);
+                    decision.append("; active ")
+                            .append(playerDetails(configuration, reportedDevices, deviceError))
+                            .append(", routeSource=")
+                            .append(reportedRoute ? "reportedDevices" : "policyDevices")
                             .append(", policyDevices=").append(policyDevices(devices));
-                    if (voice || !speakerOnly(devices)) {
+                    if (voice || !playerSpeaker) {
                         allowed = false;
                         reason += voice ? "; active voice or signalling player"
+                                : reportedRoute ? "; active player's reported route is non-speaker"
                                 : "; active player's policy route is empty or non-speaker";
                         break;
                     }
