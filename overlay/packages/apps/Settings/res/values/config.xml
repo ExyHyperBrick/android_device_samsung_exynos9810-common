@@ -15,6 +15,10 @@
 -->
 
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <!-- Use the classic compatibility and capability-filtered
+         security controls for the 2.4/5 GHz hotspot. -->
+    <bool name="config_show_wifi_hotspot_speed">false</bool>
+
     <!-- Whether or not the device is capable of multiple levels of vibration intensity.
          Note that this is different from whether it can control the vibration amplitude as some
          devices will be able to vary their amplitude but do not possess enough dynamic range to
