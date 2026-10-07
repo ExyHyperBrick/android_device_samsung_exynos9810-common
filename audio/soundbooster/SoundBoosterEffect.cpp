@@ -34,7 +34,8 @@ constexpr effect_uuid_t kImplementation = {
 constexpr effect_descriptor_t kDescriptor = {
     kType, kImplementation, EFFECT_CONTROL_API_VERSION,
     EFFECT_FLAG_TYPE_INSERT | EFFECT_FLAG_INSERT_LAST | EFFECT_FLAG_DEVICE_IND |
-        EFFECT_FLAG_VOLUME_IND | EFFECT_FLAG_AUDIO_MODE_IND,
+        EFFECT_FLAG_VOLUME_IND | EFFECT_FLAG_AUDIO_MODE_IND |
+        EFFECT_FLAG_NOT_ELIGIBLE_SUSPEND,
     75, 25, "Exynos9810 SoundBooster", "Samsung / LineageOS",
 };
 constexpr size_t kChannels = 2;
