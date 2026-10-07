@@ -70,6 +70,7 @@ final class SoundBooster {
     private int mAppliedRotation = -1;
     private int mStatus = R.string.soundbooster_starting;
     private String mDetails = "Effect discovery pending";
+    private String mLastRouteDecision;
 
     SoundBooster(Context context, AudioManager audioManager, SharedPreferences preferences,
             Executor worker, Handler main, Runnable changed) {
@@ -184,13 +185,54 @@ final class SoundBooster {
         return true;
     }
 
+    private static String policyDevices(List<AudioDeviceAttributes> devices) {
+        if (devices == null) return "not queried";
+        StringBuilder result = new StringBuilder("[");
+        for (AudioDeviceAttributes device : devices) {
+            if (result.length() > 1) result.append(", ");
+            if (device == null) result.append("null");
+            else result.append("role=").append(device.getRole())
+                    .append("/type=").append(device.getType());
+        }
+        return result.append("]").toString();
+    }
+
+    private static String playerDetails(AudioPlaybackConfiguration configuration) {
+        AudioAttributes attributes = configuration.getAudioAttributes();
+        StringBuilder result = new StringBuilder()
+                .append("uid=").append(configuration.getClientUid())
+                .append(", player=").append(configuration.getPlayerInterfaceId())
+                .append(", session=").append(configuration.getSessionId())
+                .append(", usage=").append(attributes.getUsage())
+                .append(", content=").append(attributes.getContentType())
+                .append(", flags=0x").append(Integer.toHexString(attributes.getAllFlags()));
+        // Report actual player device IDs when the platform supplies them.
+        // Missing diagnostic data must not change the selected-route decision.
+        try {
+            result.append(", reportedDevices=[");
+            List<AudioDeviceInfo> devices = configuration.getAudioDeviceInfos();
+            for (int i = 0; i < devices.size(); ++i) {
+                if (i != 0) result.append(", ");
+                AudioDeviceInfo device = devices.get(i);
+                result.append("id=").append(device.getId())
+                        .append("/type=").append(device.getType());
+            }
+            result.append("]");
+        } catch (RuntimeException e) {
+            result.append("unavailable: ").append(e.getClass().getSimpleName());
+        }
+        return result.toString();
+    }
+
     void requestApply() {
         if (!mAvailable || mClosed) return;
         final long generation = ++mGeneration;
         boolean allowed = false;
         int rotation = 0;
         int status = R.string.soundbooster_unavailable;
-        String details = "Audio server unavailable or automatic recovery suspended";
+        String details = "Audio server unavailable or automatic recovery suspended"
+                + ": alive=" + mServerAlive + ", recoveryAllowed=" + mServerAllowed
+                + ", ownershipBlocked=" + mBlocked;
         try {
             registerMonitoring();
             if (!mEnabled) {
@@ -198,9 +240,15 @@ final class SoundBooster {
                 details = "Disabled by user";
             } else if (mServerAlive && mServerAllowed && !mBlocked) {
                 status = R.string.soundbooster_paused;
-                details = "Waiting for speaker-only playback in normal audio mode";
-                allowed = mAudioManager.getMode() == AudioManager.MODE_NORMAL
-                        && speakerOnly(mAudioManager.getDevicesForAttributes(MEDIA));
+                int mode = mAudioManager.getMode();
+                List<AudioDeviceAttributes> mediaDevices = mode == AudioManager.MODE_NORMAL
+                        ? mAudioManager.getDevicesForAttributes(MEDIA) : null;
+                allowed = mode == AudioManager.MODE_NORMAL && speakerOnly(mediaDevices);
+                String reason = mode != AudioManager.MODE_NORMAL ? "audio mode is not normal"
+                        : !speakerOnly(mediaDevices) ? "MEDIA policy route is empty or non-speaker"
+                        : "speaker-only playback";
+                StringBuilder decision = new StringBuilder("mode=").append(mode)
+                        .append(", MEDIA policyDevices=").append(policyDevices(mediaDevices));
                 // Connected hardware is not a route. Check selected policy routes, including
                 // active streams that may use a different output from media.
                 for (AudioPlaybackConfiguration configuration :
@@ -208,13 +256,20 @@ final class SoundBooster {
                     if (!configuration.isActive()) continue;
                     AudioAttributes attributes = configuration.getAudioAttributes();
                     int usage = attributes.getUsage();
-                    if (usage == AudioAttributes.USAGE_VOICE_COMMUNICATION
-                            || usage == AudioAttributes.USAGE_VOICE_COMMUNICATION_SIGNALLING
-                            || !speakerOnly(mAudioManager.getDevicesForAttributes(attributes))) {
+                    boolean voice = usage == AudioAttributes.USAGE_VOICE_COMMUNICATION
+                            || usage == AudioAttributes.USAGE_VOICE_COMMUNICATION_SIGNALLING;
+                    List<AudioDeviceAttributes> devices = voice ? null
+                            : mAudioManager.getDevicesForAttributes(attributes);
+                    decision.append("; active ").append(playerDetails(configuration))
+                            .append(", policyDevices=").append(policyDevices(devices));
+                    if (voice || !speakerOnly(devices)) {
                         allowed = false;
+                        reason += voice ? "; active voice or signalling player"
+                                : "; active player's policy route is empty or non-speaker";
                         break;
                     }
                 }
+                details = (allowed ? "Allowed: " : "Paused: ") + reason + "; " + decision;
                 Display display = mDisplayManager == null ? null
                         : mDisplayManager.getDisplay(Display.DEFAULT_DISPLAY);
                 if (display != null) rotation = display.getRotation();
@@ -224,6 +279,11 @@ final class SoundBooster {
             status = R.string.soundbooster_unavailable;
             details = e.toString();
             Log.w(TAG, "Cannot determine speaker route", e);
+        }
+        String routeDecision = "allowed=" + allowed + ", " + details;
+        if (!routeDecision.equals(mLastRouteDecision)) {
+            mLastRouteDecision = routeDecision;
+            Log.i(TAG, "Speaker route decision: " + routeDecision);
         }
         final boolean canProcess = allowed;
         final int angle = rotation;
