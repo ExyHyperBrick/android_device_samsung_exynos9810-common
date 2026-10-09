@@ -83,30 +83,27 @@ def patch_telephoto(decoded):
 .end method
 """)
 
-    # Separate rear sensors can have buttons without Samsung fusion/seamless IDs.
-    # Preserve the stock zoom-support, resize, special zoom and stabilization gates.
+    # The stock app calls rear-facing1 and front-facing0. Separate sensors
+    # do not satisfy Photo/Video's Samsung seamless or ultra-wide zoom gate.
+    # Check their validated rear capability first; preserve the stock fallback.
     menu = decoded / "smali_classes2/com/sec/android/app/camera/menu/AbstractBaseMenu.smali"
-    _edit(menu, "private isZoomChangeButtonAvailable()Z", lambda body: _once(body,
-        "    :cond_0\n    iget-object v0, p0, Lcom/sec/android/app/camera/menu/AbstractBaseMenu;->mCameraContext:" + CONTEXT,
-        f"""    :cond_0
+    _edit(menu, "private isZoomChangeButtonAvailable()Z", lambda body: _entry(body, f"""
     iget-object v0, p0, Lcom/sec/android/app/camera/menu/AbstractBaseMenu;->mCameraContext:{CONTEXT}
     invoke-interface {{v0}}, {CONTEXT}->getCameraSettings(){CAMERA}
     move-result-object v0
     invoke-interface {{v0}}, {CAMERA}->getCameraFacing()I
     move-result v0
-    if-nez v0, :compat_seamless_buttons
-    iget-object v0, p0, Lcom/sec/android/app/camera/menu/AbstractBaseMenu;->mCameraContext:{CONTEXT}
-    invoke-interface {{v0}}, {CONTEXT}->getCameraSettings(){CAMERA}
-    move-result-object v0
-    invoke-interface {{v0}}, {CAMERA}->compatShootingMode()I
+    iget-object v1, p0, Lcom/sec/android/app/camera/menu/AbstractBaseMenu;->mCameraContext:{CONTEXT}
+    invoke-interface {{v1}}, {CONTEXT}->getCameraSettings(){CAMERA}
+    move-result-object v1
+    invoke-interface {{v1}}, {CAMERA}->compatShootingMode()I
+    move-result v1
+    invoke-static {{v0, v1}}, {HELPER}->isLensButtonAvailable(II)Z
     move-result v0
-    invoke-static {{v0}}, {HELPER}->isAvailableForMode(I)Z
-    move-result v0
-    if-eqz v0, :compat_seamless_buttons
-    const/4 v0, 0x1
+    if-eqz v0, :compat_stock_zoom_buttons
     return v0
-    :compat_seamless_buttons
-    iget-object v0, p0, Lcom/sec/android/app/camera/menu/AbstractBaseMenu;->mCameraContext:{CONTEXT}"""))
+    :compat_stock_zoom_buttons
+"""))
 
     # Normalize only the persisted startup ID. Keep the currently opened ID intact
     # during a mode transition so CLOSE_CAMERA always closes the actual old device.
@@ -190,11 +187,15 @@ def patch_telephoto(decoded):
 """))
 
     group = decoded / "smali_classes2/com/sec/android/app/camera/menu/ZoomChangeGroup.smali"
-    _edit(group, "private isSupportBackTeleCamera()Z", lambda body: _entry(body, f"""
+    _edit(group, "private isSupportBackTeleCamera()Z", lambda body: _entry(
+            _once(body, "    .locals 1", "    .locals 2"), f"""
     iget-object v0, p0, {GROUP}->mCameraSettings:{CAMERA}
-    invoke-interface {{v0}}, {CAMERA}->compatShootingMode()I
+    invoke-interface {{v0}}, {CAMERA}->getCameraFacing()I
     move-result v0
-    invoke-static {{v0}}, {HELPER}->isAvailableForMode(I)Z
+    iget-object v1, p0, {GROUP}->mCameraSettings:{CAMERA}
+    invoke-interface {{v1}}, {CAMERA}->compatShootingMode()I
+    move-result v1
+    invoke-static {{v0, v1}}, {HELPER}->isAvailableForFacing(II)Z
     move-result v0
     if-nez v0, :compat_tele_supported
     const/4 v0, 0x0
@@ -211,9 +212,12 @@ def patch_telephoto(decoded):
 """))
     _edit(group, "private getZoomType(I)I", lambda body: _entry(body, f"""
     iget-object v0, p0, {GROUP}->mCameraSettings:{CAMERA}
-    invoke-interface {{v0}}, {CAMERA}->compatShootingMode()I
+    invoke-interface {{v0}}, {CAMERA}->getCameraFacing()I
     move-result v0
-    invoke-static {{v0}}, {HELPER}->isAvailableForMode(I)Z
+    iget-object v1, p0, {GROUP}->mCameraSettings:{CAMERA}
+    invoke-interface {{v1}}, {CAMERA}->compatShootingMode()I
+    move-result v1
+    invoke-static {{v0, v1}}, {HELPER}->isAvailableForFacing(II)Z
     move-result v0
     if-eqz v0, :compat_tele_zoom_original
     iget-object v0, p0, {GROUP}->mCameraSettings:{CAMERA}
@@ -237,9 +241,12 @@ def patch_telephoto(decoded):
     _edit(group, "public onClick(Lcom/samsung/android/glview/GLView;)Z", lambda body: _once(body,
         "    :cond_2\n    const/4 v0, 0x0", f"""    :cond_2
     iget-object v0, p0, {GROUP}->mCameraSettings:{CAMERA}
-    invoke-interface {{v0}}, {CAMERA}->compatShootingMode()I
+    invoke-interface {{v0}}, {CAMERA}->getCameraFacing()I
     move-result v0
-    invoke-static {{v0}}, {HELPER}->isAvailableForMode(I)Z
+    iget-object v2, p0, {GROUP}->mCameraSettings:{CAMERA}
+    invoke-interface {{v2}}, {CAMERA}->compatShootingMode()I
+    move-result v2
+    invoke-static {{v0, v2}}, {HELPER}->isAvailableForFacing(II)Z
     move-result v0
     if-eqz v0, :compat_tele_click_original
     iget v0, p0, {GROUP}->mType:I
@@ -267,9 +274,12 @@ def patch_telephoto(decoded):
     receiver = decoded / "smali/com/sec/android/app/camera/CommandReceiver.smali"
     _edit(receiver, f"public onLensTypeSelectCommand({COMMAND})Z", lambda body: _entry(body, f"""
     iget-object v0, p0, Lcom/sec/android/app/camera/CommandReceiver;->mCameraSettings:{CAMERA}
-    invoke-interface {{v0}}, {CAMERA}->compatShootingMode()I
+    invoke-interface {{v0}}, {CAMERA}->getCameraFacing()I
     move-result v0
-    invoke-static {{v0}}, {HELPER}->isAvailableForMode(I)Z
+    iget-object v1, p0, Lcom/sec/android/app/camera/CommandReceiver;->mCameraSettings:{CAMERA}
+    invoke-interface {{v1}}, {CAMERA}->compatShootingMode()I
+    move-result v1
+    invoke-static {{v0, v1}}, {HELPER}->isAvailableForFacing(II)Z
     move-result v0
     if-eqz v0, :compat_tele_record_done
     sget-object v0, {COMMAND}->BACK_CAMERA_ZOOM_TELE:{COMMAND}

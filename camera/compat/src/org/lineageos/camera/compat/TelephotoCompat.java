@@ -18,6 +18,7 @@ import android.util.SizeF;
 
 import java.lang.reflect.Array;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -43,30 +44,56 @@ public final class TelephotoCompat {
         sAvailable = false;
         sStreams = null;
         sAeRanges = null;
+        String reason = "no-camera-manager";
+        String[] cameraIds = null;
+        Integer mainFacing = null;
+        Integer teleFacing = null;
+        float scale = Float.NaN;
         try {
             CameraManager manager = context == null ? null
                     : context.getSystemService(CameraManager.class);
-            if (manager != null && contains(manager.getCameraIdList(), PHYSICAL_TELE)) {
-                CameraCharacteristics main = manager.getCameraCharacteristics("0");
-                CameraCharacteristics tele = manager.getCameraCharacteristics(PHYSICAL_TELE);
-                float scale = magnification(main, tele);
-                StreamConfigurationMap streams = tele.get(
-                        CameraCharacteristics.SCALER_STREAM_CONFIGURATION_MAP);
-                if (isRearPhotoCamera(main) && isRearPhotoCamera(tele)
-                        && scale >= 1.5f && scale <= 2.5f
-                        && supportsStockPhotoSizes(streams)
-                        && hasSizes(streams, ImageFormat.PRIVATE)
-                        && hasSizes(streams, ImageFormat.YUV_420_888)) {
-                    sStreams = streams;
-                    sAeRanges = tele.get(CameraCharacteristics.CONTROL_AE_AVAILABLE_TARGET_FPS_RANGES);
-                    // The ordinary Video path has a known, validated fallback before opening.
-                    sAvailable = isVideoSupported(1920, 1080, 30);
-                    if (sAvailable) sMagnification = scale;
+            if (manager != null) {
+                cameraIds = manager.getCameraIdList();
+                reason = "camera-50-not-exposed";
+                if (contains(cameraIds, PHYSICAL_TELE)) {
+                    CameraCharacteristics main = manager.getCameraCharacteristics("0");
+                    CameraCharacteristics tele = manager.getCameraCharacteristics(PHYSICAL_TELE);
+                    mainFacing = main.get(CameraCharacteristics.LENS_FACING);
+                    teleFacing = tele.get(CameraCharacteristics.LENS_FACING);
+                    scale = magnification(main, tele);
+                    StreamConfigurationMap streams = tele.get(
+                            CameraCharacteristics.SCALER_STREAM_CONFIGURATION_MAP);
+                    if (!isRearPhotoCamera(main)) {
+                        reason = "incompatible-main-photo-camera";
+                    } else if (!isRearPhotoCamera(tele)) {
+                        reason = "incompatible-tele-photo-camera";
+                    } else if (!(scale >= 1.5f && scale <= 2.5f)) {
+                        reason = "invalid-tele-magnification";
+                    } else if (!supportsStockPhotoSizes(streams)) {
+                        reason = "missing-stock-photo-sizes";
+                    } else if (!hasSizes(streams, ImageFormat.PRIVATE)) {
+                        reason = "missing-private-streams";
+                    } else if (!hasSizes(streams, ImageFormat.YUV_420_888)) {
+                        reason = "missing-yuv-streams";
+                    } else {
+                        sStreams = streams;
+                        sAeRanges = tele.get(
+                                CameraCharacteristics.CONTROL_AE_AVAILABLE_TARGET_FPS_RANGES);
+                        // Ordinary Video requires its validated fallback before opening.
+                        sAvailable = isVideoSupported(1920, 1080, 30);
+                        reason = sAvailable ? "ready" : "no-fhd30-video-fallback";
+                        if (sAvailable) sMagnification = scale;
+                    }
                 }
             }
         } catch (CameraAccessException | RuntimeException e) {
+            reason = "metadata-error";
             Log.w(TAG, "Telephoto metadata unavailable; use main rear camera", e);
         }
+        Log.i(TAG, "Telephoto capability available=" + sAvailable
+                + " reason=" + reason + " cameras=" + Arrays.toString(cameraIds)
+                + " mainFacing=" + mainFacing + " teleFacing=" + teleFacing
+                + " magnification=" + scale);
         put(features, "SUPPORT_BACK_TELE_CAMERA", Boolean.toString(sAvailable));
         put(features, "BACK_TELE_CAMERA_ID", sAvailable ? PHYSICAL_TELE : "-1");
         // Two physical cameras must be closed and opened separately, without fusion IDs 20/21.
@@ -84,6 +111,20 @@ public final class TelephotoCompat {
 
     public static synchronized boolean isAvailableForMode(int mode) {
         return sAvailable && (mode == 0 || mode == 1);
+    }
+
+    /** CameraSettings uses 1 for rear and 0 for front, including logical tele 100. */
+    public static synchronized boolean isAvailableForFacing(int cameraFacing, int mode) {
+        return cameraFacing == 1 && isAvailableForMode(mode);
+    }
+
+    /** Log layout decisions, without logging the per-frame zoom calculations. */
+    public static synchronized boolean isLensButtonAvailable(int cameraFacing, int mode) {
+        boolean available = isAvailableForFacing(cameraFacing, mode);
+        Log.i(TAG, "Telephoto lens buttons available=" + available
+                + " facing=" + cameraFacing + " mode=" + mode
+                + " capability=" + sAvailable);
+        return available;
     }
 
     public static int normalizeCameraId(int id, int mode) {
