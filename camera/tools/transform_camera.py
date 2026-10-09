@@ -18,6 +18,8 @@ import tempfile
 import xml.etree.ElementTree as ET
 import zipfile
 
+from telephoto_patch import patch_telephoto
+
 ANDROID = "{http://schemas.android.com/apk/res/android}"
 ET.register_namespace("android", ANDROID[1:-1])
 HERE = Path(__file__).resolve().parent
@@ -2951,6 +2953,7 @@ def patch_decoded(decoded, mappings):
     patch_front_fallback_active_array(decoded)
     patch_gallery_viewer(decoded)
     patch_recording_progress(decoded)
+    patch_telephoto(decoded)
     manifest = decoded / "AndroidManifest.xml"
     xml = ET.parse(manifest)
     application = xml.getroot().find("application")
