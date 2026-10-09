@@ -1,0 +1,468 @@
+{
+  "bridge_descriptor": "Lorg/lineageos/camera/compat/AndroidCompat;",
+  "type_map": {
+    "Landroid/app/SemStatusBarManager;": "Landroid/app/StatusBarManager;",
+    "Landroid/hardware/display/SemWifiDisplayStatus;": "Landroid/hardware/display/WifiDisplayStatus;",
+    "Landroid/os/SemSystemProperties;": "Landroid/os/SystemProperties;",
+    "Landroid/os/VibrationEffect$SemMagnitudeType;": "Lorg/lineageos/camera/compat/AndroidCompat$SemMagnitudeType;",
+    "Landroid/os/Vibrator$SemMagnitudeTypes;": "Lorg/lineageos/camera/compat/AndroidCompat$SemMagnitudeTypes;"
+  },
+  "methods": [
+    {
+      "original": "Landroid/app/SemStatusBarManager;->collapsePanels()V",
+      "after_type_remap": "Landroid/app/StatusBarManager;->collapsePanels()V",
+      "original_invoke": "virtual",
+      "observed_opcodes": [
+        "invoke-virtual"
+      ],
+      "replacement": "Lorg/lineageos/camera/compat/AndroidCompat;->collapsePanels(Landroid/app/StatusBarManager;)V",
+      "replacement_invoke": "static"
+    },
+    {
+      "original": "Landroid/bluetooth/BluetoothHeadset;->semGetHeadsetSetting(Landroid/bluetooth/BluetoothDevice;I)I",
+      "after_type_remap": "Landroid/bluetooth/BluetoothHeadset;->semGetHeadsetSetting(Landroid/bluetooth/BluetoothDevice;I)I",
+      "original_invoke": "virtual",
+      "observed_opcodes": [
+        "invoke-virtual"
+      ],
+      "replacement": "Lorg/lineageos/camera/compat/AndroidCompat;->semGetHeadsetSetting(Landroid/bluetooth/BluetoothHeadset;Landroid/bluetooth/BluetoothDevice;I)I",
+      "replacement_invoke": "static"
+    },
+    {
+      "original": "Landroid/bluetooth/BluetoothHeadset;->semGetHighPriorityDevice()Landroid/bluetooth/BluetoothDevice;",
+      "after_type_remap": "Landroid/bluetooth/BluetoothHeadset;->semGetHighPriorityDevice()Landroid/bluetooth/BluetoothDevice;",
+      "original_invoke": "virtual",
+      "observed_opcodes": [
+        "invoke-virtual"
+      ],
+      "replacement": "Lorg/lineageos/camera/compat/AndroidCompat;->semGetHighPriorityDevice(Landroid/bluetooth/BluetoothHeadset;)Landroid/bluetooth/BluetoothDevice;",
+      "replacement_invoke": "static"
+    },
+    {
+      "original": "Landroid/content/pm/PackageManager;->semGetSystemFeatureLevel(Ljava/lang/String;)I",
+      "after_type_remap": "Landroid/content/pm/PackageManager;->semGetSystemFeatureLevel(Ljava/lang/String;)I",
+      "original_invoke": "virtual",
+      "observed_opcodes": [
+        "invoke-virtual"
+      ],
+      "replacement": "Lorg/lineageos/camera/compat/AndroidCompat;->semGetSystemFeatureLevel(Landroid/content/pm/PackageManager;Ljava/lang/String;)I",
+      "replacement_invoke": "static"
+    },
+    {
+      "original": "Landroid/hardware/display/DisplayManager;->semGetWifiDisplayStatus()Landroid/hardware/display/SemWifiDisplayStatus;",
+      "after_type_remap": "Landroid/hardware/display/DisplayManager;->semGetWifiDisplayStatus()Landroid/hardware/display/WifiDisplayStatus;",
+      "original_invoke": "virtual",
+      "observed_opcodes": [
+        "invoke-virtual"
+      ],
+      "replacement": "Lorg/lineageos/camera/compat/AndroidCompat;->semGetWifiDisplayStatus(Landroid/hardware/display/DisplayManager;)Landroid/hardware/display/WifiDisplayStatus;",
+      "replacement_invoke": "static"
+    },
+    {
+      "original": "Landroid/hardware/display/SemWifiDisplayStatus;->getActiveDisplayState()I",
+      "after_type_remap": "Landroid/hardware/display/WifiDisplayStatus;->getActiveDisplayState()I",
+      "original_invoke": "virtual",
+      "observed_opcodes": [
+        "invoke-virtual"
+      ],
+      "replacement": "Lorg/lineageos/camera/compat/AndroidCompat;->getActiveDisplayState(Landroid/hardware/display/WifiDisplayStatus;)I",
+      "replacement_invoke": "static"
+    },
+    {
+      "original": "Landroid/hardware/display/SemWifiDisplayStatus;->getConnectedState()I",
+      "after_type_remap": "Landroid/hardware/display/WifiDisplayStatus;->getConnectedState()I",
+      "original_invoke": "virtual",
+      "observed_opcodes": [
+        "invoke-virtual"
+      ],
+      "replacement": "Lorg/lineageos/camera/compat/AndroidCompat;->getConnectedState(Landroid/hardware/display/WifiDisplayStatus;)I",
+      "replacement_invoke": "static"
+    },
+    {
+      "original": "Landroid/media/AudioAttributes$Builder;->semAddAudioTag(Ljava/lang/String;)Landroid/media/AudioAttributes$Builder;",
+      "after_type_remap": "Landroid/media/AudioAttributes$Builder;->semAddAudioTag(Ljava/lang/String;)Landroid/media/AudioAttributes$Builder;",
+      "original_invoke": "virtual",
+      "observed_opcodes": [
+        "invoke-virtual"
+      ],
+      "replacement": "Lorg/lineageos/camera/compat/AndroidCompat;->semAddAudioTag(Landroid/media/AudioAttributes$Builder;Ljava/lang/String;)Landroid/media/AudioAttributes$Builder;",
+      "replacement_invoke": "static"
+    },
+    {
+      "original": "Landroid/media/AudioManager;->semGetSituationVolume(II)F",
+      "after_type_remap": "Landroid/media/AudioManager;->semGetSituationVolume(II)F",
+      "original_invoke": "virtual",
+      "observed_opcodes": [
+        "invoke-virtual"
+      ],
+      "replacement": "Lorg/lineageos/camera/compat/AndroidCompat;->semGetSituationVolume(Landroid/media/AudioManager;II)F",
+      "replacement_invoke": "static"
+    },
+    {
+      "original": "Landroid/media/AudioManager;->semGetStreamType(I)I",
+      "after_type_remap": "Landroid/media/AudioManager;->semGetStreamType(I)I",
+      "original_invoke": "static",
+      "observed_opcodes": [
+        "invoke-static"
+      ],
+      "replacement": "Lorg/lineageos/camera/compat/AndroidCompat;->semGetStreamType(I)I",
+      "replacement_invoke": "static"
+    },
+    {
+      "original": "Landroid/media/AudioManager;->semIsFmRadioActive()Z",
+      "after_type_remap": "Landroid/media/AudioManager;->semIsFmRadioActive()Z",
+      "original_invoke": "virtual",
+      "observed_opcodes": [
+        "invoke-virtual"
+      ],
+      "replacement": "Lorg/lineageos/camera/compat/AndroidCompat;->semIsFmRadioActive(Landroid/media/AudioManager;)Z",
+      "replacement_invoke": "static"
+    },
+    {
+      "original": "Landroid/media/AudioManager;->semIsRecordActive(I)Z",
+      "after_type_remap": "Landroid/media/AudioManager;->semIsRecordActive(I)Z",
+      "original_invoke": "virtual",
+      "observed_opcodes": [
+        "invoke-virtual"
+      ],
+      "replacement": "Lorg/lineageos/camera/compat/AndroidCompat;->semIsRecordActive(Landroid/media/AudioManager;I)Z",
+      "replacement_invoke": "static"
+    },
+    {
+      "original": "Landroid/media/AudioRecord$Builder;->semAllowConcurrentCapture(Z)Landroid/media/AudioRecord$Builder;",
+      "after_type_remap": "Landroid/media/AudioRecord$Builder;->semAllowConcurrentCapture(Z)Landroid/media/AudioRecord$Builder;",
+      "original_invoke": "virtual",
+      "observed_opcodes": [
+        "invoke-virtual"
+      ],
+      "replacement": "Lorg/lineageos/camera/compat/AndroidCompat;->semAllowConcurrentCapture(Landroid/media/AudioRecord$Builder;Z)Landroid/media/AudioRecord$Builder;",
+      "replacement_invoke": "static"
+    },
+    {
+      "original": "Landroid/media/MediaMetadataRetriever;->semSetVideoSize(IIZZ)V",
+      "after_type_remap": "Landroid/media/MediaMetadataRetriever;->semSetVideoSize(IIZZ)V",
+      "original_invoke": "virtual",
+      "observed_opcodes": [
+        "invoke-virtual"
+      ],
+      "replacement": "Lorg/lineageos/camera/compat/AndroidCompat;->semSetVideoSize(Landroid/media/MediaMetadataRetriever;IIZZ)V",
+      "replacement_invoke": "static"
+    },
+    {
+      "original": "Landroid/media/MediaRecorder;->semSetAuthor(I)V",
+      "after_type_remap": "Landroid/media/MediaRecorder;->semSetAuthor(I)V",
+      "original_invoke": "virtual",
+      "observed_opcodes": [
+        "invoke-virtual"
+      ],
+      "replacement": "Lorg/lineageos/camera/compat/AndroidCompat;->semSetAuthor(Landroid/media/MediaRecorder;I)V",
+      "replacement_invoke": "static"
+    },
+    {
+      "original": "Landroid/media/MediaRecorder;->semSetDurationInterval(I)V",
+      "after_type_remap": "Landroid/media/MediaRecorder;->semSetDurationInterval(I)V",
+      "original_invoke": "virtual",
+      "observed_opcodes": [
+        "invoke-virtual"
+      ],
+      "replacement": "Lorg/lineageos/camera/compat/AndroidCompat;->semSetDurationInterval(Landroid/media/MediaRecorder;I)V",
+      "replacement_invoke": "static"
+    },
+    {
+      "original": "Landroid/media/MediaRecorder;->semSetFileSizeInterval(JI)V",
+      "after_type_remap": "Landroid/media/MediaRecorder;->semSetFileSizeInterval(JI)V",
+      "original_invoke": "virtual",
+      "observed_opcodes": [
+        "invoke-virtual"
+      ],
+      "replacement": "Lorg/lineageos/camera/compat/AndroidCompat;->semSetFileSizeInterval(Landroid/media/MediaRecorder;JI)V",
+      "replacement_invoke": "static"
+    },
+    {
+      "original": "Landroid/media/MediaRecorder;->semSetIframeInterval(I)V",
+      "after_type_remap": "Landroid/media/MediaRecorder;->semSetIframeInterval(I)V",
+      "original_invoke": "virtual",
+      "observed_opcodes": [
+        "invoke-virtual"
+      ],
+      "replacement": "Lorg/lineageos/camera/compat/AndroidCompat;->semSetIframeInterval(Landroid/media/MediaRecorder;I)V",
+      "replacement_invoke": "static"
+    },
+    {
+      "original": "Landroid/media/MediaRecorder;->semSetRecordingMode(I)V",
+      "after_type_remap": "Landroid/media/MediaRecorder;->semSetRecordingMode(I)V",
+      "original_invoke": "virtual",
+      "observed_opcodes": [
+        "invoke-virtual"
+      ],
+      "replacement": "Lorg/lineageos/camera/compat/AndroidCompat;->semSetRecordingMode(Landroid/media/MediaRecorder;I)V",
+      "replacement_invoke": "static"
+    },
+    {
+      "original": "Landroid/media/MediaRecorder;->semSetVideoFlip(I)V",
+      "after_type_remap": "Landroid/media/MediaRecorder;->semSetVideoFlip(I)V",
+      "original_invoke": "virtual",
+      "observed_opcodes": [
+        "invoke-virtual"
+      ],
+      "replacement": "Lorg/lineageos/camera/compat/AndroidCompat;->semSetVideoFlip(Landroid/media/MediaRecorder;I)V",
+      "replacement_invoke": "static"
+    },
+    {
+      "original": "Landroid/media/MediaRouter$RouteInfo;->semGetDeviceAddress()Ljava/lang/String;",
+      "after_type_remap": "Landroid/media/MediaRouter$RouteInfo;->semGetDeviceAddress()Ljava/lang/String;",
+      "original_invoke": "virtual",
+      "observed_opcodes": [
+        "invoke-virtual"
+      ],
+      "replacement": "Lorg/lineageos/camera/compat/AndroidCompat;->semGetDeviceAddress(Landroid/media/MediaRouter$RouteInfo;)Ljava/lang/String;",
+      "replacement_invoke": "static"
+    },
+    {
+      "original": "Landroid/media/MediaRouter$RouteInfo;->semGetStatusCode()I",
+      "after_type_remap": "Landroid/media/MediaRouter$RouteInfo;->semGetStatusCode()I",
+      "original_invoke": "virtual",
+      "observed_opcodes": [
+        "invoke-virtual"
+      ],
+      "replacement": "Lorg/lineageos/camera/compat/AndroidCompat;->semGetStatusCode(Landroid/media/MediaRouter$RouteInfo;)I",
+      "replacement_invoke": "static"
+    },
+    {
+      "original": "Landroid/net/ConnectivityManager;->semIsNetworkSupported(I)Z",
+      "after_type_remap": "Landroid/net/ConnectivityManager;->semIsNetworkSupported(I)Z",
+      "original_invoke": "virtual",
+      "observed_opcodes": [
+        "invoke-virtual"
+      ],
+      "replacement": "Lorg/lineageos/camera/compat/AndroidCompat;->semIsNetworkSupported(Landroid/net/ConnectivityManager;I)Z",
+      "replacement_invoke": "static"
+    },
+    {
+      "original": "Landroid/os/Debug;->semIsProductDev()Z",
+      "after_type_remap": "Landroid/os/Debug;->semIsProductDev()Z",
+      "original_invoke": "static",
+      "observed_opcodes": [
+        "invoke-static"
+      ],
+      "replacement": "Lorg/lineageos/camera/compat/AndroidCompat;->semIsProductDev()Z",
+      "replacement_invoke": "static"
+    },
+    {
+      "original": "Landroid/os/PowerManager;->semGoToSleep(J)V",
+      "after_type_remap": "Landroid/os/PowerManager;->semGoToSleep(J)V",
+      "original_invoke": "virtual",
+      "observed_opcodes": [
+        "invoke-virtual"
+      ],
+      "replacement": "Lorg/lineageos/camera/compat/AndroidCompat;->semGoToSleep(Landroid/os/PowerManager;J)V",
+      "replacement_invoke": "static"
+    },
+    {
+      "original": "Landroid/os/PowerManager;->semSetAutoBrightnessLimit(II)V",
+      "after_type_remap": "Landroid/os/PowerManager;->semSetAutoBrightnessLimit(II)V",
+      "original_invoke": "virtual",
+      "observed_opcodes": [
+        "invoke-virtual"
+      ],
+      "replacement": "Lorg/lineageos/camera/compat/AndroidCompat;->semSetAutoBrightnessLimit(Landroid/os/PowerManager;II)V",
+      "replacement_invoke": "static"
+    },
+    {
+      "original": "Landroid/os/PowerManager;->semWakeUp(JILjava/lang/String;)V",
+      "after_type_remap": "Landroid/os/PowerManager;->semWakeUp(JILjava/lang/String;)V",
+      "original_invoke": "virtual",
+      "observed_opcodes": [
+        "invoke-virtual"
+      ],
+      "replacement": "Lorg/lineageos/camera/compat/AndroidCompat;->semWakeUp(Landroid/os/PowerManager;JILjava/lang/String;)V",
+      "replacement_invoke": "static"
+    },
+    {
+      "original": "Landroid/os/SemSystemProperties;->get(Ljava/lang/String;)Ljava/lang/String;",
+      "after_type_remap": "Landroid/os/SystemProperties;->get(Ljava/lang/String;)Ljava/lang/String;",
+      "original_invoke": "static",
+      "observed_opcodes": [
+        "invoke-static"
+      ],
+      "replacement": "Lorg/lineageos/camera/compat/AndroidCompat;->get(Ljava/lang/String;)Ljava/lang/String;",
+      "replacement_invoke": "static"
+    },
+    {
+      "original": "Landroid/os/SemSystemProperties;->get(Ljava/lang/String;Ljava/lang/String;)Ljava/lang/String;",
+      "after_type_remap": "Landroid/os/SystemProperties;->get(Ljava/lang/String;Ljava/lang/String;)Ljava/lang/String;",
+      "original_invoke": "static",
+      "observed_opcodes": [
+        "invoke-static"
+      ],
+      "replacement": "Lorg/lineageos/camera/compat/AndroidCompat;->get(Ljava/lang/String;Ljava/lang/String;)Ljava/lang/String;",
+      "replacement_invoke": "static"
+    },
+    {
+      "original": "Landroid/os/SemSystemProperties;->getCountryCode()Ljava/lang/String;",
+      "after_type_remap": "Landroid/os/SystemProperties;->getCountryCode()Ljava/lang/String;",
+      "original_invoke": "static",
+      "observed_opcodes": [
+        "invoke-static"
+      ],
+      "replacement": "Lorg/lineageos/camera/compat/AndroidCompat;->getCountryCode()Ljava/lang/String;",
+      "replacement_invoke": "static"
+    },
+    {
+      "original": "Landroid/os/UserHandle;->semGetMyUserId()I",
+      "after_type_remap": "Landroid/os/UserHandle;->semGetMyUserId()I",
+      "original_invoke": "static",
+      "observed_opcodes": [
+        "invoke-static"
+      ],
+      "replacement": "Lorg/lineageos/camera/compat/AndroidCompat;->semGetMyUserId()I",
+      "replacement_invoke": "static"
+    },
+    {
+      "original": "Landroid/os/VibrationEffect;->semCreateWaveform(IILandroid/os/VibrationEffect$SemMagnitudeType;)Landroid/os/VibrationEffect;",
+      "after_type_remap": "Landroid/os/VibrationEffect;->semCreateWaveform(IILorg/lineageos/camera/compat/AndroidCompat$SemMagnitudeType;)Landroid/os/VibrationEffect;",
+      "original_invoke": "static",
+      "observed_opcodes": [
+        "invoke-static"
+      ],
+      "replacement": "Lorg/lineageos/camera/compat/AndroidCompat;->semCreateWaveform(IILorg/lineageos/camera/compat/AndroidCompat$SemMagnitudeType;)Landroid/os/VibrationEffect;",
+      "replacement_invoke": "static"
+    },
+    {
+      "original": "Landroid/os/Vibrator;->semVibrate(IILandroid/media/AudioAttributes;Landroid/os/Vibrator$SemMagnitudeTypes;)V",
+      "after_type_remap": "Landroid/os/Vibrator;->semVibrate(IILandroid/media/AudioAttributes;Lorg/lineageos/camera/compat/AndroidCompat$SemMagnitudeTypes;)V",
+      "original_invoke": "virtual",
+      "observed_opcodes": [
+        "invoke-virtual"
+      ],
+      "replacement": "Lorg/lineageos/camera/compat/AndroidCompat;->semVibrate(Landroid/os/Vibrator;IILandroid/media/AudioAttributes;Lorg/lineageos/camera/compat/AndroidCompat$SemMagnitudeTypes;)V",
+      "replacement_invoke": "static"
+    },
+    {
+      "original": "Landroid/telephony/TelephonyManager;->semGetCallState(I)I",
+      "after_type_remap": "Landroid/telephony/TelephonyManager;->semGetCallState(I)I",
+      "original_invoke": "virtual",
+      "observed_opcodes": [
+        "invoke-virtual"
+      ],
+      "replacement": "Lorg/lineageos/camera/compat/AndroidCompat;->semGetCallState(Landroid/telephony/TelephonyManager;I)I",
+      "replacement_invoke": "static"
+    },
+    {
+      "original": "Landroid/telephony/TelephonyManager;->semIsVideoCall()Z",
+      "after_type_remap": "Landroid/telephony/TelephonyManager;->semIsVideoCall()Z",
+      "original_invoke": "virtual",
+      "observed_opcodes": [
+        "invoke-virtual"
+      ],
+      "replacement": "Lorg/lineageos/camera/compat/AndroidCompat;->semIsVideoCall(Landroid/telephony/TelephonyManager;)Z",
+      "replacement_invoke": "static"
+    },
+    {
+      "original": "Landroid/view/HapticFeedbackConstants;->semGetVibrationIndex(I)I",
+      "after_type_remap": "Landroid/view/HapticFeedbackConstants;->semGetVibrationIndex(I)I",
+      "original_invoke": "static",
+      "observed_opcodes": [
+        "invoke-static"
+      ],
+      "replacement": "Lorg/lineageos/camera/compat/AndroidCompat;->semGetVibrationIndex(I)I",
+      "replacement_invoke": "static"
+    },
+    {
+      "original": "Landroid/view/View;->semSetRoundedCornerColor(II)V",
+      "after_type_remap": "Landroid/view/View;->semSetRoundedCornerColor(II)V",
+      "original_invoke": "virtual",
+      "observed_opcodes": [
+        "invoke-virtual"
+      ],
+      "replacement": "Lorg/lineageos/camera/compat/AndroidCompat;->semSetRoundedCornerColor(Landroid/view/View;II)V",
+      "replacement_invoke": "static"
+    },
+    {
+      "original": "Landroid/view/View;->semSetRoundedCorners(I)V",
+      "after_type_remap": "Landroid/view/View;->semSetRoundedCorners(I)V",
+      "original_invoke": "virtual",
+      "observed_opcodes": [
+        "invoke-virtual"
+      ],
+      "replacement": "Lorg/lineageos/camera/compat/AndroidCompat;->semSetRoundedCorners(Landroid/view/View;I)V",
+      "replacement_invoke": "static"
+    },
+    {
+      "original": "Landroid/view/accessibility/AccessibilityManager;->semUpdateAssitantMenu(Landroid/os/Bundle;)V",
+      "after_type_remap": "Landroid/view/accessibility/AccessibilityManager;->semUpdateAssitantMenu(Landroid/os/Bundle;)V",
+      "original_invoke": "virtual",
+      "observed_opcodes": [
+        "invoke-virtual"
+      ],
+      "replacement": "Lorg/lineageos/camera/compat/AndroidCompat;->semUpdateAssitantMenu(Landroid/view/accessibility/AccessibilityManager;Landroid/os/Bundle;)V",
+      "replacement_invoke": "static"
+    },
+    {
+      "original": "Landroid/widget/TextView;->semSetButtonShapeEnabled(Z)V",
+      "after_type_remap": "Landroid/widget/TextView;->semSetButtonShapeEnabled(Z)V",
+      "original_invoke": "virtual",
+      "observed_opcodes": [
+        "invoke-virtual"
+      ],
+      "replacement": "Lorg/lineageos/camera/compat/AndroidCompat;->semSetButtonShapeEnabled(Landroid/widget/TextView;Z)V",
+      "replacement_invoke": "static"
+    },
+    {
+      "original": "Lcom/sec/android/app/camera/Camera;->semIsResumed()Z",
+      "after_type_remap": "Lcom/sec/android/app/camera/Camera;->semIsResumed()Z",
+      "original_invoke": "virtual",
+      "observed_opcodes": [
+        "invoke-virtual"
+      ],
+      "replacement": "Lorg/lineageos/camera/compat/AndroidCompat;->semIsResumed(Landroid/app/Activity;)Z",
+      "replacement_invoke": "static",
+      "additional_closure_audit_mapping": true
+    },
+    {
+      "original": "Lcom/sec/android/app/camera/provider/CallStateManager$CallStateListener;->semSetSubscriptionId(I)V",
+      "after_type_remap": "Lcom/sec/android/app/camera/provider/CallStateManager$CallStateListener;->semSetSubscriptionId(I)V",
+      "original_invoke": "virtual",
+      "observed_opcodes": [
+        "invoke-virtual"
+      ],
+      "replacement": "Lorg/lineageos/camera/compat/AndroidCompat;->semSetSubscriptionId(Landroid/telephony/PhoneStateListener;I)V",
+      "replacement_invoke": "static",
+      "additional_closure_audit_mapping": true
+    },
+    {
+      "original": "Landroid/media/MediaExtractor;->semSetRunningMode(I)V",
+      "after_type_remap": "Landroid/media/MediaExtractor;->semSetRunningMode(I)V",
+      "original_invoke": "virtual",
+      "observed_opcodes": [
+        "invoke-virtual"
+      ],
+      "replacement": "Lorg/lineageos/camera/compat/AndroidCompat;->semSetRunningMode(Landroid/media/MediaExtractor;I)V",
+      "replacement_invoke": "static",
+      "additional_closure_audit_mapping": true
+    },
+    {
+      "original": "Landroid/telephony/TelephonyManager;->listen(Landroid/telephony/PhoneStateListener;I)V",
+      "after_type_remap": "Landroid/telephony/TelephonyManager;->listen(Landroid/telephony/PhoneStateListener;I)V",
+      "original_invoke": "virtual",
+      "observed_opcodes": [
+        "invoke-virtual"
+      ],
+      "replacement": "Lorg/lineageos/camera/compat/AndroidCompat;->listen(Landroid/telephony/TelephonyManager;Landroid/telephony/PhoneStateListener;I)V",
+      "replacement_invoke": "static",
+      "additional_closure_audit_mapping": true
+    }
+  ],
+  "string_replacements": {
+    "sem_statusbar": "statusbar"
+  },
+  "notes": [
+    "Rewrite invocations before applying the global type map, or match after_type_remap.",
+    "Virtual replacements prepend the receiver descriptor; register lists are unchanged.",
+    "Preserve /range suffix when replacing invoke-virtual/range with invoke-static/range.",
+    "Camera recorder advanced modes and encoded-video transforms require feature gating.",
+    "The magnitude enum field names and ordinal order match stock."
+  ],
+  "initial_android_sem_method_count": 40,
+  "additional_closure_audit_mapping_count": 4
+}
