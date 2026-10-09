@@ -4,16 +4,16 @@
   <local name="SHOOTING_MODE_PHOTO" back="PHOTO" front="PHOTO" enable="true" more="false" order="0" />
   <local name="SHOOTING_MODE_VIDEO" back="VIDEO" front="VIDEO" enable="true" more="false" order="1" />
   <local name="SHOOTING_MODE_PRO" back="PRO" front="" enable="true" more="true" order="1" />
-  <local name="SHOOTING_MODE_PANORAMA" back="" front="" enable="false" more="true" order="2" preview-size="1920x1080" capture-size="4032x2268" />
+  <local name="SHOOTING_MODE_PANORAMA" back="PANORAMA" front="" enable="true" more="true" order="2" preview-size="1920x1080" capture-size="4032x2268" />
   <local name="SHOOTING_MODE_FOOD" back="" front="" enable="false" more="true" order="3" info="2" />
   <local name="SHOOTING_MODE_NIGHT" back="" front="" enable="false" more="true" order="4" info="3" />
   <local name="SHOOTING_MODE_LIVE_FOCUS" front="" back="" enable="false" more="true" order="5" />
   <local name="SHOOTING_MODE_SELECTIVE_FOCUS" back="" front="" enable="false" more="true" order="6" />
   <local name="SHOOTING_MODE_WIDE_SELFIE" front="" back="" enable="false" more="true" order="7" preview-size="1920x1440" capture-size="1920x1440" />
   <local name="SHOOTING_MODE_SPORTS" back="" front="" enable="false" more="true" order="8" />
-  <local name="SHOOTING_MODE_PRO_VIDEO" back="" front="" enable="false" more="true" order="9" />
+  <local name="SHOOTING_MODE_PRO_VIDEO" back="PRO_VIDEO" front="" enable="true" more="true" order="9" />
   <local name="SHOOTING_MODE_SUPER_SLOW_MOTION" back="" front="" enable="false" more="true" order="10" preview-size="1280x720" capture-size="1280x720" info="4" />
-  <local name="SHOOTING_MODE_SLOW_MOTION" back="" front="" enable="false" more="true" order="11" preview-size="1280x720" capture-size="1920x1080" />
+  <local name="SHOOTING_MODE_SLOW_MOTION" back="SLOW_MOTION" front="" enable="true" more="true" order="11" preview-size="1280x720" capture-size="1920x1080" />
   <local name="SHOOTING_MODE_HYPER_LAPSE" back="" front="" enable="false" more="true" order="12" preview-size="1920x1080" capture-size="1920x1080" info="5" />
   <local name="BACK_CAMERA_RESOLUTION_FULL_RATIO" value="4032x1960" />
   <local name="BACK_CAMERA_RESOLUTION_16BY9_LARGE" value="4032x2268" />
