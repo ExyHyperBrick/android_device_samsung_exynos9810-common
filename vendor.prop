@@ -60,17 +60,6 @@ vendor.hwc.exynos.vsync_mode=0
 # Keystore
 ro.hardware.keystore=mdfpp
 
-# LMK
-ro.lmk.use_psi=true
-ro.lmk.kill_heaviest_task=true
-ro.lmk.swap_compression_ratio=2
-ro.lmk.swap_free_low_percentage=10
-ro.lmk.lowmem_min_oom_score=950
-ro.lmk.thrashing_limit=30
-ro.lmk.thrashing_limit_decay=50
-ro.lmk.swap_util_max=90
-ro.lmk.kill_timeout_ms=100
-
 # NFC
 ro.vendor.nfc.legacy_core_init_rsp=true
 

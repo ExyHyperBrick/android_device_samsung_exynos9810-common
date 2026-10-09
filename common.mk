@@ -127,7 +127,6 @@ PRODUCT_PACKAGES += \
     exynos9810_init_rc \
     exynos9810_mobicore_rc \
     exynos9810_samsung_rc \
-    exynos9810_swap_rc \
     exynos9810_ueventd_rc \
     exynos9810_usb_rc \
     exynos9810_wifi_rc
@@ -361,6 +360,3 @@ PRODUCT_PACKAGES += \
 
 PRODUCT_COPY_FILES += \
     $(COMMON_PATH)/configs/wifi/wpa_supplicant_overlay.conf:$(TARGET_COPY_OUT_VENDOR)/etc/wifi/wpa_supplicant_overlay.conf
-
-PRODUCT_VENDOR_PROPERTIES += \
-    ro.vendor.init_dev_config.path=/vendor/bin/init_dev_config
