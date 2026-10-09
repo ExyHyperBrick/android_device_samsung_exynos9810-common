@@ -2809,6 +2809,84 @@ def patch_public_slow_motion(decoded):
     path.write_text(text + '\n' + PUBLIC_HIGH_SPEED_LIST_METHOD)
 
 
+PANORAMA_PREVIEW_METHOD = '''.method private postLivePreview(Lcom/samsung/android/camera/core2/util/ImageBuffer;)Z
+    .locals 9
+
+    invoke-virtual {p1}, Lcom/samsung/android/camera/core2/util/ImageBuffer;->rentByteBuffer()Ljava/nio/ByteBuffer;
+    move-result-object v0
+
+    :public_preview_start
+    invoke-virtual {p1}, Lcom/samsung/android/camera/core2/util/ImageBuffer;->getImageInfo()Lcom/samsung/android/camera/core2/util/ImageInfo;
+    move-result-object v7
+    invoke-virtual {v7}, Lcom/samsung/android/camera/core2/util/ImageInfo;->getStrideInfo()Lcom/samsung/android/camera/core2/util/ImageInfo$StrideInfo;
+    move-result-object v7
+
+    iget-object v8, p0, Lcom/samsung/android/camera/core2/node/panorama/PanoramaNode;->mInitParam:Lcom/samsung/android/camera/core2/node/panorama/PanoramaNodeBase$PanoramaInitParam;
+    iget-object v8, v8, Lcom/samsung/android/camera/core2/node/panorama/PanoramaNodeBase$PanoramaInitParam;->previewSize:Landroid/util/Size;
+    invoke-virtual {v8}, Landroid/util/Size;->getWidth()I
+    move-result v1
+    invoke-virtual {v8}, Landroid/util/Size;->getHeight()I
+    move-result v2
+    invoke-virtual {v7}, Lcom/samsung/android/camera/core2/util/ImageInfo$StrideInfo;->getRowStride()I
+    move-result v3
+    invoke-virtual {v7}, Lcom/samsung/android/camera/core2/util/ImageInfo$StrideInfo;->getHeightSlice()I
+    move-result v4
+
+    iget-object v8, p0, Lcom/samsung/android/camera/core2/node/panorama/PanoramaNode;->mScaledPreviewSize:Landroid/util/Size;
+    invoke-virtual {v8}, Landroid/util/Size;->getWidth()I
+    move-result v5
+    invoke-virtual {v8}, Landroid/util/Size;->getHeight()I
+    move-result v6
+    invoke-static/range {v0 .. v6}, Lorg/lineageos/camera/compat/PanoramaCompat;->resizeNv21ToExtendedRgba(Ljava/nio/ByteBuffer;IIIIII)[B
+    move-result-object v7
+    :public_preview_end
+    .catchall {:public_preview_start .. :public_preview_end} :public_preview_error
+
+    invoke-virtual {p1, v0}, Lcom/samsung/android/camera/core2/util/ImageBuffer;->returnByteBuffer(Ljava/nio/ByteBuffer;)V
+    if-eqz v7, :public_preview_invalid
+
+    iget-object v8, p0, Lcom/samsung/android/camera/core2/node/panorama/PanoramaNode;->mNodeCallback:Lcom/samsung/android/camera/core2/node/panorama/PanoramaNodeBase$NodeCallback;
+    invoke-interface {v8, v7}, Lcom/samsung/android/camera/core2/node/panorama/PanoramaNodeBase$NodeCallback;->onPanoramaLivePreviewData([B)V
+    const/4 v0, 0x1
+    return v0
+
+    :public_preview_invalid
+    sget-object v8, Lcom/samsung/android/camera/core2/node/panorama/PanoramaNode;->SEC_PANORAMA_TAG:Lcom/samsung/android/camera/core2/util/CLog$Tag;
+    const-string v7, "postLivePreview fail - invalid NV21 preview buffer"
+    invoke-static {v8, v7}, Lcom/samsung/android/camera/core2/util/CLog;->e(Lcom/samsung/android/camera/core2/util/CLog$Tag;Ljava/lang/String;)V
+    const/4 v0, 0x0
+    return v0
+
+    :public_preview_error
+    move-exception v7
+    invoke-virtual {p1, v0}, Lcom/samsung/android/camera/core2/util/ImageBuffer;->returnByteBuffer(Ljava/nio/ByteBuffer;)V
+    throw v7
+.end method
+'''
+
+def patch_panorama_live_preview(decoded):
+    path = Path(decoded) / 'smali/com/samsung/android/camera/core2/node/panorama/PanoramaNode.smali'
+    text = path.read_text()
+    pattern = re.compile(r'(?ms)^\.method private postLivePreview\(Lcom/samsung/android/camera/core2/util/ImageBuffer;\)Z\n.*?^\.end method\n')
+    matches = list(pattern.finditer(text))
+    if len(matches) != 1 or 'PanoramaCompat;' in text:
+        raise ValueError('Unexpected Panorama live-preview method')
+    original = matches[0].group(0)
+    expected = 'Lcom/samsung/android/camera/core2/util/ImageUtils;->quramResizeNV21ToRGBA('
+    contract = {
+        expected: 1,
+        '->getRowStride()I': 1,
+        '->getHeightSlice()I': 1,
+        '->mInitParam:Lcom/samsung/android/camera/core2/node/panorama/PanoramaNodeBase$PanoramaInitParam;': 2,
+        '->mScaledPreviewSize:Landroid/util/Size;': 2,
+        '->onPanoramaLivePreviewData([B)V': 1,
+    }
+    if any(original.count(token) != count for token, count in contract.items()):
+        raise ValueError('Unexpected Panorama preview conversion contract')
+    text = pattern.sub(lambda _: PANORAMA_PREVIEW_METHOD, text, count=1)
+    path.write_text(text)
+
+
 def patch_decoded(decoded, mappings):
     counts = {}
     methods = {item["after_type_remap"]: item for item in mappings["methods"]}
@@ -2861,6 +2939,7 @@ def patch_decoded(decoded, mappings):
     patch_public_video_requests(decoded)
     patch_public_pro_video(decoded)
     patch_public_slow_motion(decoded)
+    patch_panorama_live_preview(decoded)
     patch_gl_spr_loader(decoded)
     adapt_spinner_dropdown_layout(decoded)
     patch_preview_snapshot(decoded)
@@ -2905,7 +2984,7 @@ def patch_decoded(decoded, mappings):
     xml.write(manifest, encoding="utf-8", xml_declaration=True)
     marker = decoded / MARKER
     marker.parent.mkdir(parents=True, exist_ok=True)
-    marker.write_text(json.dumps({"port": 13, "modes": ["photo", "video", "pro"],
+    marker.write_text(json.dumps({"port": 14, "modes": ["photo", "video", "pro"],
                                  "available_experimental_modes": ["pro_video", "panorama", "slow_motion"],
                                  "android_api_call_counts": counts}, indent=2) + "\n")
     return counts
