@@ -5,6 +5,9 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 
+from importlib.util import module_from_spec, spec_from_file_location
+from pathlib import Path
+
 from extract_utils.fixups_blob import (
     blob_fixup,
     blob_fixups_user_type,
@@ -50,7 +53,30 @@ lib_fixups: lib_fixups_user_type = {
     libs_remove: lib_fixup_remove,
 }
 
+# Apply the bounded HFD copy during extraction and accept its fixed form.
+_hfd_spec = spec_from_file_location(
+    'exynos9810_hfd_chroma',
+    Path(__file__).parent / 'camera' / 'fixups' / 'patch_hfd_chroma.py',
+)
+_hfd_fixup = module_from_spec(_hfd_spec)
+_hfd_spec.loader.exec_module(_hfd_fixup)
+
 blob_fixups: blob_fixups_user_type = {
+    'vendor/lib/libhfd.so': blob_fixup()
+        .call(_hfd_fixup.fixup, need_tmp_dir=False),
+    'system_ext/lib64/libsecimaging.camera.samsung.so': blob_fixup()
+        .clear_symbol_version('jniThrowException')
+        .clear_symbol_version('jniThrowExceptionFmt')
+        .replace_needed('libnativehelper.so', 'libnativehelper_compat_libc++.so'),
+    'system_ext/lib64/libOpenCv.camera.samsung.so': blob_fixup()
+        .add_needed('libcompiler_rt.so'),
+    'system_ext/lib64/libcore2nativeutil.camera.samsung.so': blob_fixup()
+        .clear_symbol_version('jniThrowException')
+        .clear_symbol_version('jniThrowExceptionFmt')
+        .clear_symbol_version('jniThrowNullPointerException')
+        .add_needed('libSamsungCameraLegacyCameraUtils.so')
+        .replace_needed('libnativehelper.so', 'libnativehelper_compat_libc++.so'),
+
     'vendor/etc/media_profiles_V1_0.xml': blob_fixup()
         .regex_replace(
             r'(?s)(?!.*<CamcorderProfiles cameraId="(?:3|50)">)'
@@ -81,6 +107,17 @@ module = ExtractUtilsModule(
     blob_fixups=blob_fixups,
     lib_fixups=lib_fixups,
     namespace_imports=namespace_imports,
+)
+
+# The camera inputs are transformed after extraction has copied both JARs.
+_camera_spec = spec_from_file_location(
+    'exynos9810_camera_prepare',
+    Path(__file__).parent / 'camera' / 'prepare_vendor_camera.py',
+)
+_camera_prepare = module_from_spec(_camera_spec)
+_camera_spec.loader.exec_module(_camera_prepare)
+module.proprietary_files[0].add_post_makefile_generation_fn(
+    _camera_prepare.prepare_vendor_camera,
 )
 
 if __name__ == '__main__':

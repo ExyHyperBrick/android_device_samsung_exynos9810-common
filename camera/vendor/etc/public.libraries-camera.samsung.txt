@@ -1,0 +1,3 @@
+libsecimaging.camera.samsung.so 64
+libOpenCv.camera.samsung.so 64
+libcore2nativeutil.camera.samsung.so 64

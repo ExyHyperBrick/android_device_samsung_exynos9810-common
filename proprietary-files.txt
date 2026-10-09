@@ -237,3 +237,27 @@ vendor/firmware/nvram.txt_r02b_b2|02bf8a48b74edb8c81ed580ff6dca1f9c40089b6
 # https://android.googlesource.com/platform/prebuilts/vndk/v30/+/5f9884aa352825291757dfd6694b874ad8c1805e/
 vendor/lib/android.frameworks.schedulerservice@1.0.so|88dc4dfd03bc4ebbd9d30f9238a321c5670396c3
 vendor/lib64/android.frameworks.schedulerservice@1.0.so|d20b02d9f2b775f1033ac95885d4fe385a74a407
+
+# Samsung Camera application and DEX inputs
+system/priv-app/SamsungCamera/SamsungCamera.apk:system_ext/priv-app/SamsungCameraExynos9810/SamsungCameraExynos9810.apk;EXTRACT_ONLY;FILEGROUP=exynos9810_samsung_camera_apk
+system/framework/secimaging.jar:system_ext/camera-inputs/secimaging.jar;EXTRACT_ONLY
+system/framework/semextendedformat.jar:system_ext/camera-inputs/semextendedformat.jar;EXTRACT_ONLY
+system/framework/sprengine.jar:system_ext/camera-inputs/sprengine.jar;EXTRACT_ONLY
+
+# Samsung Camera app-facing ARM64 native libraries
+# Generated filegroups are consumed by camera/Android.bp.
+# These extraction entries intentionally contain no firmware hash pins.
+
+system/lib64/libsecimaging.camera.samsung.so:system_ext/lib64/libsecimaging.camera.samsung.so;EXTRACT_ONLY;FILEGROUP=exynos9810_stock_camera_secimaging_blob
+system/lib64/libSEF.quram.so:system_ext/lib64/libSEF.quram.so;EXTRACT_ONLY;FILEGROUP=exynos9810_stock_camera_sef_blob
+system/lib64/libOpenCv.camera.samsung.so:system_ext/lib64/libOpenCv.camera.samsung.so;EXTRACT_ONLY;FILEGROUP=exynos9810_stock_camera_opencv_blob
+system/lib64/libexifa.camera.samsung.so:system_ext/lib64/libexifa.camera.samsung.so;EXTRACT_ONLY;FILEGROUP=exynos9810_stock_camera_exif_blob
+system/lib64/libjpega.camera.samsung.so:system_ext/lib64/libjpega.camera.samsung.so;EXTRACT_ONLY;FILEGROUP=exynos9810_stock_camera_jpeg_blob
+system/lib64/libsecjpeginterface.camera.samsung.so:system_ext/lib64/libsecjpeginterface.camera.samsung.so;EXTRACT_ONLY;FILEGROUP=exynos9810_stock_camera_jpeginterface_blob
+system/lib64/libsccore.so:system_ext/lib64/libsccore.so;EXTRACT_ONLY;FILEGROUP=exynos9810_stock_camera_core_blob
+system/lib64/libimagecodec.quram.so:system_ext/lib64/libimagecodec.quram.so;EXTRACT_ONLY;FILEGROUP=exynos9810_stock_camera_imagecodec_blob
+system/lib64/libcore2nativeutil.camera.samsung.so:system_ext/lib64/libcore2nativeutil.camera.samsung.so;EXTRACT_ONLY;FILEGROUP=exynos9810_stock_camera_core2nativeutil_blob
+system/lib64/libjpegsq.media.samsung.so:system_ext/lib64/libjpegsq.media.samsung.so;EXTRACT_ONLY;FILEGROUP=exynos9810_stock_camera_jpegsqueezer_blob
+system/lib64/libsavscmn.so:system_ext/lib64/libsavscmn.so;EXTRACT_ONLY;FILEGROUP=exynos9810_stock_camera_savscommon_blob
+system/lib64/libpadm.so:system_ext/lib64/libpadm.so;EXTRACT_ONLY;FILEGROUP=exynos9810_stock_camera_padm_blob
+system/lib64/libsxqk.so:system_ext/lib64/libsxqk.so;EXTRACT_ONLY;FILEGROUP=exynos9810_stock_camera_sxqk_blob

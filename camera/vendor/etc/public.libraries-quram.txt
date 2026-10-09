@@ -1,0 +1,2 @@
+libSEF.quram.so 64
+libimagecodec.quram.so 64

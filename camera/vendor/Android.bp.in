@@ -1,0 +1,375 @@
+// SPDX-FileCopyrightText: 2026 The LineageOS Project
+// SPDX-License-Identifier: Apache-2.0
+
+android_app_import {
+    name: "SamsungCameraExynos9810",
+    apk: "//device/samsung/exynos9810-common:SamsungCameraExynos9810Apk",
+    certificate: "platform",
+    privileged: true,
+    system_ext_specific: true,
+    optional_uses_libs: ["org.apache.http.legacy"],
+    enforce_uses_libs: true,
+    dex_preopt: {
+        enabled: false,
+    },
+}
+
+// SPDX-License-Identifier: Apache-2.0
+// Copyright (C) 2026 The LineageOS Project
+
+cc_prebuilt_library_shared {
+    name: "libSamsungCameraSecImaging",
+    owner: "samsung",
+    srcs: [":exynos9810_stock_camera_secimaging_blob"],
+    stem: "libsecimaging.camera.samsung",
+    compile_multilib: "64",
+    system_ext_specific: true,
+    stl: "none",
+    strip: {
+        none: true,
+    },
+    prefer: true,
+    check_elf_files: true,
+    shared_libs: [
+        "libnativehelper_compat_libc++",
+        "libcutils",
+        "libutils",
+        "libbinder",
+        "libandroid_runtime",
+        "libjpeg",
+        "liblog",
+        "libz",
+        "libSamsungCameraExif",
+        "libSamsungCameraJpeg",
+        "libGLESv2",
+        "libEGL",
+        "libgui",
+        "libSamsungCameraJpegInterface",
+        "libandroid",
+        "libui",
+        "libjnigraphics",
+        "libSamsungCameraCore",
+        "libpng",
+        "libaudioclient",
+        "libmedia",
+        "libstagefright_foundation",
+        "libstagefright",
+        "libc++",
+        "libc",
+        "libm",
+        "libdl",
+    ],
+}
+
+cc_prebuilt_library_shared {
+    name: "libSamsungCameraSEF",
+    owner: "samsung",
+    srcs: [":exynos9810_stock_camera_sef_blob"],
+    stem: "libSEF.quram",
+    compile_multilib: "64",
+    system_ext_specific: true,
+    stl: "none",
+    strip: {
+        none: true,
+    },
+    prefer: true,
+    check_elf_files: true,
+    shared_libs: [
+        "libclang_rt.ubsan_standalone",
+        "liblog",
+        "libc++",
+        "libc",
+        "libm",
+        "libdl",
+    ],
+}
+
+cc_prebuilt_library_shared {
+    name: "libSamsungCameraOpenCv",
+    owner: "samsung",
+    srcs: [":exynos9810_stock_camera_opencv_blob"],
+    stem: "libOpenCv.camera.samsung",
+    compile_multilib: "64",
+    system_ext_specific: true,
+    stl: "none",
+    strip: {
+        none: true,
+    },
+    prefer: true,
+    check_elf_files: true,
+    shared_libs: [
+        "libcompiler_rt",
+        "libc++",
+        "libdl",
+        "libm",
+        "liblog",
+        "libz",
+        "libc",
+    ],
+}
+
+cc_prebuilt_library_shared {
+    name: "libSamsungCameraExif",
+    owner: "samsung",
+    srcs: [":exynos9810_stock_camera_exif_blob"],
+    stem: "libexifa.camera.samsung",
+    compile_multilib: "64",
+    system_ext_specific: true,
+    stl: "none",
+    strip: {
+        none: true,
+    },
+    prefer: true,
+    check_elf_files: true,
+    shared_libs: [
+        "liblog",
+        "libc++",
+        "libc",
+        "libm",
+        "libdl",
+    ],
+}
+
+cc_prebuilt_library_shared {
+    name: "libSamsungCameraJpeg",
+    owner: "samsung",
+    srcs: [":exynos9810_stock_camera_jpeg_blob"],
+    stem: "libjpega.camera.samsung",
+    compile_multilib: "64",
+    system_ext_specific: true,
+    stl: "none",
+    strip: {
+        none: true,
+    },
+    prefer: true,
+    check_elf_files: true,
+    shared_libs: [
+        "libSamsungCameraExif",
+        "libc++",
+        "libc",
+        "libm",
+        "libdl",
+    ],
+}
+
+cc_prebuilt_library_shared {
+    name: "libSamsungCameraJpegInterface",
+    owner: "samsung",
+    srcs: [":exynos9810_stock_camera_jpeginterface_blob"],
+    stem: "libsecjpeginterface.camera.samsung",
+    compile_multilib: "64",
+    system_ext_specific: true,
+    stl: "none",
+    strip: {
+        none: true,
+    },
+    prefer: true,
+    check_elf_files: true,
+    shared_libs: [
+        "libui",
+        "libcutils",
+        "libutils",
+        "libjpeg",
+        "libSamsungCameraCore",
+        "liblog",
+        "libc++",
+        "libc",
+        "libm",
+        "libdl",
+    ],
+}
+
+cc_prebuilt_library_shared {
+    name: "libSamsungCameraCore",
+    owner: "samsung",
+    srcs: [":exynos9810_stock_camera_core_blob"],
+    stem: "libsccore",
+    compile_multilib: "64",
+    system_ext_specific: true,
+    stl: "none",
+    strip: {
+        none: true,
+    },
+    prefer: true,
+    check_elf_files: true,
+    shared_libs: [
+        "libcutils",
+        "libutils",
+        "liblog",
+        "libpng",
+        "libc++",
+        "libc",
+        "libm",
+        "libdl",
+    ],
+}
+
+cc_prebuilt_library_shared {
+    name: "libSamsungCameraImageCodec",
+    owner: "samsung",
+    srcs: [":exynos9810_stock_camera_imagecodec_blob"],
+    stem: "libimagecodec.quram",
+    compile_multilib: "64",
+    system_ext_specific: true,
+    stl: "none",
+    strip: {
+        none: true,
+    },
+    prefer: true,
+    check_elf_files: true,
+    shared_libs: [
+        "libm",
+        "liblog",
+        "libjnigraphics",
+        "libz",
+        "libc",
+        "libdl",
+    ],
+}
+
+cc_prebuilt_library_shared {
+    name: "libSamsungCameraCore2NativeUtil",
+    owner: "samsung",
+    srcs: [":exynos9810_stock_camera_core2nativeutil_blob"],
+    stem: "libcore2nativeutil.camera.samsung",
+    compile_multilib: "64",
+    system_ext_specific: true,
+    stl: "none",
+    strip: {
+        none: true,
+    },
+    prefer: true,
+    check_elf_files: true,
+    shared_libs: [
+        "//device/samsung/exynos9810-common:libSamsungCameraLegacyCameraUtils",
+        "libandroid_runtime",
+        "libbinder",
+        "libcamera_client",
+        "libcamera_metadata",
+        "libcutils",
+        "libnativehelper_compat_libc++",
+        "libutils",
+        "libgui",
+        "libui",
+        "liblog",
+        "libandroid",
+        "libc++",
+        "libc",
+        "libm",
+        "libdl",
+    ],
+}
+
+prebuilt_etc {
+    name: "SamsungCameraCameraPublicLibraries",
+    src: "etc/public.libraries-camera.samsung.txt",
+    filename: "public.libraries-camera.samsung.txt",
+    system_ext_specific: true,
+}
+
+prebuilt_etc {
+    name: "SamsungCameraQuramPublicLibraries",
+    src: "etc/public.libraries-quram.txt",
+    filename: "public.libraries-quram.txt",
+    system_ext_specific: true,
+}
+
+cc_prebuilt_library_shared {
+    name: "libSamsungCameraJpegSqueezer",
+    owner: "samsung",
+    srcs: [":exynos9810_stock_camera_jpegsqueezer_blob"],
+    stem: "libjpegsq.media.samsung",
+    compile_multilib: "64",
+    system_ext_specific: true,
+    stl: "none",
+    strip: {
+        none: true,
+    },
+    prefer: true,
+    check_elf_files: true,
+    shared_libs: [
+        "libSamsungCameraSavsCommon",
+        "libSamsungCameraPadm",
+        "libSamsungCameraSxqk",
+        "liblog",
+        "libc++",
+        "libc",
+        "libm",
+        "libdl",
+    ],
+}
+
+cc_prebuilt_library_shared {
+    name: "libSamsungCameraSavsCommon",
+    owner: "samsung",
+    srcs: [":exynos9810_stock_camera_savscommon_blob"],
+    stem: "libsavscmn",
+    compile_multilib: "64",
+    system_ext_specific: true,
+    stl: "none",
+    strip: {
+        none: true,
+    },
+    prefer: true,
+    check_elf_files: true,
+    shared_libs: [
+        "libm",
+        "libz",
+        "liblog",
+        "libc++",
+        "libc",
+        "libdl",
+    ],
+}
+
+cc_prebuilt_library_shared {
+    name: "libSamsungCameraPadm",
+    owner: "samsung",
+    srcs: [":exynos9810_stock_camera_padm_blob"],
+    stem: "libpadm",
+    compile_multilib: "64",
+    system_ext_specific: true,
+    stl: "none",
+    strip: {
+        none: true,
+    },
+    prefer: true,
+    check_elf_files: true,
+    shared_libs: [
+        "libutils",
+        "liblog",
+        "libc++",
+        "libc",
+        "libm",
+        "libdl",
+    ],
+}
+
+cc_prebuilt_library_shared {
+    name: "libSamsungCameraSxqk",
+    owner: "samsung",
+    srcs: [":exynos9810_stock_camera_sxqk_blob"],
+    stem: "libsxqk",
+    compile_multilib: "64",
+    system_ext_specific: true,
+    stl: "none",
+    strip: {
+        none: true,
+    },
+    prefer: true,
+    check_elf_files: true,
+    shared_libs: [
+        "libutils",
+        "libc++",
+        "libc",
+        "libm",
+        "libdl",
+    ],
+}
+
+prebuilt_etc {
+    name: "SamsungCameraMediaPublicLibraries",
+    src: "etc/public.libraries-media.samsung.txt",
+    filename: "public.libraries-media.samsung.txt",
+    system_ext_specific: true,
+}

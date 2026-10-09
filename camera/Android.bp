@@ -1,0 +1,81 @@
+// SPDX-FileCopyrightText: 2026 The LineageOS Project
+// SPDX-License-Identifier: Apache-2.0
+
+java_library {
+    name: "Exynos9810StockCameraCompat",
+    srcs: ["compat/src/**/*.java"],
+    compile_dex: true,
+    installable: false,
+    min_sdk_version: "29",
+    optimize: {
+        enabled: false,
+    },
+}
+
+python_binary_host {
+    name: "exynos9810_stock_camera_merge_compat_dex",
+    main: "tools/merge_compat_dex.py",
+    srcs: ["tools/merge_compat_dex.py"],
+}
+
+genrule {
+    name: "SamsungCameraExynos9810Apk",
+    srcs: [":exynos9810_samsung_camera_apk"],
+    device_common_srcs: [":Exynos9810StockCameraCompat"],
+    tools: ["exynos9810_stock_camera_merge_compat_dex"],
+    out: ["SamsungCameraExynos9810.apk"],
+    cmd: "$(location exynos9810_stock_camera_merge_compat_dex) " +
+        "--apk \"$(location :exynos9810_samsung_camera_apk)\" " +
+        "--compat-dex-jar \"$(location :Exynos9810StockCameraCompat)\" " +
+        "--out \"$(out)\"",
+}
+
+prebuilt_etc {
+    name: "exynos9810_stock_camera_privapp_permissions",
+    src: "permissions/privapp-permissions-exynos9810-stock-camera.xml",
+    filename_from_src: true,
+    sub_dir: "permissions",
+    system_ext_specific: true,
+}
+
+prebuilt_etc {
+    name: "exynos9810_stock_camera_default_permissions",
+    src: "permissions/default-permissions-exynos9810-stock-camera.xml",
+    filename_from_src: true,
+    sub_dir: "default-permissions",
+    system_ext_specific: true,
+}
+
+prebuilt_etc {
+    name: "exynos9810_stock_camera_camera_feature",
+    src: "config/camera-feature.xml",
+    filename_from_src: true,
+    sub_dir: "camera",
+    system_ext_specific: true,
+}
+
+prebuilt_etc {
+    name: "exynos9810_stock_camera_floating_feature",
+    src: "config/floating_feature.xml",
+    filename_from_src: true,
+    sub_dir: "camera",
+    system_ext_specific: true,
+}
+
+// SPDX-License-Identifier: Apache-2.0
+// Copyright (C) 2026 The LineageOS Project
+
+cc_library_shared {
+    name: "libSamsungCameraLegacyCameraUtils",
+    srcs: ["compat/native/LegacyCameraUtils.cpp"],
+    compile_multilib: "64",
+    system_ext_specific: true,
+    stl: "none",
+    shared_libs: ["libcamera_client"],
+    cflags: [
+        "-Wall",
+        "-Wextra",
+        "-Werror",
+        "-fvisibility=hidden",
+    ],
+}

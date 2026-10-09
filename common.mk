@@ -348,6 +348,9 @@ PRODUCT_PACKAGES += \
 PRODUCT_PACKAGES += \
     android.hardware.vibrator-service.samsung
 
+# Stock Samsung Camera
+$(call inherit-product, device/samsung/exynos9810-common/camera/stock-camera.mk)
+
 # Wi-Fi
 PRODUCT_PACKAGES += \
     android.hardware.wifi-service \
