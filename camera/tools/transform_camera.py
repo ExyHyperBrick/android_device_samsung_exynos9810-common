@@ -753,6 +753,36 @@ def adapt_optional_scene_toast(root):
                                   "    if-eqz " + register + ", :" + label
                                   + "\n\n" + call + "\n\n    :" + label)
         photo_text = photo_text[:match.start()] + method + photo_text[match.end():]
+    # Delayed and broadcast callbacks can still run with scene optimization off.
+    # Skip only the nullable view operation, leaving guide/state updates intact.
+    for signature, register, operation, label in (
+            ("private stop()V", "v1", "hide()V", "compat_stop_toast_hidden"),
+            ("public synthetic lambda$new$2$Photo$IntelligentManager()V",
+             "p0", "hide()V", "compat_delayed_toast_hidden"),
+            ("public onSceneDetectButtonClicked(Z)V", "v0",
+             "show(Ljava/lang/String;)V", "compat_scene_toast_shown")):
+        pattern = re.compile(r"(?m)^\.method " + re.escape(signature)
+                             + r"\n.*?^\.end method$", re.S)
+        matches = list(pattern.finditer(text))
+        if len(matches) != 1:
+            raise ValueError("Missing stock optional toast callback: " + signature)
+        match = matches[0]
+        arguments = register + (", p1" if operation.startswith("show") else "")
+        call = ("    invoke-virtual {" + arguments + "}, Lcom/sec/android/"
+                "app/camera/widget/gl/SceneOptimizerToast;->" + operation)
+        method = replace_once(match[0], call,
+            "    if-eqz " + register + ", :" + label + "\n\n"
+            + call + "\n\n    :" + label)
+        text = text[:match.start()] + method + text[match.end():]
+
+    receiver_path = root / "smali_classes2/com/sec/android/app/camera/shootingmode/Photo$1.smali"
+    receiver = receiver_path.read_text()
+    call = ("    invoke-virtual {p1}, Lcom/sec/android/app/camera/widget/gl/"
+            "SceneOptimizerToast;->hide()V")
+    receiver = replace_once(receiver, call,
+        "    if-eqz p1, :compat_zoom_toast_hidden\n\n" + call
+        + "\n\n    :compat_zoom_toast_hidden")
+    receiver_path.write_text(receiver)
     path.write_text(text)
     photo_path.write_text(photo_text)
 
