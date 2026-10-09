@@ -19,6 +19,7 @@ import xml.etree.ElementTree as ET
 import zipfile
 
 from telephoto_patch import patch_telephoto
+from panorama_patch import patch_panorama_storage
 
 ANDROID = "{http://schemas.android.com/apk/res/android}"
 ET.register_namespace("android", ANDROID[1:-1])
@@ -2976,6 +2977,7 @@ def patch_decoded(decoded, mappings):
     adapt_spinner_dropdown_layout(decoded)
     patch_preview_snapshot(decoded)
     patch_media_store(decoded)
+    patch_panorama_storage(decoded)
     patch_recording_orientation(decoded)
     patch_single_photo_shutter(decoded)
     adapt_optional_scene_toast(decoded)
@@ -3017,7 +3019,7 @@ def patch_decoded(decoded, mappings):
     xml.write(manifest, encoding="utf-8", xml_declaration=True)
     marker = decoded / MARKER
     marker.parent.mkdir(parents=True, exist_ok=True)
-    marker.write_text(json.dumps({"port": 15, "modes": ["photo", "video", "pro"],
+    marker.write_text(json.dumps({"port": 16, "modes": ["photo", "video", "pro"],
                                  "available_experimental_modes": ["pro_video", "panorama", "slow_motion"],
                                  "android_api_call_counts": counts}, indent=2) + "\n")
     return counts

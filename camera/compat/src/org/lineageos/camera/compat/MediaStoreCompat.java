@@ -16,6 +16,8 @@ import android.provider.MediaStore;
 import android.util.Log;
 
 import java.io.IOException;
+import java.io.File;
+import java.io.FileInputStream;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 import java.util.ArrayList;
@@ -42,6 +44,144 @@ public final class MediaStoreCompat {
         ContentValues result = new ContentValues(values);
         for (String column : SAMSUNG_VALUES) result.remove(column);
         return result;
+    }
+
+    /** A file-based capture owns one pending row until its saving task claims it. */
+    public static final class PendingImage {
+        private final ContentResolver resolver;
+        private final Uri uri;
+        private final String displayName;
+        private final String title;
+        private final long dateTaken;
+        private File file;
+        private boolean claimed;
+        private boolean finished;
+
+        private PendingImage(ContentResolver resolver, Uri uri, File file,
+                ContentValues requested) {
+            this.resolver = resolver;
+            this.uri = uri;
+            this.file = file;
+            displayName = requested.getAsString(MediaStore.MediaColumns.DISPLAY_NAME);
+            title = requested.getAsString(MediaStore.MediaColumns.TITLE);
+            dateTaken = System.currentTimeMillis();
+        }
+
+        public Uri getUri() {
+            return uri;
+        }
+
+        public synchronized String getPath() {
+            return file == null ? null : file.getPath();
+        }
+
+        public String getDisplayName() {
+            return displayName;
+        }
+
+        public long getDateTaken() {
+            return dateTaken;
+        }
+
+        public synchronized boolean matches(String path) {
+            if (file == null || path == null) return false;
+            try {
+                return file.getCanonicalPath().equals(new File(path).getCanonicalPath());
+            } catch (IOException | RuntimeException error) {
+                return false;
+            }
+        }
+
+        public synchronized Uri claim(String path) {
+            if (finished || claimed || !matches(path)) return null;
+            claimed = true;
+            return uri;
+        }
+
+        public synchronized boolean isClaimed() {
+            return claimed;
+        }
+
+        public synchronized void cancel() {
+            if (!claimed) fail();
+        }
+
+        public synchronized void fail() {
+            if (finished) return;
+            finished = true;
+            deleteFailedSave(resolver, uri);
+        }
+
+        public synchronized int publish(ContentValues values) {
+            if (!claimed || finished) {
+                throw new IllegalStateException("Pending image is not owned by the saving task");
+            }
+            try {
+                if (!file.isFile() || file.length() == 0) {
+                    throw new IOException("Missing panorama JPEG");
+                }
+                try (FileInputStream input = new FileInputStream(file)) {
+                    if (input.read() != 0xff || input.read() != 0xd8) {
+                        throw new IOException("Panorama output is not a JPEG");
+                    }
+                }
+                ContentValues published = new ContentValues(values);
+                published.remove(MediaStore.MediaColumns.DATA);
+                published.put(MediaStore.MediaColumns.DISPLAY_NAME, displayName);
+                published.put(MediaStore.MediaColumns.TITLE, title);
+                published.put(MediaStore.Images.ImageColumns.DATE_TAKEN, dateTaken);
+                published.put(MediaStore.MediaColumns.DATE_MODIFIED, dateTaken / 1000);
+                int updated = MediaStoreCompat.publish(resolver, uri, published);
+                finished = true;
+                // Publishing renames the managed hidden file to its visible name.
+                try {
+                    file = new File(queryImagePath(resolver, uri, false));
+                } catch (RuntimeException error) {
+                    file = null;
+                    Log.w(TAG, "Published panorama is available by URI only", error);
+                }
+                return updated;
+            } catch (IOException | RuntimeException error) {
+                fail();
+                throw new IllegalStateException("Could not publish the panorama JPEG", error);
+            }
+        }
+    }
+
+    private static String queryImagePath(ContentResolver resolver, Uri uri,
+            boolean requirePending) {
+        String[] columns = {MediaStore.MediaColumns.DATA, MediaStore.MediaColumns.IS_PENDING};
+        try (Cursor cursor = resolver.query(uri, columns, null, null, null)) {
+            if (cursor == null || !cursor.moveToFirst()) {
+                throw new IllegalStateException("MediaStore did not return the image pathname");
+            }
+            if (requirePending && cursor.getInt(1) != 1) {
+                throw new IllegalStateException("MediaStore image is not pending");
+            }
+            String path = cursor.getString(0);
+            if (path == null || path.isEmpty()) {
+                throw new IllegalStateException("MediaStore returned an empty image pathname");
+            }
+            return path;
+        }
+    }
+
+    public static PendingImage insertPendingFile(ContentResolver resolver, Uri collection,
+            ContentValues values, String requestedPath) {
+        if (requestedPath == null || requestedPath.isEmpty()) {
+            throw new IllegalArgumentException("Missing panorama output pathname");
+        }
+        ContentValues pending = new ContentValues(values);
+        pending.remove(MediaStore.MediaColumns.DATA);
+        pending.put(MediaStore.MediaColumns.RELATIVE_PATH, "DCIM/Camera");
+        Uri uri = insertPending(resolver, collection, pending);
+        try {
+            return new PendingImage(resolver, uri,
+                    new File(queryImagePath(resolver, uri, true)), pending);
+        } catch (RuntimeException error) {
+            deleteFailedSave(resolver, uri);
+            throw error;
+        }
     }
 
     public static Uri insertPending(ContentResolver resolver, Uri collection,
