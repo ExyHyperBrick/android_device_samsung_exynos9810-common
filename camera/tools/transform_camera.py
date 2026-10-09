@@ -3017,7 +3017,7 @@ def patch_decoded(decoded, mappings):
     xml.write(manifest, encoding="utf-8", xml_declaration=True)
     marker = decoded / MARKER
     marker.parent.mkdir(parents=True, exist_ok=True)
-    marker.write_text(json.dumps({"port": 14, "modes": ["photo", "video", "pro"],
+    marker.write_text(json.dumps({"port": 15, "modes": ["photo", "video", "pro"],
                                  "available_experimental_modes": ["pro_video", "panorama", "slow_motion"],
                                  "android_api_call_counts": counts}, indent=2) + "\n")
     return counts

@@ -24,7 +24,7 @@ def prepare_vendor_camera(ctx, _packages_ctx):
         legacy_marker = "assets/lineage_stock_camera_test.json"
         transformed = marker in archive.namelist()
         if legacy_marker in archive.namelist() or (transformed and
-                json.loads(archive.read(marker)).get("port") != 14):
+                json.loads(archive.read(marker)).get("port") != 15):
             raise RuntimeError("Camera payload needs runtime fixes. Re-extract "
                                "stock inputs or apply the matching vendor patch.")
     if not transformed:

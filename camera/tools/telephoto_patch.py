@@ -67,13 +67,54 @@ def patch_telephoto(decoded):
         path.write_text(_once(path.read_text(), "    return-void", added + "    return-void"))
 
     settings = decoded / "smali_classes2/com/sec/android/app/camera/setting/CameraSettingsImpl.smali"
+    # The custom-mode setting is an override context, not the active mode.
+    # Export the actual field used by setShootingMode and its notifications.
+    camera_interface = decoded / "smali_classes2/com/sec/android/app/camera/interfaces/CameraSettings.smali"
+    interface_text = camera_interface.read_text()
+    if "compatShootingMode" in interface_text:
+        raise ValueError("Current-mode compatibility getter already installed")
+    camera_interface.write_text(interface_text + "\n.method public abstract compatShootingMode()I\n.end method\n")
+    with settings.open("a") as stream:
+        stream.write(f"""
+.method public compatShootingMode()I
+    .locals 0
+    iget p0, p0, {SETTINGS}->mShootingMode:I
+    return p0
+.end method
+""")
+
+    # Separate rear sensors can have buttons without Samsung fusion/seamless IDs.
+    # Preserve the stock zoom-support, resize, special zoom and stabilization gates.
+    menu = decoded / "smali_classes2/com/sec/android/app/camera/menu/AbstractBaseMenu.smali"
+    _edit(menu, "private isZoomChangeButtonAvailable()Z", lambda body: _once(body,
+        "    :cond_0\n    iget-object v0, p0, Lcom/sec/android/app/camera/menu/AbstractBaseMenu;->mCameraContext:" + CONTEXT,
+        f"""    :cond_0
+    iget-object v0, p0, Lcom/sec/android/app/camera/menu/AbstractBaseMenu;->mCameraContext:{CONTEXT}
+    invoke-interface {{v0}}, {CONTEXT}->getCameraSettings(){CAMERA}
+    move-result-object v0
+    invoke-interface {{v0}}, {CAMERA}->getCameraFacing()I
+    move-result v0
+    if-nez v0, :compat_seamless_buttons
+    iget-object v0, p0, Lcom/sec/android/app/camera/menu/AbstractBaseMenu;->mCameraContext:{CONTEXT}
+    invoke-interface {{v0}}, {CONTEXT}->getCameraSettings(){CAMERA}
+    move-result-object v0
+    invoke-interface {{v0}}, {CAMERA}->compatShootingMode()I
+    move-result v0
+    invoke-static {{v0}}, {HELPER}->isAvailableForMode(I)Z
+    move-result v0
+    if-eqz v0, :compat_seamless_buttons
+    const/4 v0, 0x1
+    return v0
+    :compat_seamless_buttons
+    iget-object v0, p0, Lcom/sec/android/app/camera/menu/AbstractBaseMenu;->mCameraContext:{CONTEXT}"""))
+
     # Normalize only the persisted startup ID. Keep the currently opened ID intact
     # during a mode transition so CLOSE_CAMERA always closes the actual old device.
     _edit(settings, "public getCameraId()I", lambda body: _once(body,
         f"    invoke-direct {{p0, v1, v0}}, {SETTINGS}->loadPreferences(Ljava/lang/String;I)I\n\n    move-result p0\n\n    return p0",
         f"""    invoke-direct {{p0, v1, v0}}, {SETTINGS}->loadPreferences(Ljava/lang/String;I)I
     move-result v0
-    invoke-virtual {{p0}}, {SETTINGS}->getModeCustomSetting()I
+    invoke-virtual {{p0}}, {SETTINGS}->compatShootingMode()I
     move-result v1
     invoke-static {{v0, v1}}, {HELPER}->normalizeCameraId(II)I
     move-result p0
@@ -83,7 +124,7 @@ def patch_telephoto(decoded):
     .locals 2
     invoke-direct {{p0}}, {SETTINGS}->compatBackCameraLensType()I
     move-result v0
-    invoke-virtual {{p0}}, {SETTINGS}->getModeCustomSetting()I
+    invoke-virtual {{p0}}, {SETTINGS}->compatShootingMode()I
     move-result v1
     invoke-static {{v0, v1}}, {HELPER}->normalizeLensType(II)I
     move-result v0
@@ -151,7 +192,7 @@ def patch_telephoto(decoded):
     group = decoded / "smali_classes2/com/sec/android/app/camera/menu/ZoomChangeGroup.smali"
     _edit(group, "private isSupportBackTeleCamera()Z", lambda body: _entry(body, f"""
     iget-object v0, p0, {GROUP}->mCameraSettings:{CAMERA}
-    invoke-interface {{v0}}, {CAMERA}->getModeCustomSetting()I
+    invoke-interface {{v0}}, {CAMERA}->compatShootingMode()I
     move-result v0
     invoke-static {{v0}}, {HELPER}->isAvailableForMode(I)Z
     move-result v0
@@ -170,7 +211,7 @@ def patch_telephoto(decoded):
 """))
     _edit(group, "private getZoomType(I)I", lambda body: _entry(body, f"""
     iget-object v0, p0, {GROUP}->mCameraSettings:{CAMERA}
-    invoke-interface {{v0}}, {CAMERA}->getModeCustomSetting()I
+    invoke-interface {{v0}}, {CAMERA}->compatShootingMode()I
     move-result v0
     invoke-static {{v0}}, {HELPER}->isAvailableForMode(I)Z
     move-result v0
@@ -196,7 +237,7 @@ def patch_telephoto(decoded):
     _edit(group, "public onClick(Lcom/samsung/android/glview/GLView;)Z", lambda body: _once(body,
         "    :cond_2\n    const/4 v0, 0x0", f"""    :cond_2
     iget-object v0, p0, {GROUP}->mCameraSettings:{CAMERA}
-    invoke-interface {{v0}}, {CAMERA}->getModeCustomSetting()I
+    invoke-interface {{v0}}, {CAMERA}->compatShootingMode()I
     move-result v0
     invoke-static {{v0}}, {HELPER}->isAvailableForMode(I)Z
     move-result v0
@@ -226,7 +267,7 @@ def patch_telephoto(decoded):
     receiver = decoded / "smali/com/sec/android/app/camera/CommandReceiver.smali"
     _edit(receiver, f"public onLensTypeSelectCommand({COMMAND})Z", lambda body: _entry(body, f"""
     iget-object v0, p0, Lcom/sec/android/app/camera/CommandReceiver;->mCameraSettings:{CAMERA}
-    invoke-interface {{v0}}, {CAMERA}->getModeCustomSetting()I
+    invoke-interface {{v0}}, {CAMERA}->compatShootingMode()I
     move-result v0
     invoke-static {{v0}}, {HELPER}->isAvailableForMode(I)Z
     move-result v0
