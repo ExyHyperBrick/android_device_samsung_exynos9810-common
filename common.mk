@@ -44,6 +44,7 @@ PRODUCT_PACKAGES += \
     SamsungDAP \
     Exynos9810SoundBooster \
     exynos9810_soundbooster_effect \
+    Exynos9810OutputEqualizer \
     exynos9810_output_equalizer_effect
 
 PRODUCT_COPY_FILES += \

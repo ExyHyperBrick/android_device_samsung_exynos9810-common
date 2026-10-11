@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Copyright (C) 2026 The LineageOS Project; SPDX-License-Identifier: Apache-2.0 -->
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <ListPreference android:key="equalizer_profile" android:title="@string/equalizer_profile"
+        android:entries="@array/equalizer_profiles" android:entryValues="@array/equalizer_profile_values"
+        android:defaultValue="0" android:persistent="false" app:useSimpleSummaryProvider="true" />
+    <com.android.settingslib.widget.MainSwitchPreference android:key="equalizer_enable"
+        android:title="@string/equalizer_enable" android:persistent="false" />
+    <PreferenceCategory android:title="@string/equalizer_bands">
+        <org.lineageos.audio.equalizer.EqualizerBandsPreference
+            android:key="equalizer_bands" android:persistent="false" />
+        <Preference android:key="equalizer_level" android:selectable="false"
+            android:summary="@string/equalizer_flat_level" />
+    </PreferenceCategory>
+    <Preference android:key="equalizer_dolby" android:title="@string/equalizer_dolby" />
+    <Preference android:key="equalizer_soundbooster"
+        android:title="@string/equalizer_soundbooster" />
+    <Preference android:key="equalizer_reset" android:title="@string/equalizer_reset"
+        android:summary="@string/equalizer_reset_summary" />
+    <SwitchPreferenceCompat android:key="equalizer_launcher"
+        android:title="@string/equalizer_launcher"
+        android:summary="@string/equalizer_launcher_summary"
+        android:defaultValue="false" android:persistent="false" />
+    <Preference android:key="equalizer_status" android:title="@string/equalizer_status"
+        android:selectable="false" />
+    <Preference android:key="equalizer_retry" android:title="@string/equalizer_retry" />
+    <Preference android:key="equalizer_copy_status" android:title="@string/equalizer_copy_status" />
+    <Preference android:summary="@string/equalizer_help" android:selectable="false" />
+</PreferenceScreen>

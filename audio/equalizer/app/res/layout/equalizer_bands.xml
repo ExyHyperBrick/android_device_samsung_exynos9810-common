@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Copyright (C) 2026 The LineageOS Project; SPDX-License-Identifier: Apache-2.0 -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent" android:layout_height="wrap_content"
+    android:paddingStart="16dp" android:paddingEnd="16dp" android:paddingTop="8dp"
+    android:paddingBottom="8dp" android:orientation="horizontal">
+    <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content"
+        android:layout_weight="1" android:orientation="vertical" android:gravity="center_horizontal"
+        android:minWidth="48dp">
+        <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:minHeight="40dp" android:gravity="center" android:textSize="12sp"
+            android:textAppearance="?android:attr/textAppearanceSmall"
+            android:text="@string/equalizer_band_60"
+            android:importantForAccessibility="no" />
+        <org.lineageos.audio.equalizer.VerticalSeekBar android:id="@+id/equalizer_slider_0"
+            android:layout_width="match_parent" android:layout_height="200dp" />
+        <TextView android:id="@+id/equalizer_gain_0" android:layout_width="match_parent"
+            android:layout_height="wrap_content" android:minHeight="40dp" android:gravity="center"
+            android:textSize="13sp" android:textAppearance="?android:attr/textAppearanceSmall" />
+    </LinearLayout>
+    <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content"
+        android:layout_weight="1" android:orientation="vertical" android:gravity="center_horizontal"
+        android:minWidth="48dp">
+        <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:minHeight="40dp" android:gravity="center" android:textSize="12sp"
+            android:textAppearance="?android:attr/textAppearanceSmall"
+            android:text="@string/equalizer_band_230"
+            android:importantForAccessibility="no" />
+        <org.lineageos.audio.equalizer.VerticalSeekBar android:id="@+id/equalizer_slider_1"
+            android:layout_width="match_parent" android:layout_height="200dp" />
+        <TextView android:id="@+id/equalizer_gain_1" android:layout_width="match_parent"
+            android:layout_height="wrap_content" android:minHeight="40dp" android:gravity="center"
+            android:textSize="13sp" android:textAppearance="?android:attr/textAppearanceSmall" />
+    </LinearLayout>
+    <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content"
+        android:layout_weight="1" android:orientation="vertical" android:gravity="center_horizontal"
+        android:minWidth="48dp">
+        <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:minHeight="40dp" android:gravity="center" android:textSize="12sp"
+            android:textAppearance="?android:attr/textAppearanceSmall"
+            android:text="@string/equalizer_band_910"
+            android:importantForAccessibility="no" />
+        <org.lineageos.audio.equalizer.VerticalSeekBar android:id="@+id/equalizer_slider_2"
+            android:layout_width="match_parent" android:layout_height="200dp" />
+        <TextView android:id="@+id/equalizer_gain_2" android:layout_width="match_parent"
+            android:layout_height="wrap_content" android:minHeight="40dp" android:gravity="center"
+            android:textSize="13sp" android:textAppearance="?android:attr/textAppearanceSmall" />
+    </LinearLayout>
+    <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content"
+        android:layout_weight="1" android:orientation="vertical" android:gravity="center_horizontal"
+        android:minWidth="48dp">
+        <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:minHeight="40dp" android:gravity="center" android:textSize="12sp"
+            android:textAppearance="?android:attr/textAppearanceSmall"
+            android:text="@string/equalizer_band_3600"
+            android:importantForAccessibility="no" />
+        <org.lineageos.audio.equalizer.VerticalSeekBar android:id="@+id/equalizer_slider_3"
+            android:layout_width="match_parent" android:layout_height="200dp" />
+        <TextView android:id="@+id/equalizer_gain_3" android:layout_width="match_parent"
+            android:layout_height="wrap_content" android:minHeight="40dp" android:gravity="center"
+            android:textSize="13sp" android:textAppearance="?android:attr/textAppearanceSmall" />
+    </LinearLayout>
+    <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content"
+        android:layout_weight="1" android:orientation="vertical" android:gravity="center_horizontal"
+        android:minWidth="48dp">
+        <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:minHeight="40dp" android:gravity="center" android:textSize="12sp"
+            android:textAppearance="?android:attr/textAppearanceSmall"
+            android:text="@string/equalizer_band_14000"
+            android:importantForAccessibility="no" />
+        <org.lineageos.audio.equalizer.VerticalSeekBar android:id="@+id/equalizer_slider_4"
+            android:layout_width="match_parent" android:layout_height="200dp" />
+        <TextView android:id="@+id/equalizer_gain_4" android:layout_width="match_parent"
+            android:layout_height="wrap_content" android:minHeight="40dp" android:gravity="center"
+            android:textSize="13sp" android:textAppearance="?android:attr/textAppearanceSmall" />
+    </LinearLayout>
+</LinearLayout>

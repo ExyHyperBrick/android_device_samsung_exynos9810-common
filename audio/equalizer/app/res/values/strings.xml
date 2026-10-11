@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Copyright (C) 2026 The LineageOS Project; SPDX-License-Identifier: Apache-2.0 -->
+<resources>
+    <string name="equalizer_title">Output equalizer</string>
+    <string name="equalizer_profile">Output profile</string>
+    <string name="equalizer_enable">Use equalizer for this output</string>
+    <string name="equalizer_bands">Equalizer bands</string>
+    <string name="equalizer_band_60">60 Hz</string>
+    <string name="equalizer_band_230">230 Hz</string>
+    <string name="equalizer_band_910">910 Hz</string>
+    <string name="equalizer_band_3600">3.6 kHz</string>
+    <string name="equalizer_band_14000">14 kHz</string>
+    <string name="equalizer_gain">%1$+d dB</string>
+    <string name="equalizer_boost_level">Boosting bands lowers overall volume to reduce distortion. Try lowering other bands for a similar balance with less volume reduction.</string>
+    <string name="equalizer_flat_level">Flat settings keep the original volume. Lowering bands reduces only those frequencies.</string>
+    <string name="equalizer_reset">Reset this profile</string>
+    <string name="equalizer_reset_summary">Return all five bands to zero</string>
+    <string name="equalizer_dolby">Dolby Atmos</string>
+    <string name="equalizer_soundbooster">Samsung speaker tuning</string>
+    <string name="equalizer_launcher">Show app icon</string>
+    <string name="equalizer_launcher_summary">Open the equalizer from your app drawer or home screen</string>
+    <string name="equalizer_launcher_failed">Could not change app icon visibility</string>
+    <string name="equalizer_status">Status</string>
+    <string name="equalizer_starting">Starting equalizer…</string>
+    <string name="equalizer_off">All output profiles are off</string>
+    <string name="equalizer_active">Enabled profiles apply automatically to media playback</string>
+    <string name="equalizer_unavailable">Equalizer unavailable. Try again to reconnect.</string>
+    <string name="equalizer_owner_only">Only the device owner can change the output equalizer</string>
+    <string name="equalizer_retry">Try again</string>
+    <string name="equalizer_copy_status">Copy diagnostics</string>
+    <string name="equalizer_help">Profiles are saved separately for the speaker, headphone jack and USB-C. Samsung speaker tuning has its own switch.</string>
+    <string-array name="equalizer_profiles">
+        <item>Speaker</item>
+        <item>Headphone jack</item>
+        <item>USB-C audio</item>
+    </string-array>
+    <string-array name="equalizer_profile_values">
+        <item>0</item><item>1</item><item>2</item>
+    </string-array>
+    <string name="equalizer_effect_loading">Checking status…</string>
+    <string name="equalizer_effect_on">On</string>
+    <string name="equalizer_effect_off">Off</string>
+    <string name="equalizer_effect_unavailable">Status unavailable · Tap to open settings</string>
+    <string name="equalizer_effect_detail">%1$s · %2$s</string>
+</resources>
