@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- SPDX-FileCopyrightText: 2026 The LineageOS Project; SPDX-License-Identifier: Apache-2.0 -->
+<resources>
+    <string name="lineage_camera_accessibility_title">Samsung Camera accessibility</string>
+    <string name="lineage_camera_accessibility_description">Provides camera gestures for TalkBack users. Requires TalkBack to be enabled. This does not control the camera app or its volume-key shutter. The volume-key accessibility shortcut toggles this service.</string>
+</resources>

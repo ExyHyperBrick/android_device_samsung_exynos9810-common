@@ -20,6 +20,8 @@ import zipfile
 
 from telephoto_patch import patch_telephoto
 from panorama_patch import patch_panorama_storage
+from launcher_icon import adapt_launcher_icon
+from accessibility_patch import clarify_accessibility_service
 
 ANDROID = "{http://schemas.android.com/apk/res/android}"
 ET.register_namespace("android", ANDROID[1:-1])
@@ -3059,6 +3061,8 @@ def patch_decoded(decoded, mappings):
                 for category in component.iter("category")):
             component.set(ANDROID + "label", "Samsung Camera")
     add_camera_launcher_alias(application)
+    adapt_launcher_icon(decoded, application)
+    clarify_accessibility_service(decoded, application)
     xml.write(manifest, encoding="utf-8", xml_declaration=True)
     marker = decoded / MARKER
     marker.parent.mkdir(parents=True, exist_ok=True)
