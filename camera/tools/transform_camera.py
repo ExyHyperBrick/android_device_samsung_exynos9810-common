@@ -509,6 +509,11 @@ def patch_recording_orientation(decoded):
     start_text = edit(start_path.read_text(), "execute()V",
                       lambda body: replace(body, start_before, start_after))
     # Validate both inputs before writing either staged file.
+    # prepareMediaRecorder already writes location while the recorder accepts
+    # configuration. Updating it again at recording start is illegal on AOSP.
+    location = "    invoke-direct {p0}, Lcom/sec/android/app/camera/engine/RecordingManagerImpl;->updateLocationInfo()V"
+    recording_text = edit(recording_text, "public startVideoRecording()V",
+                          lambda body: replace(body, location, ""))
     recording_path.write_text(recording_text)
     start_path.write_text(start_text)
     return [str(recording_path), str(start_path)]
@@ -2178,6 +2183,12 @@ def patch_public_pro_video(decoded):
         '    invoke-virtual {p0, p2}, ' + PRO_VIDEO_CONTROLLER + '->applyPublicProVideoExposure(Lcom/sec/android/app/camera/interfaces/Engine$MakerSettings;)Z\n'
         '    move-result v0\n    return v0\n    :lineage_video_torch_stock')
     controller = _pro_video_prepend(controller, 'public synthetic lambda$setTorchFlashMode$18$AeAfController(ILcom/sec/android/app/camera/interfaces/Engine$MakerSettings;)Z', torch_dispatch)
+    # The shooting-mode package calls the static exposure bridge directly.
+    # Its owner must be public as well as the method, or ART rejects the call.
+    declaration = '.class ' + PRO_VIDEO_CONTROLLER
+    if controller.count(declaration + '\n') != 1:
+        raise ValueError('Unexpected AeAfController class visibility')
+    controller = controller.replace(declaration, '.class public ' + PRO_VIDEO_CONTROLLER, 1)
     controller += '\n\n' + PRO_VIDEO_WORKER
     # Never leave one class updated when another exact stock contract fails.
     for rel, text in zip(relative, [video, controller]):
@@ -2757,6 +2768,36 @@ PUBLIC_HIGH_SPEED_LIST_METHOD = r'''
 '''
 
 
+
+def gate_slow_motion(decoded):
+    """Use one capability decision for the mode list and saved selections."""
+    loader = Path(decoded) / 'smali/com/samsung/android/camera/feature/FeatureLoader.smali'
+    text = loader.read_text()
+    helper = 'Lorg/lineageos/camera/compat/SlowMotionCompat;'
+    if helper in text:
+        raise ValueError('Slow Motion feature gate already applied')
+    signature = 'public static loadFeature(Landroid/content/Context;)V'
+    pattern = re.compile(r'(?ms)^\.method ' + re.escape(signature)
+                         + r'\n.*?^\.end method$')
+    matches = list(pattern.finditer(text))
+    if len(matches) != 1 or matches[0][0].count('    return-void') != 2:
+        raise ValueError('Unexpected stock feature loading exits')
+    body = matches[0][0]
+    feature_gate = (
+        '    sget-object v0, Lcom/samsung/android/camera/feature/FeatureLoader;'
+        '->mFeatureList:Ljava/util/HashMap;\n'
+        '    invoke-static {v0}, ' + helper + '->applyFeatures(Ljava/util/Map;)V\n')
+    body = body.replace('    return-void', feature_gate + '    return-void')
+    loader.write_text(text[:matches[0].start()] + body + text[matches[0].end():])
+    camera = Path(decoded) / 'smali/com/sec/android/app/camera/Camera.smali'
+    text = camera.read_text()
+    if helper in text:
+        raise ValueError('Slow Motion mode gate already applied')
+    guard = ('    invoke-static {p1}, ' + helper + '->normalizeShootingMode(I)I\n'
+             '    move-result p1\n')
+    camera.write_text(_pro_video_prepend(text, 'private setShootingMode(IZ)V', guard))
+
+
 def patch_public_slow_motion(decoded):
     path = Path(decoded) / 'smali/com/samsung/android/camera/core2/device/CamDeviceImpl.smali'
     text = path.read_text()
@@ -2972,6 +3013,7 @@ def patch_decoded(decoded, mappings):
     patch_public_video_requests(decoded)
     patch_public_pro_video(decoded)
     patch_public_slow_motion(decoded)
+    gate_slow_motion(decoded)
     patch_panorama_live_preview(decoded)
     patch_gl_spr_loader(decoded)
     adapt_spinner_dropdown_layout(decoded)
@@ -3019,7 +3061,7 @@ def patch_decoded(decoded, mappings):
     xml.write(manifest, encoding="utf-8", xml_declaration=True)
     marker = decoded / MARKER
     marker.parent.mkdir(parents=True, exist_ok=True)
-    marker.write_text(json.dumps({"port": 16, "modes": ["photo", "video", "pro"],
+    marker.write_text(json.dumps({"port": 19, "modes": ["photo", "video", "pro"],
                                  "available_experimental_modes": ["pro_video", "panorama", "slow_motion"],
                                  "android_api_call_counts": counts}, indent=2) + "\n")
     return counts
