@@ -1,0 +1,21 @@
+// SPDX-FileCopyrightText: 2026 The LineageOS Project
+// SPDX-License-Identifier: Apache-2.0
+android_app {
+    name: "SamsungCameraLauncherSettings",
+    defaults: ["SettingsLibDefaults"],
+    srcs: ["src/**/*.java"],
+    platform_apis: true,
+    static_libs: ["androidx.preference_preference"],
+    certificate: "platform",
+    privileged: true,
+    system_ext_specific: true,
+    required: ["samsung_camera_launcher_settings_permissions"],
+}
+
+prebuilt_etc {
+    name: "samsung_camera_launcher_settings_permissions",
+    src: "privapp-permissions-org.lineageos.camera.settings.xml",
+    filename_from_src: true,
+    sub_dir: "permissions",
+    system_ext_specific: true,
+}

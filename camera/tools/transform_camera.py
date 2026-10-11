@@ -3058,6 +3058,7 @@ def patch_decoded(decoded, mappings):
                 category.get(ANDROID + "name") == "android.intent.category.LAUNCHER"
                 for category in component.iter("category")):
             component.set(ANDROID + "label", "Samsung Camera")
+    add_camera_launcher_alias(application)
     xml.write(manifest, encoding="utf-8", xml_declaration=True)
     marker = decoded / MARKER
     marker.parent.mkdir(parents=True, exist_ok=True)
@@ -3065,6 +3066,41 @@ def patch_decoded(decoded, mappings):
                                  "available_experimental_modes": ["pro_video", "panorama", "slow_motion"],
                                  "android_api_call_counts": counts}, indent=2) + "\n")
     return counts
+
+
+def add_camera_launcher_alias(application):
+    camera_name = "com.sec.android.app.camera.Camera"
+    alias_name = "com.sec.android.app.camera.LauncherActivity"
+    cameras = [node for node in application.findall("activity")
+               if node.get(ANDROID + "name") == camera_name]
+    if len(cameras) != 1 or any(node.get(ANDROID + "name") == alias_name
+                                for node in application):
+        raise ValueError("Unexpected Samsung Camera launcher layout")
+    camera = cameras[0]
+    launchers = [node for node in camera.findall("intent-filter")
+                 if any(category.get(ANDROID + "name") ==
+                        "android.intent.category.LAUNCHER"
+                        for category in node.findall("category"))]
+    if len(launchers) != 1:
+        raise ValueError("Expected one Samsung Camera launcher filter")
+    launcher = launchers[0]
+    if [node.get(ANDROID + "name") for node in launcher.findall("action")] != [
+            "android.intent.action.MAIN"]:
+        raise ValueError("Unexpected actions in Samsung Camera launcher filter")
+    alias = ET.Element("activity-alias", {
+        ANDROID + "name": alias_name,
+        ANDROID + "targetActivity": camera_name,
+        ANDROID + "enabled": "true",
+        ANDROID + "exported": "true",
+        ANDROID + "label": "Samsung Camera",
+        ANDROID + "icon": camera.get(ANDROID + "icon", "@mipmap/tw30_icon_camera"),
+    })
+    camera.remove(launcher)
+    alias.append(launcher)
+    for node in camera.findall("meta-data"):
+        if node.get(ANDROID + "name") == "android.app.shortcuts":
+            alias.append(ET.fromstring(ET.tostring(node)))
+    application.insert(list(application).index(camera) + 1, alias)
 
 
 def main():

@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- SPDX-FileCopyrightText: 2026 The LineageOS Project; SPDX-License-Identifier: Apache-2.0 -->
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+    android:title="@string/camera_settings_title">
+    <com.android.settingslib.widget.MainSwitchPreference android:key="camera_enable"
+        android:persistent="false" android:title="@string/camera_enable_title" />
+    <com.android.settingslib.widget.TopIntroPreference android:key="camera_launcher_intro"
+        android:title="@string/camera_launcher_intro" />
+    <com.android.settingslib.widget.MainSwitchPreference android:key="camera_launcher_enable"
+        android:persistent="false" android:title="@string/camera_launcher_title" />
+    <Preference android:key="camera_launcher_status" android:selectable="false"
+        android:summary="@string/camera_launcher_unavailable" />
+</PreferenceScreen>

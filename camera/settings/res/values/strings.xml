@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- SPDX-FileCopyrightText: 2026 The LineageOS Project; SPDX-License-Identifier: Apache-2.0 -->
+<resources>
+    <string name="camera_settings_app_title">Samsung Camera settings</string>
+    <string name="camera_settings_title">Samsung Camera</string>
+    <string name="camera_settings_summary">Enable the app and choose launcher visibility</string>
+    <string name="camera_enable_title">Use Samsung Camera</string>
+    <string name="camera_unavailable">Samsung Camera is not installed for this user.</string>
+    <string name="camera_restricted">App changes are restricted for this user.</string>
+    <string name="camera_disabled">Samsung Camera is disabled. Enable it here to use it again.</string>
+    <string name="camera_enable_failed">Could not change the Samsung Camera app state.</string>
+    <string name="camera_launcher_title">Show Samsung Camera in launcher</string>
+    <string name="camera_launcher_intro">Hiding the launcher icon keeps Samsung Camera available to other apps.</string>
+    <string name="camera_launcher_unavailable">Update Samsung Camera to change its launcher icon.</string>
+    <string name="camera_launcher_failed">Could not change the launcher icon.</string>
+</resources>

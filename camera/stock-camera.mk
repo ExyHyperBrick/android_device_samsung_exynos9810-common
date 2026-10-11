@@ -3,6 +3,7 @@
 
 PRODUCT_PACKAGES += \
     SamsungCameraExynos9810 \
+    SamsungCameraLauncherSettings \
     exynos9810_stock_camera_privapp_permissions \
     exynos9810_stock_camera_default_permissions \
     libSamsungCameraSecImaging \
