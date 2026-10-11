@@ -43,7 +43,8 @@ PRODUCT_PACKAGES += \
 PRODUCT_PACKAGES += \
     SamsungDAP \
     Exynos9810SoundBooster \
-    exynos9810_soundbooster_effect
+    exynos9810_soundbooster_effect \
+    exynos9810_output_equalizer_effect
 
 PRODUCT_COPY_FILES += \
     frameworks/av/services/audiopolicy/config/bluetooth_audio_policy_configuration_7_0.xml:$(TARGET_COPY_OUT_VENDOR)/etc/bluetooth_audio_policy_configuration_7_0.xml \

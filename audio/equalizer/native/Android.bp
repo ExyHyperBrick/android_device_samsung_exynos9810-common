@@ -1,0 +1,12 @@
+// SPDX-FileCopyrightText: The LineageOS Project
+// SPDX-License-Identifier: Apache-2.0
+cc_library_shared {
+    name: "exynos9810_output_equalizer_effect",
+    stem: "libexynos9810_output_equalizer",
+    vendor: true,
+    relative_install_path: "soundfx",
+    compile_multilib: "32",
+    srcs: ["OutputEqualizerEffect.cpp"],
+    header_libs: ["libhardware_headers", "libaudio_system_headers"],
+    cflags: ["-Wall", "-Wextra", "-Werror"],
+}

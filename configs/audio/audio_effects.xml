@@ -26,6 +26,7 @@
         <library name="pre_processing" path="libaudiopreprocessing.so" />
         <library name="dap" path="libswdap.so"/>
         <library name="soundbooster" path="libexynos9810_soundbooster.so"/>
+        <library name="output_equalizer" path="libexynos9810_output_equalizer.so"/>
     </libraries>
 
     <!-- list of effects to load.
@@ -69,6 +70,7 @@
         <effect name="ns" library="pre_processing" uuid="c06c8400-8e06-11e0-9cb6-0002a5d5c51b"/>
         <effect name="dap" library="dap" uuid="6ab06da4-c516-4611-8166-452799218539"/>
         <effect name="soundbooster" library="soundbooster" uuid="50de45f0-5d4c-11e5-a837-0800200c9a66"/>
+        <effect name="output_equalizer" library="output_equalizer" uuid="32614e50-20f4-4e2c-949b-4f770747b102"/>
     </effects>
 
     <!-- Audio pre processor configurations.
