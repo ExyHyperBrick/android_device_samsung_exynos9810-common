@@ -294,10 +294,6 @@ PRODUCT_PACKAGES += \
 PRODUCT_COPY_FILES += \
     $(COMMON_PATH)/configs/linker/public.libraries.txt:$(TARGET_COPY_OUT_VENDOR)/etc/public.libraries.txt
 
-# Display density
-PRODUCT_COPY_FILES += \
-    $(COMMON_PATH)/configs/display/default.xml:$(TARGET_COPY_OUT_VENDOR)/etc/displayconfig/default.xml
-
 # RIL
 PRODUCT_PACKAGES += \
     secril_config_svc
