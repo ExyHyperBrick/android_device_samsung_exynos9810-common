@@ -4,10 +4,12 @@
     android:title="@string/camera_settings_title">
     <com.android.settingslib.widget.MainSwitchPreference android:key="camera_enable"
         android:persistent="false" android:title="@string/camera_enable_title" />
-    <com.android.settingslib.widget.TopIntroPreference android:key="camera_launcher_intro"
-        android:title="@string/camera_launcher_intro" />
-    <com.android.settingslib.widget.MainSwitchPreference android:key="camera_launcher_enable"
-        android:persistent="false" android:title="@string/camera_launcher_title" />
-    <Preference android:key="camera_launcher_status" android:selectable="false"
-        android:summary="@string/camera_launcher_unavailable" />
+    <com.android.settingslib.widget.TopIntroPreference android:key="camera_intro"
+        android:title="@string/camera_enable_intro" />
+    <Preference android:key="camera_status" android:selectable="false" />
+    <com.android.settingslib.widget.MainSwitchPreference android:key="aperture_launcher_hide"
+        android:persistent="false" android:title="@string/aperture_launcher_title" />
+    <com.android.settingslib.widget.TopIntroPreference android:key="aperture_launcher_intro"
+        android:title="@string/aperture_launcher_intro" />
+    <Preference android:key="aperture_launcher_status" android:selectable="false" />
 </PreferenceScreen>

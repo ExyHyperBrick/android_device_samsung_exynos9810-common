@@ -6,13 +6,14 @@ package org.lineageos.camera.settings;
 
 import android.os.Bundle;
 import android.widget.Toast;
+import androidx.preference.Preference;
 import com.android.settingslib.widget.MainSwitchPreference;
 import com.android.settingslib.widget.SettingsBasePreferenceFragment;
 
 public final class CameraSettingsFragment extends SettingsBasePreferenceFragment {
     private CameraLauncherController mController;
     private MainSwitchPreference mEnabled;
-    private MainSwitchPreference mShown;
+    private MainSwitchPreference mApertureHidden;
 
     @Override public void onCreatePreferences(Bundle state, String rootKey) {
         setPreferencesFromResource(R.xml.camera_settings, rootKey);
@@ -26,11 +27,11 @@ public final class CameraSettingsFragment extends SettingsBasePreferenceFragment
             refresh();
             return success;
         });
-        mShown = findPreference("camera_launcher_enable");
-        mShown.setOnPreferenceChangeListener((preference, value) -> {
+        mApertureHidden = findPreference("aperture_launcher_hide");
+        mApertureHidden.setOnPreferenceChangeListener((preference, value) -> {
             if (!(value instanceof Boolean)) return false;
-            boolean success = mController.setShown((Boolean) value);
-            if (!success) Toast.makeText(requireContext(), R.string.camera_launcher_failed,
+            boolean success = mController.setApertureHidden((Boolean) value);
+            if (!success) Toast.makeText(requireContext(), R.string.aperture_launcher_failed,
                     Toast.LENGTH_SHORT).show();
             refresh();
             return success;
@@ -44,17 +45,18 @@ public final class CameraSettingsFragment extends SettingsBasePreferenceFragment
 
     private void refresh() {
         boolean cameraAvailable = mController.isCameraAvailable();
-        boolean cameraEnabled = mController.isCameraEnabled();
-        boolean launcherAvailable = mController.isAvailable();
+        boolean apertureAvailable = mController.isApertureAvailable();
         boolean allowed = mController.canChangeState();
         mEnabled.setEnabled(cameraAvailable && allowed);
-        mEnabled.setChecked(cameraEnabled);
-        mShown.setEnabled(launcherAvailable && allowed);
-        mShown.setChecked(mController.isShown());
-        androidx.preference.Preference status = findPreference("camera_launcher_status");
-        status.setVisible(!launcherAvailable || !allowed);
-        status.setSummary(!cameraAvailable ? R.string.camera_unavailable
-                : !allowed ? R.string.camera_restricted
-                : !cameraEnabled ? R.string.camera_disabled : R.string.camera_launcher_unavailable);
+        mEnabled.setChecked(mController.isCameraEnabled());
+        mApertureHidden.setEnabled(apertureAvailable && allowed);
+        mApertureHidden.setChecked(mController.isApertureHidden());
+        Preference cameraStatus = findPreference("camera_status");
+        cameraStatus.setVisible(!cameraAvailable || !allowed);
+        cameraStatus.setSummary(!allowed ? R.string.camera_restricted : R.string.camera_unavailable);
+        Preference apertureStatus = findPreference("aperture_launcher_status");
+        apertureStatus.setVisible(!apertureAvailable || !allowed);
+        apertureStatus.setSummary(!allowed ? R.string.camera_restricted
+                : R.string.aperture_launcher_unavailable);
     }
 }

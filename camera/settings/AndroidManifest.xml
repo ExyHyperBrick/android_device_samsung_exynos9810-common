@@ -3,7 +3,10 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="org.lineageos.camera.settings" android:versionCode="1" android:versionName="1.0">
     <uses-permission android:name="android.permission.CHANGE_COMPONENT_ENABLED_STATE" />
-    <queries><package android:name="com.sec.android.app.camera" /></queries>
+    <queries>
+        <package android:name="com.sec.android.app.camera" />
+        <package android:name="org.lineageos.aperture" />
+    </queries>
     <application android:allowBackup="false" android:supportsRtl="true"
         android:label="@string/camera_settings_app_title" android:theme="@style/CameraSettingsTheme">
         <activity android:name=".CameraSettingsActivity" android:exported="true"
