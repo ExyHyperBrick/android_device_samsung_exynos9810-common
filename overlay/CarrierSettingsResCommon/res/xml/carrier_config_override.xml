@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<!--
+    Copyright (C) 2026 The LineageOS Project
+    SPDX-License-Identifier: Apache-2.0
+-->
+<carrier_config>
+    <!-- Request the IMS PDN without requiring MMTEL on the legacy data path. -->
+    <boolean name="ims.request_ims_pdn_without_mmtel_bool" value="true" />
+
+    <!-- The AP ImsMedia path has no integrated EVS codec. -->
+    <boolean name="imsvoice.audio_evs_support_bool" value="false" />
+
+    <!-- The legacy data HAL does not report dedicated-bearer QoS. -->
+    <boolean name="ims.support_sdp_precondition_bool" value="false" />
+    <boolean name="imsvoice.voice_qos_precondition_supported_bool" value="false" />
+    <boolean name="imsvoice.voice_on_default_bearer_supported_bool" value="true" />
+    <boolean name="imsvoice.wait_qos_when_local_precondition_not_supported_bool" value="false" />
+    <boolean name="imsvoice.release_call_on_qos_lost_during_setup_bool" value="false" />
+
+    <!-- Additional Child SA proposals include unsupported AES-CTR. -->
+    <boolean name="iwlan.supports_child_session_multiple_sa_proposals_bool" value="false" />
+
+    <!-- Keep HMAC integrity transforms; omit AES-XCBC-96 (integrity ID 5). -->
+    <int-array name="iwlan.supported_integrity_algorithms_int_array" num="4">
+        <item value="2" />
+        <item value="12" />
+        <item value="13" />
+        <item value="14" />
+    </int-array>
+
+    <!-- Defer IMS teardown until ongoing calls finish. -->
+    <boolean name="delay_ims_tear_down_until_call_end_bool" value="true" />
+
+    <!-- Disallow IMS/EIMS handover between cellular and IWLAN. -->
+    <string-array name="iwlan_handover_policy_string_array" num="5">
+        <item value="source=EUTRAN|NGRAN, target=IWLAN, type=disallowed, capabilities=IMS|EIMS" />
+        <item value="source=IWLAN, target=EUTRAN|NGRAN, type=disallowed, capabilities=IMS|EIMS" />
+        <item value="source=IWLAN, target=GERAN|UTRAN, type=disallowed" />
+        <item value="source=GERAN|UTRAN, target=IWLAN, type=disallowed" />
+        <item value="source=GERAN|UTRAN|EUTRAN|NGRAN|IWLAN|UNKNOWN, target=GERAN|UTRAN|EUTRAN|NGRAN|IWLAN, type=allowed" />
+    </string-array>
+</carrier_config>

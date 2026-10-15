@@ -72,6 +72,10 @@ PRODUCT_PACKAGES += \
     android.hardware.camera.provider-service_32.samsung \
     libGrallocMapperCamera
 
+# CarrierSettings
+PRODUCT_PACKAGES += \
+    CarrierSettingsResCommon
+
 # Charger
 PRODUCT_PACKAGES += \
     charger_res_images_vendor
