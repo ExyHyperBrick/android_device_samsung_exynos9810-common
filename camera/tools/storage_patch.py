@@ -24,6 +24,36 @@ def method(path, signature, body):
                                + '\n.end method', text, count=1))
 
 
+def patch_storage_preference(text):
+    """Keep the editor link out of Samsung's camera-control/analytics binding."""
+    pattern = re.compile(r'(?ms)^\.method private updatePreferencesAttr\(\)V\n.*?^\.end method$')
+    matches = list(pattern.finditer(text))
+    if len(matches) != 1:
+        raise ValueError('Unexpected Samsung preference attribute method')
+    original = matches[0].group()
+    anchor = ('    invoke-virtual {v2, v3}, Landroidx/preference/PreferenceCategory;'
+              '->getPreference(I)Landroidx/preference/Preference;\n\n'
+              '    move-result-object v4\n')
+    if original.count(anchor) != 1 or original.count('    :goto_4\n') != 1:
+        raise ValueError('Unexpected Samsung preference iteration')
+    if 'lineage_storage' in original:
+        raise ValueError('Samsung storage preference already excluded')
+    # This is an intent-only row, not a Samsung setting. Registering it would
+    # reach Samsung's strict event-id switch and crash when settings opens.
+    skip = '''
+    invoke-virtual {v4}, Landroidx/preference/Preference;->getKey()Ljava/lang/String;
+    move-result-object v5
+    const-string v6, "lineage_storage"
+    invoke-virtual {v6, v5}, Ljava/lang/String;->equals(Ljava/lang/Object;)Z
+    move-result v5
+    if-eqz v5, :lineage_stock_preference
+    goto/16 :goto_4
+    :lineage_stock_preference
+'''
+    updated = original.replace(anchor, anchor + skip, 1)
+    return text[:matches[0].start()] + updated + text[matches[0].end():]
+
+
 def patch_storage(decoded):
     decoded = Path(decoded)
     classes = decoded / 'smali_classes2/com/sec/android/app/camera'
@@ -101,6 +131,9 @@ def patch_storage(decoded):
             raise ValueError('Unexpected recording media transaction: ' + before)
         text = text.replace(target, 'Lorg/lineageos/camera/compat/MediaStoreCompat;' + after)
     recording.write_text(text)
+
+    fragment = classes / 'setting/PreferenceSettingFragment.smali'
+    fragment.write_text(patch_storage_preference(fragment.read_text()))
 
     # A plain preference launches the real editor. Its own key avoids the
     # stock removable-card-only visibility and spinner/value listeners.
