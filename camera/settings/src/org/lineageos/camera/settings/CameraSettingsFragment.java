@@ -51,6 +51,8 @@ public final class CameraSettingsFragment extends SettingsBasePreferenceFragment
         mEnabled.setChecked(mController.isCameraEnabled());
         mApertureHidden.setEnabled(apertureAvailable && allowed);
         mApertureHidden.setChecked(mController.isApertureHidden());
+        findPreference("camera_storage").setEnabled(cameraAvailable && allowed
+                && mController.isCameraEnabled());
         Preference cameraStatus = findPreference("camera_status");
         cameraStatus.setVisible(!cameraAvailable || !allowed);
         cameraStatus.setSummary(!allowed ? R.string.camera_restricted : R.string.camera_unavailable);

@@ -20,6 +20,7 @@ import zipfile
 
 from telephoto_patch import patch_telephoto
 from panorama_patch import patch_panorama_storage
+from storage_patch import patch_storage, add_storage_activity
 from launcher_icon import adapt_launcher_icon
 from accessibility_patch import clarify_accessibility_service
 
@@ -3022,6 +3023,7 @@ def patch_decoded(decoded, mappings):
     patch_preview_snapshot(decoded)
     patch_media_store(decoded)
     patch_panorama_storage(decoded)
+    patch_storage(decoded)
     patch_recording_orientation(decoded)
     patch_single_photo_shutter(decoded)
     adapt_optional_scene_toast(decoded)
@@ -3061,12 +3063,13 @@ def patch_decoded(decoded, mappings):
                 for category in component.iter("category")):
             component.set(ANDROID + "label", "Samsung Camera")
     add_camera_launcher_alias(application)
+    add_storage_activity(xml.getroot(), application)
     adapt_launcher_icon(decoded, application)
     clarify_accessibility_service(decoded, application)
     xml.write(manifest, encoding="utf-8", xml_declaration=True)
     marker = decoded / MARKER
     marker.parent.mkdir(parents=True, exist_ok=True)
-    marker.write_text(json.dumps({"port": 19, "modes": ["photo", "video", "pro"],
+    marker.write_text(json.dumps({"port": 20, "modes": ["photo", "video", "pro"],
                                  "available_experimental_modes": ["pro_video", "panorama", "slow_motion"],
                                  "android_api_call_counts": counts}, indent=2) + "\n")
     return counts

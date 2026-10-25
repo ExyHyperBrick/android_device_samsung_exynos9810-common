@@ -38,6 +38,13 @@ public final class MediaStoreCompat {
     private static final Pattern CLOUD_PATH = Pattern.compile(
             "(?i)\\bcloud_server_path\\s+LIKE\\s+'(?:''|[^'])*'");
 
+    private static final Pattern CAMERA_FOLDERS = Pattern.compile(
+            "(?i)\\b(?:_data\\s+LIKE\\s+'(?:''|[^'])*DCIM/(?:''|[^'])*'"
+            + "|bucket_display_name\\s+IN\\s*\\([^)]*\\))");
+
+    private static final Pattern PENDING_VIDEO_NAME = Pattern.compile(
+            "^\\.pending-\\d+-[^/]+$");
+
     private MediaStoreCompat() {}
 
     private static ContentValues standardValues(ContentValues values) {
@@ -135,7 +142,7 @@ public final class MediaStoreCompat {
                 finished = true;
                 // Publishing renames the managed hidden file to its visible name.
                 try {
-                    file = new File(queryImagePath(resolver, uri, false));
+                    file = new File(queryMediaPath(resolver, uri, false));
                 } catch (RuntimeException error) {
                     file = null;
                     Log.w(TAG, "Published panorama is available by URI only", error);
@@ -148,19 +155,19 @@ public final class MediaStoreCompat {
         }
     }
 
-    private static String queryImagePath(ContentResolver resolver, Uri uri,
+    private static String queryMediaPath(ContentResolver resolver, Uri uri,
             boolean requirePending) {
         String[] columns = {MediaStore.MediaColumns.DATA, MediaStore.MediaColumns.IS_PENDING};
         try (Cursor cursor = resolver.query(uri, columns, null, null, null)) {
             if (cursor == null || !cursor.moveToFirst()) {
-                throw new IllegalStateException("MediaStore did not return the image pathname");
+                throw new IllegalStateException("MediaStore did not return the media pathname");
             }
             if (requirePending && cursor.getInt(1) != 1) {
-                throw new IllegalStateException("MediaStore image is not pending");
+                throw new IllegalStateException("MediaStore row is not pending");
             }
             String path = cursor.getString(0);
             if (path == null || path.isEmpty()) {
-                throw new IllegalStateException("MediaStore returned an empty image pathname");
+                throw new IllegalStateException("MediaStore returned an empty media pathname");
             }
             return path;
         }
@@ -173,11 +180,10 @@ public final class MediaStoreCompat {
         }
         ContentValues pending = new ContentValues(values);
         pending.remove(MediaStore.MediaColumns.DATA);
-        pending.put(MediaStore.MediaColumns.RELATIVE_PATH, "DCIM/Camera");
         Uri uri = insertPending(resolver, collection, pending);
         try {
             return new PendingImage(resolver, uri,
-                    new File(queryImagePath(resolver, uri, true)), pending);
+                    new File(queryMediaPath(resolver, uri, true)), pending);
         } catch (RuntimeException error) {
             deleteFailedSave(resolver, uri);
             throw error;
@@ -186,8 +192,45 @@ public final class MediaStoreCompat {
 
     public static Uri insertPending(ContentResolver resolver, Uri collection,
             ContentValues values) {
+        return insertPendingRow(resolver, collection,
+                StorageCompat.pendingValues(standardValues(values)));
+    }
+
+    /** Match MediaProvider's pending-filename contract before MediaRecorder opens it. */
+    public static String pendingVideoPath(String directory) {
+        long expires = System.currentTimeMillis() / 1000 + 7 * 24 * 60 * 60;
+        return new File(directory, ".pending-" + expires + "-" + System.nanoTime() + ".mp4").getPath();
+    }
+
+    /** MediaRecorder already owns this prepared native file before recording starts. */
+    public static Uri insertPendingVideo(ContentResolver resolver, Uri collection,
+            ContentValues values) {
+        String path = values.getAsString(MediaStore.MediaColumns.DATA);
+        if (path == null || !new File(path).isFile()
+                || !PENDING_VIDEO_NAME.matcher(new File(path).getName()).matches()) {
+            throw new IllegalStateException("Missing prepared recording file");
+        }
         ContentValues pending = standardValues(values);
+        pending.remove(MediaStore.MediaColumns.RELATIVE_PATH);
+        Uri uri = insertPendingRow(resolver, collection, pending);
+        try {
+            if (!new File(path).getCanonicalFile().equals(
+                    new File(queryMediaPath(resolver, uri, true)).getCanonicalFile())) {
+                throw new IllegalStateException("MediaStore changed the recording pathname");
+            }
+            return uri;
+        } catch (IOException | RuntimeException error) {
+            deleteFailedSave(resolver, uri);
+            throw new IllegalStateException("Could not register the prepared recording file", error);
+        }
+    }
+
+    private static Uri insertPendingRow(ContentResolver resolver, Uri collection,
+            ContentValues pending) {
         pending.put(MediaStore.MediaColumns.IS_PENDING, 1);
+        if (MediaStore.VOLUME_EXTERNAL.equals(MediaStore.getVolumeName(collection))) {
+            collection = StorageCompat.collection(collection, 0);
+        }
         Uri result = resolver.insert(collection, pending);
         if (result == null) {
             throw new IllegalStateException("MediaStore did not create a pending row");
@@ -199,6 +242,37 @@ public final class MediaStoreCompat {
             ContentValues values) {
         if (item == null) throw new IllegalStateException("Missing pending media URI");
         ContentValues published = standardValues(values);
+        // The pending row already owns its volume and folder. Do not move it
+        // using a legacy pathname or a setting changed during capture.
+        published.remove(MediaStore.MediaColumns.DATA);
+        published.remove(MediaStore.MediaColumns.RELATIVE_PATH);
+        return publishRow(resolver, item, published);
+    }
+
+    /** Retain the stock recorder's native rename contract without publishing an empty row. */
+    public static int publishVideo(ContentResolver resolver, Uri item, ContentValues values) {
+        String path = values.getAsString(MediaStore.MediaColumns.DATA);
+        if (item == null || path == null) {
+            throw new IllegalStateException("Missing pending recording or completed pathname");
+        }
+        try {
+            File recorded = new File(path).getCanonicalFile();
+            File pending = new File(queryMediaPath(resolver, item, true)).getCanonicalFile();
+            if (!recorded.isFile() || recorded.length() == 0
+                    || PENDING_VIDEO_NAME.matcher(recorded.getName()).matches()
+                    || !recorded.getParentFile().equals(pending.getParentFile())) {
+                throw new IllegalStateException("Recording is empty or moved outside its capture folder");
+            }
+            ContentValues published = standardValues(values);
+            // The recorder renamed its own file in place; keep that actual path.
+            published.remove(MediaStore.MediaColumns.RELATIVE_PATH);
+            return publishRow(resolver, item, published);
+        } catch (IOException error) {
+            throw new IllegalStateException("Could not resolve the completed recording", error);
+        }
+    }
+
+    private static int publishRow(ContentResolver resolver, Uri item, ContentValues published) {
         published.put(MediaStore.MediaColumns.IS_PENDING, 0);
         int updated = resolver.update(item, published, null, null);
         if (updated != 1) {
@@ -262,13 +336,18 @@ public final class MediaStoreCompat {
         }
         Bundle query = new Bundle();
         if (selection != null) {
-            // AOSP has no Samsung cloud rows. Keep genuine local folder filters.
+            // AOSP has no Samsung cloud rows or hidden-media column.
             selection = CLOUD_PATH.matcher(selection).replaceAll("0");
+            selection = selection.replace("datetime", "datetaken").replace(
+                    " AND (is_hide != 1 OR is_hide is null)", "").replace(
+                    " AND (is_hide != 1 OR is_hide is NULL)", "");
+            // Stock caches its DCIM/Camera filters in static fields. Resolve the
+            // active destination last, in one pass, so folder names that contain
+            // SQL-looking text or "datetime" remain literal names.
+            String folder = Matcher.quoteReplacement(StorageCompat.folderSelection());
+            selection = CAMERA_FOLDERS.matcher(selection).replaceAll(folder);
             query.putString(ContentResolver.QUERY_ARG_SQL_SELECTION,
-                    "(" + selection.replace("datetime", "datetaken").replace(
-                            " AND (is_hide != 1 OR is_hide is null)", "").replace(
-                            " AND (is_hide != 1 OR is_hide is NULL)", "")
-                            + ") AND is_pending=0");
+                    "(" + selection + ") AND is_pending=0");
         } else {
             query.putString(ContentResolver.QUERY_ARG_SQL_SELECTION, "is_pending=0");
         }

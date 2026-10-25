@@ -13,4 +13,6 @@
     <string name="aperture_launcher_intro">Hiding the launcher icon keeps Aperture available to other apps and camera shortcuts.</string>
     <string name="aperture_launcher_unavailable">Aperture is disabled, not installed or its launcher icon cannot be changed.</string>
     <string name="aperture_launcher_failed">Could not change the Aperture launcher icon.</string>
+    <string name="camera_storage_title">Save location</string>
+    <string name="camera_storage_summary">Choose storage and a folder under DCIM in Samsung Camera</string>
 </resources>
