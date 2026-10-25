@@ -15,6 +15,7 @@
           - "sd" (480p)
           - "hd" (720p)
           - "fhd" (1080p)
+          - "qhd" (1440p)
           - "uhd" (2160p)
          Valid values of framerate are:
           - "24"
@@ -28,7 +29,7 @@
              </string-array>
     -->
     <string-array name="config_additionalVideoConfigurations">
-        <item>0</item> <item>fhd|uhd</item> <item>60</item>
+        <item>0</item> <item>fhd|qhd|uhd</item> <item>60</item>
         <item>1</item> <item>sd|hd|fhd</item> <item>60</item>
     </string-array>
 </resources>

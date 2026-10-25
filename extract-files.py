@@ -79,6 +79,28 @@ blob_fixups: blob_fixups_user_type = {
 
     'vendor/etc/media_profiles_V1_0.xml': blob_fixup()
         .regex_replace(
+            r'(<!ATTLIST EncoderProfile quality \()(?![^)]*\bqhd\b)',
+            r'\1qhd|',
+        )
+        .regex_replace(
+            r'(?s)(<CamcorderProfiles cameraId="0">)'
+            r'(?!(?:(?!</CamcorderProfiles>).)*<EncoderProfile quality="qhd")'
+            r'((?:(?!</CamcorderProfiles>).)*?'
+            r'<EncoderProfile quality="2160p".*?</EncoderProfile>)',
+            r'\1\2\n\n'
+            '    <EncoderProfile quality="qhd" fileFormat="mp4" duration="30">\n'
+            '      <Video codec="h264"\n'
+            '             bitRate="28000000"\n'
+            '             width="2560"\n'
+            '             height="1440"\n'
+            '             frameRate="30" />\n\n'
+            '      <Audio codec="aac"\n'
+            '             bitRate="256000"\n'
+            '             sampleRate="48000"\n'
+            '             channels="2" />\n'
+            '    </EncoderProfile>',
+        )
+        .regex_replace(
             r'(?s)(?!.*<CamcorderProfiles cameraId="(?:3|50)">)'
             r'(<CamcorderProfiles cameraId="2">)(.*?)(</CamcorderProfiles>)',
             r'\1\2\3\n\n'
