@@ -1,0 +1,13 @@
+// Copyright (C) 2026 The LineageOS Project
+// SPDX-License-Identifier: Apache-2.0
+
+cc_library_shared {
+    name: "libshim_camera_fence",
+    vendor: true,
+    compile_multilib: "both",
+    srcs: ["LegacyFence.cpp"],
+    header_libs: ["libbase_headers"],
+    shared_libs: ["libsync"],
+    version_script: "exports.map",
+    cflags: ["-Wall", "-Wextra", "-Werror"],
+}

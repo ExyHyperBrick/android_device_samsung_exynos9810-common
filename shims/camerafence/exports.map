@@ -1,0 +1,7 @@
+{
+    global:
+        _ZN7samsung5FenceC1Ei;
+        _ZN7samsung5Fence4waitEi;
+    local:
+        *;
+};
