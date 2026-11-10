@@ -12,6 +12,7 @@
 #include <algorithm>
 #include <atomic>
 #include <cstdint>
+#include <cstddef>
 #include <mutex>
 #include <string>
 #include <unordered_map>
@@ -41,21 +42,29 @@ static std::mutex gRequestMutex;
 static std::unordered_map<RIL_Token, int> gRequests;
 static std::atomic<int> gRilVersion{0};
 
+// Samsung's LP64 v12 response retains the v11 scalar MTU, followed by
+// IPv4 and IPv6 MTUs. Keep the complete record, including its tail padding.
+static constexpr size_t kSamsungDataCallSize = 80;
+static constexpr size_t kSamsungMtuV4Offset = 68;
+static constexpr size_t kSamsungMtuV6Offset = 72;
+static_assert(sizeof(RIL_Data_Call_Response_v11) == 72);
+static_assert(offsetof(RIL_Data_Call_Response_v11, mtu) == 64);
+static_assert(sizeof(int) == 4);
+
+static int minimumDataCallMtu(const char* type) {
+    if (type == nullptr) return 0;
+    if (strcmp(type, "IP") == 0) return 68;
+    if (strcmp(type, "IPV6") == 0 || strcmp(type, "IPV4V6") == 0) return 1280;
+    return 0;
+}
+
 static int normalizeDataCallMtu(const RIL_Data_Call_Response_v11& call) {
-    if (call.status != 0 || call.mtu <= 0xffff || call.type == nullptr) return call.mtu;
+    if (call.status != 0 || call.mtu <= 0xffff) return call.mtu;
 
-    int minimum;
-    if (strcmp(call.type, "IP") == 0) {
-        minimum = 68;
-    } else if (strcmp(call.type, "IPV6") == 0 || strcmp(call.type, "IPV4V6") == 0) {
-        minimum = 1280;
-    } else {
-        return call.mtu;
-    }
+    int minimum = minimumDataCallMtu(call.type);
+    if (minimum == 0) return call.mtu;
 
-    // Samsung packs two 16-bit MTUs into the legacy scalar field. A single
-    // link MTU must fit both families; taking the smaller avoids assuming
-    // which half belongs to IPv4. Leave incomplete/invalid encodings alone.
+    // Preserve support for legacy responses containing two packed MTUs.
     uint32_t packed = static_cast<uint32_t>(call.mtu);
     int low = packed & 0xffff;
     int high = packed >> 16;
@@ -64,26 +73,56 @@ static int normalizeDataCallMtu(const RIL_Data_Call_Response_v11& call) {
 }
 
 static bool normalizeDataCalls(const void* response, size_t responselen, bool setup,
-                               std::vector<RIL_Data_Call_Response_v11>* normalized) {
+                               std::vector<uint64_t>* normalized) {
     int version = gRilVersion.load(std::memory_order_acquire);
-    if (version < 11 || version > 15 || response == nullptr || responselen == 0
-            || responselen % sizeof(RIL_Data_Call_Response_v11) != 0
-            || (setup && responselen != sizeof(RIL_Data_Call_Response_v11))) {
+    if (version < 11 || version > 15 || response == nullptr || responselen == 0) {
         return false;
     }
 
+    bool legacy = responselen % sizeof(RIL_Data_Call_Response_v11) == 0;
+    bool samsung = version == 15 && responselen % kSamsungDataCallSize == 0;
+    // A list length divisible by both sizes does not identify its record layout.
+    if (legacy == samsung) return false;
+    size_t recordSize = samsung ? kSamsungDataCallSize : sizeof(RIL_Data_Call_Response_v11);
+    if (setup && responselen != recordSize) return false;
+
     const auto* bytes = static_cast<const unsigned char*>(response);
-    size_t count = responselen / sizeof(RIL_Data_Call_Response_v11);
+    size_t count = responselen / recordSize;
     for (size_t i = 0; i < count; ++i) {
+        const auto* record = bytes + i * recordSize;
         RIL_Data_Call_Response_v11 call;
-        memcpy(&call, bytes + i * sizeof(call), sizeof(call));
-        int mtu = normalizeDataCallMtu(call);
-        if (mtu != call.mtu) {
-            if (normalized->empty()) {
-                normalized->resize(count);
-                memcpy(normalized->data(), response, responselen);
-            }
-            (*normalized)[i].mtu = mtu;
+        memcpy(&call, record, sizeof(call));
+
+        int mtu;
+        if (samsung) {
+            if (call.status != 0 || call.mtu < 68 || call.mtu > 0xffff) continue;
+            int minimum = minimumDataCallMtu(call.type);
+            if (minimum == 0 || call.mtu < minimum) continue;
+            // The vendor already calculated a scalar MTU. Its HIDL 1.4 bridge
+            // packs the per-family fields again, so clear that upper half only
+            // in the forwarded copy. The vendor-owned response stays unchanged.
+            mtu = call.mtu;
+            int mtuV4, mtuV6;
+            memcpy(&mtuV4, record + kSamsungMtuV4Offset, sizeof(mtuV4));
+            memcpy(&mtuV6, record + kSamsungMtuV6Offset, sizeof(mtuV6));
+            if (mtuV4 == mtu && mtuV6 == 0) continue;
+        } else {
+            mtu = normalizeDataCallMtu(call);
+            if (mtu == call.mtu) continue;
+        }
+
+        if (normalized->empty()) {
+            // Both known LP64 record sizes are multiples of eight. Word storage
+            // keeps the copy suitably aligned for the vendor callback consumer.
+            normalized->resize(responselen / sizeof(uint64_t));
+            memcpy(normalized->data(), response, responselen);
+        }
+        auto* output = reinterpret_cast<unsigned char*>(normalized->data()) + i * recordSize;
+        size_t mtuOffset = samsung ? kSamsungMtuV4Offset : offsetof(RIL_Data_Call_Response_v11, mtu);
+        memcpy(output + mtuOffset, &mtu, sizeof(mtu));
+        if (samsung) {
+            int zero = 0;
+            memcpy(output + kSamsungMtuV6Offset, &zero, sizeof(zero));
         }
     }
     return !normalized->empty();
@@ -243,7 +282,7 @@ static void Shim_OnRequestComplete(RIL_Token token, RIL_Errno error, void* respo
 
     if (error == RIL_E_SUCCESS && (request == RIL_REQUEST_SETUP_DATA_CALL
             || request == RIL_REQUEST_DATA_CALL_LIST)) {
-        std::vector<RIL_Data_Call_Response_v11> normalized;
+        std::vector<uint64_t> normalized;
         if (normalizeDataCalls(response, responselen, request == RIL_REQUEST_SETUP_DATA_CALL,
                                &normalized)) {
             gRealEnv->OnRequestComplete(token, error, normalized.data(), responselen);
@@ -270,7 +309,7 @@ static void Shim_OnRequestComplete(RIL_Token token, RIL_Errno error, void* respo
 
 static void Shim_OnUnsolicitedResponse(int unsol, const void* response, size_t responselen) {
     if (unsol == RIL_UNSOL_DATA_CALL_LIST_CHANGED) {
-        std::vector<RIL_Data_Call_Response_v11> normalized;
+        std::vector<uint64_t> normalized;
         if (normalizeDataCalls(response, responselen, false, &normalized)) {
             gRealEnv->OnUnsolicitedResponse(unsol, normalized.data(), responselen);
             return;
